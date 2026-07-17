@@ -1,0 +1,362 @@
+/* ============================================================
+   Color Sort
+   Палитра стандарта студии: кремовый фон + чернила.
+   Все цвета в :root — перекраска дешёвая.
+   ============================================================ */
+:root {
+  --paper:   #f3ead6;  /* кремовый фон */
+  --ink:     #2b2723;  /* чернила */
+  --ink-soft:#6b6258;
+  --card:    #fbf5e9;
+  --accent:  #b7502e;  /* тёплый акцент кнопок */
+  --accent-ink: #fff8ef;
+  --shadow:  rgba(43, 39, 35, 0.18);
+  --header-h: 72px; /* фактическая высота .game-header — обновляется из main.js */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  /* Анти-скролл: страница не «гуляет» под пальцем (урок филворда) */
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Игровой контейнер (п.1.6.2.7) — явно, поверх глобального правила
+   выше: ПКМ/протяжка над полем не должны выделять текст или открывать
+   системное меню (contextmenu гасится в main.js). */
+#screen-game {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+body {
+  font-family: Georgia, 'Times New Roman', serif; /* системный serif — стандарт студии */
+  background-color: var(--paper);
+  color: var(--ink);
+  /* бумажная крупка — как в филворде/нонограммах */
+  background-image: radial-gradient(var(--shadow) 0.5px, transparent 0.5px);
+  background-size: 22px 22px;
+}
+
+/* ---------- Экраны ---------- */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.screen.active { display: flex; }
+
+/* ---------- Загрузка ---------- */
+.loading-box { text-align: center; }
+.loading-title { font-size: 2rem; font-weight: bold; margin-bottom: 18px; }
+.loading-dots span {
+  display: inline-block;
+  width: 10px; height: 10px;
+  margin: 0 4px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  animation: pulse 1.2s infinite ease-in-out;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* ---------- Меню ---------- */
+.menu-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 32px 28px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--shadow);
+  min-width: 260px;
+}
+.game-title { font-size: 2.2rem; margin-bottom: 6px; text-align: center; }
+
+.btn {
+  font-family: inherit;
+  font-size: 1.1rem;
+  padding: 12px 28px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--shadow);
+  transition: transform 0.06s ease;
+  min-width: 200px;
+}
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--shadow); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--ink); }
+.btn-icon {
+  min-width: 0;
+  width: 48px; height: 48px;
+  padding: 0;
+  font-size: 1.3rem;
+  border-radius: 50%;
+  position: relative;
+}
+.hidden { display: none !important; }
+
+/* Перечёркнутая нота — CSS-чертой, не символом (стандарт студии) */
+.btn-icon.muted::after {
+  content: '';
+  position: absolute;
+  left: 10px; right: 10px; top: 50%;
+  height: 2px;
+  background: var(--ink);
+  transform: rotate(-40deg);
+}
+
+/* ---------- Экран сетки уровней ---------- */
+.grid-wrap {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--header-h) + 16px) 12px 28px;
+}
+.level-grid {
+  display: grid;
+  gap: 8px;
+  justify-content: center;
+  align-content: center;
+}
+.grid-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--shadow);
+  padding: 0;
+  transition: transform 0.06s ease;
+}
+.grid-tile:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--shadow); }
+.grid-tile.current { border-color: var(--accent); border-width: 3px; }
+.grid-tile.locked {
+  background: rgba(43, 39, 35, 0.06);
+  color: var(--ink-soft);
+  cursor: default;
+  box-shadow: none;
+}
+.grid-tile.locked:active { transform: none; }
+.spacer { visibility: hidden; }
+
+/* Замок на закрытой плитке — код-рисунок (студия не использует
+   картинки-эмодзи ради консистентности рендера между платформами). */
+.lock-icon {
+  position: relative;
+  width: 38%;
+  height: 32%;
+  margin-top: 18%;
+  border: 2px solid var(--ink-soft);
+  border-radius: 2px;
+  background: var(--paper);
+}
+.lock-icon::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 62%;
+  height: 55%;
+  border: 2px solid var(--ink-soft);
+  border-bottom: none;
+  border-radius: 50% 50% 0 0;
+  transform: translateX(-50%);
+}
+
+/* ---------- Игровой экран ---------- */
+.game-header {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+.level-indicator { font-size: 1.05rem; }
+.board-wrap {
+  flex: 1;
+  min-height: 0; /* без этого flex-item не сжимается ниже intrinsic-размера canvas — переполняет экран */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* сверху — реальная высота шапки (--header-h, меряется в JS) + зазор;
+     снизу резерв под будущую кнопку подсказки (урок филворда) */
+  padding: calc(var(--header-h) + 16px) 12px 90px;
+}
+#board-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0; /* та же причина: canvas — тоже flex-item (в board-wrap) */
+  touch-action: none;
+}
+/* Нижний ряд кнопок игрового экрана — зеркалит шапку (назад слева, звук справа). */
+.undo-btn {
+  position: absolute;
+  left: 14px;
+  bottom: 18px;
+}
+/* Кнопка подсказки: явный знак «это реклама» (п.4.5.1) — значок ▶ на
+   самой кнопке + подпись под ней. Ясность цепочки реклама → подсказка
+   видна ДО тапа, не после. */
+.hint-wrap {
+  position: absolute;
+  right: 14px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.hint-btn {
+  position: relative;
+}
+.hint-ad-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.6rem;
+  line-height: 18px;
+  text-align: center;
+  border: 1.5px solid var(--ink);
+  pointer-events: none;
+}
+.hint-ad-label {
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  padding: 2px 8px;
+  pointer-events: none;
+}
+.hint-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 78px;
+  transform: translateX(-50%);
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  box-shadow: 3px 3px 0 var(--shadow);
+  white-space: nowrap;
+}
+
+/* ---------- Оверлей победы ---------- */
+.win-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(43, 39, 35, 0.4);
+  /* Вспышка света при появлении — момент читается как награда,
+     не просто смена экрана. Перезапускается сама (.hidden = display:none). */
+  animation: winFlash 0.5s ease-out;
+}
+.win-box {
+  position: relative; /* конфетти-канвас поверх, координаты — от оверлея */
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 32px 28px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--shadow);
+  min-width: 240px;
+  /* Лёгкая полировка: мягкое появление с небольшим перехлёстом
+     («поп») — антистресс-темп, но ощущается как награда. */
+  animation: winPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.win-title { font-size: 1.6rem; text-align: center; }
+.confetti-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* не мешает тапу по кнопкам оверлея */
+  z-index: 2;
+}
+
+/* ---------- Оверлей завершения кампании ---------- */
+.campaign-box { max-width: 320px; }
+.campaign-note {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  text-align: center;
+  margin-top: -8px;
+}
+.campaign-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+  width: 100%;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.stat-value { font-size: 1.3rem; font-weight: bold; }
+.stat-label { font-size: 0.75rem; color: var(--ink-soft); text-align: center; }
+
+@keyframes winPop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes winFlash {
+  0%   { background: rgba(255, 248, 239, 0.9); }
+  100% { background: rgba(43, 39, 35, 0.4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-dots span { animation: none; }
+  .btn { transition: none; }
+  .win-box { animation: none; }
+  .win-overlay { animation: none; }
+}
