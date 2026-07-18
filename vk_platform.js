@@ -45,6 +45,35 @@
       выдаётся и при штатном .then() (ролик реально досмотрен), и при
       .catch()/таймауте (мост сглючил или рекламы не было) — тупика
       не остаётся ни в одном сценарии.
+
+   РЕШЕНИЕ 2026-07-18 (продолжение — второй живой тест основателя):
+   на ПК подсказка после рекламы видна, на телефоне — ролик закрыт
+   штатно, Promise резолвится нормально, но подсветка не появляется.
+   Дело НЕ в rewarded-потоке (он уже чинился выше) — дело в ТАЙМИНГЕ
+   вызова onRewarded() относительно фактического возврата экрана.
+   Board.showHint(from, to) (board.js, общий код — не трогаем) берёт
+   t0 = performance.now() СИНХРОННО в момент вызова и отсчитывает
+   2200мс РЕАЛЬНОГО времени через requestAnimationFrame. На мобильном
+   WebView нативный рекламный оверлей может приостанавливать rAF, пока
+   висит поверх страницы; onRewarded() у нас срабатывал СРАЗУ по
+   resolve Promise — то есть в тот момент, когда оверлей ТОЛЬКО
+   начинает закрываться, а не когда экран уже реально виден. Если
+   первый кадр анимации добирается до rAF с опозданием (пока rAF был
+   на паузе), t0 давно в прошлом — на первом же реальном кадре t уже
+   ≥ 1, и showHint() гасит подсказку, ПОКАЗАВ её ноль раз. На ПК
+   нативного оверлея нет, rAF не приостанавливается — поэтому там
+   всё видно. Чиним ТОЛЬКО в адаптере: перед вызовом onRewarded()
+   ждём подтверждённой видимости страницы (+ пару кадров сверху, чтобы
+   рендер-цикл гарантированно ожил) и на всякий случай форсируем
+   Board.resize() — если WebView успел поменять размеры (адресная
+   строка/safe-area) пока был перекрыт рекламой, подсказка не должна
+   рисоваться по устаревшим координатам. Board.resize() — уже
+   ПУБЛИЧНЫЙ метод board.js (тот же, что дёргается на window resize/
+   orientationchange), просто вызываем его из адаптера — код board.js
+   не редактируется. ТРЕБУЕТ ПОДТВЕРЖДЕНИЯ ЖИВЫМ ТЕСТОМ НА ТЕЛЕФОНЕ —
+   в песочнице (Playwright) нет способа сымитировать нативный
+   рекламный оверлей ВК и его влияние на visibilitychange/rAF, только
+   логика и синтетические сценарии проверены здесь.
    ============================================================ */
 const Platform = (() => {
   const SAVE_KEY = 'colorsort_save';
@@ -64,6 +93,13 @@ const Platform = (() => {
      ролик, но и не держать игрока в паузе вечно, если мост потерял
      сообщение о закрытии. */
   const REWARD_AD_TIMEOUT_MS = 40000;
+  /* Страховка ожидания видимости после закрытия рекламного оверлея
+     (см. журнал выше, второе решение). НЕ про сам показ рекламы —
+     это отдельная, короткая пауза ПОСЛЕ того, как Promise уже
+     разрешился, на случай если document.visibilitychange по какой-то
+     причине не придёт (не все нативные оверлеи гарантированно её
+     шлют) — тогда просто продолжаем, не блокируя награду вечно. */
+  const VISIBILITY_WAIT_TIMEOUT_MS = 3000;
 
   let ready = false; // true только после успешного VKWebAppInit
 
@@ -74,6 +110,35 @@ const Platform = (() => {
         (v) => { clearTimeout(timer); resolve(v); },
         (e) => { clearTimeout(timer); reject(e); }
       );
+    });
+  }
+
+  /* Ждём, пока страница ГАРАНТИРОВАННО видима, и добавляем два тика
+     requestAnimationFrame сверху — не просто дождаться флага
+     document.visibilityState, а дать рендер-циклу реально возобновить
+     работу (флаг может смениться на кадр раньше, чем rAF снова начнёт
+     тикать регулярно). Нужно ТОЛЬКО чтобы Board.showHint() (общий
+     код) стартовал свой 2200мс wall-clock пульс уже на видимом,
+     свежеотрисованном экране — см. журнал наверху. */
+  function waitVisibleAndSettled() {
+    return new Promise((resolve) => {
+      let done = false;
+      const finishWait = () => {
+        if (done) return;
+        done = true;
+        document.removeEventListener('visibilitychange', onVisible);
+        clearTimeout(fallbackTimer);
+        requestAnimationFrame(() => requestAnimationFrame(resolve));
+      };
+      const onVisible = () => {
+        if (document.visibilityState === 'visible') finishWait();
+      };
+      const fallbackTimer = setTimeout(finishWait, VISIBILITY_WAIT_TIMEOUT_MS);
+      if (document.visibilityState === 'visible') {
+        finishWait();
+      } else {
+        document.addEventListener('visibilitychange', onVisible);
+      }
     });
   }
 
@@ -192,8 +257,23 @@ const Platform = (() => {
       settled = true;
       // Видимый эффект — строго после onResume(), как в platform.js.
       if (onResume) onResume();
-      if (grantReward && onRewarded) onRewarded();
       console.log('[vk_platform] rewarded завершён:', reason, '| награда:', grantReward);
+      if (grantReward && onRewarded) {
+        // На мобильном ВК onRewarded() (внутри — Board.showHint(), общий
+        // код) не должен стартовать, пока экран ещё реально перекрыт
+        // рекламным оверлеем — см. журнал наверху. Ждём подтверждённой
+        // видимости, форсируем пересчёт лэйаута на случай смены
+        // размеров вьюпорта за время рекламы, и только потом отдаём
+        // награду вызывающей стороне. Два лога раздельно (решение vs.
+        // фактический показ) — на живом устройстве через remote-debug
+        // будет видно, если когда-нибудь разъедутся снова.
+        const waitStartedAt = performance.now();
+        waitVisibleAndSettled().then(() => {
+          if (typeof Board !== 'undefined' && Board.resize) Board.resize();
+          console.log('[vk_platform] rewarded: экран подтверждён видимым через', Math.round(performance.now() - waitStartedAt), 'мс — показываем подсказку');
+          onRewarded();
+        });
+      }
     };
     withTimeout(
       vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' }),
