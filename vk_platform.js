@@ -4,12 +4,10 @@
    методов, те же имена и сигнатуры: init, gameReady, getLang, save,
    load, showInterstitial, showRewarded) — main.js/game.js не знают,
    какая платформа под капотом, ни одной правки в общем коде не
-   требуется. Плюс ОДИН метод-расширение, которого в контракте
-   Яндекса нет — isRewardedAvailable() (используется только внутри
-   этого файла, main.js его не вызывает).
+   требуется.
 
-   Источник методов ВК Bridge — сверено 2026-07-17 с исходниками
-   пакета @vkontakte/vk-bridge@3.0.2 (packages/core/src/types/data.ts,
+   Источник методов ВК Bridge — сверено с исходниками пакета
+   @vkontakte/vk-bridge@3.0.2 (packages/core/src/types/data.ts,
    README пакета; репозиторий VKCOM/vk-bridge на GitHub), НЕ по
    памяти. dev.vk.com напрямую из этой сети недоступен (как и
    Cloudflare Pages — см. стандарты студии), сверка велась через
@@ -18,6 +16,35 @@
    Вне ВК-клиента (локальная разработка) vkBridge нет — все методы
    тихо деградируют в mock, игра остаётся живой (тот же принцип,
    что в platform.js).
+
+   РЕШЕНИЕ 2026-07-18 (живой тест основателя нашёл 2 дефекта, оба
+   починены здесь):
+   1. Кнопка подсказки (#btn-hint) БОЛЬШЕ НЕ прячется превентивно.
+      Раньше init() дергал VKWebAppCheckNativeAds и прятал кнопку при
+      false/таймауте — на ПК это ложно срабатывало (кнопки не было
+      вообще), при этом реклама на ПК реально работала. Метод
+      VKWebAppCheckNativeAds исторически нестабилен (баг-репорты
+      VKCOM/vk-bridge) — доверять ему для превентивного скрытия
+      нельзя. Раз монетизация будет подключена — кнопка теперь ВСЕГДА
+      видима на всех точках входа (WebView/Web-iframe/m.vk.com),
+      недоступность рекламы обрабатывается РЕАКТИВНО, в момент клика,
+      внутри showRewarded() (см. ниже) — не заранее.
+   2. showRewarded(): официальный контракт VKWebAppShowNativeAds не
+      даёт отдельного сигнала «досмотрено» — только один Promise на
+      весь показ (resolve/reject после закрытия, см. типы пакета).
+      Это и есть штатное поведение, менять нечего — но на реальном
+      мобильном WebView встречается известная нестабильность моста:
+      сообщение о закрытии рекламы иногда не долетает обратно в JS,
+      пока нативный оверлей рекламы перекрывал WebView (Promise висит
+      вечно, ни .then ни .catch). Раньше это оставляло игрока в
+      тупике: ролик отыгран, а onRewarded() не вызывался никогда.
+      Чиним ДВУМЯ мерами: (а) щедрый таймаут-предохранитель на сам
+      показ — если мост завис, всё равно не блокируем игрока вечно;
+      (б) по студийному стандарту — недоступная/сорвавшаяся реклама
+      выдаёт награду БЕСПЛАТНО, а не оставляет тупик. Итог: подсказка
+      выдаётся и при штатном .then() (ролик реально досмотрен), и при
+      .catch()/таймауте (мост сглючил или рекламы не было) — тупика
+      не остаётся ни в одном сценарии.
    ============================================================ */
 const Platform = (() => {
   const SAVE_KEY = 'colorsort_save';
@@ -30,7 +57,13 @@ const Platform = (() => {
      родительским фреймом (обычно <500 мс), поэтому 2000 мс не грозит
      ложным таймаутом на реальном, но медленном соединении ВК. */
   const INIT_TIMEOUT_MS = 2000;
-  const CHECK_ADS_TIMEOUT_MS = 1500;
+  /* Предохранитель показа rewarded-рекламы — НЕ обычный путь, а
+     страховка от зависшего моста (см. журнал выше, п.2). Ролики ВК
+     обычно 15–30 с; 40 с — щедрый запас поверх этого плюс время на
+     сам показ/закрытие, чтобы не обрубить ЗАКОННО идущий длинный
+     ролик, но и не держать игрока в паузе вечно, если мост потерял
+     сообщение о закрытии. */
+  const REWARD_AD_TIMEOUT_MS = 40000;
 
   let ready = false; // true только после успешного VKWebAppInit
 
@@ -62,11 +95,9 @@ const Platform = (() => {
       console.error('[vk_platform] VKWebAppInit не ответил/ошибка:', e);
       return false;
     }
-    // Прятание кнопки подсказки — по факту доступности рекламы, не
-    // блокирует загрузку игры (не await). Мок всегда «отдаёт»
-    // рекламу (стандарт студии) — эта ветка внутри if(ready), значит
-    // в dev-режиме без Bridge вообще не выполняется, кнопка видна.
-    hideHintIfAdsUnavailable();
+    // Кнопка подсказки НЕ прячется здесь: VKWebAppCheckNativeAds
+    // ненадёжен для превентивной проверки (см. журнал наверху, п.1) —
+    // доступность рекламы обрабатывается реактивно, в showRewarded().
     return true;
   }
 
@@ -139,6 +170,14 @@ const Platform = (() => {
       });
   }
 
+  /* Награда — при штатном .then() (ролик реально досмотрен) И при
+     .catch()/таймауте (реклама не показалась, ошибка, или мост
+     потерял сообщение о закрытии — известная нестабильность на части
+     мобильных клиентов, см. журнал наверху). По студийному стандарту
+     недоступная реклама выдаёт награду бесплатно — тупика для игрока
+     здесь нет ни в одном исходе. finish() — единая точка выхода,
+     settled защищает от двойного вызова (штатный ответ ПОСЛЕ того,
+     как уже сработал таймаут-предохранитель). */
   function showRewarded(onRewarded, onPause, onResume) {
     if (!ready) {
       console.warn('[vk_platform] dev: rewarded → награда выдана');
@@ -147,47 +186,25 @@ const Platform = (() => {
       return;
     }
     if (onPause) onPause();
-    vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' })
-      .then(() => {
-        // Видимый эффект — строго после onResume(), как в platform.js.
-        if (onResume) onResume();
-        if (onRewarded) onRewarded();
-      })
+    let settled = false;
+    const finish = (grantReward, reason) => {
+      if (settled) return;
+      settled = true;
+      // Видимый эффект — строго после onResume(), как в platform.js.
+      if (onResume) onResume();
+      if (grantReward && onRewarded) onRewarded();
+      console.log('[vk_platform] rewarded завершён:', reason, '| награда:', grantReward);
+    };
+    withTimeout(
+      vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' }),
+      REWARD_AD_TIMEOUT_MS
+    )
+      .then(() => finish(true, 'ролик закрыт (resolve)'))
       .catch((e) => {
-        console.error('[vk_platform] rewarded:', e);
-        if (onResume) onResume();
+        console.warn('[vk_platform] rewarded недоступна/зависла — выдаём подсказку бесплатно:', e);
+        finish(true, 'ошибка/таймаут — выдано бесплатно');
       });
   }
 
-  /* ---------- Расширение ТОЛЬКО для ВК-адаптера ----------
-     В контракте Яндекса (7 методов выше) такого метода нет — main.js
-     его не вызывает и не обязан про него знать. Используется только
-     внутри этого файла для прятания #btn-hint. VKWebAppCheckNativeAds
-     исторически нестабилен на части клиентов (известные баг-репорты
-     VKCOM/vk-bridge) — при любой неопределённости отдаём false, это
-     безопасный дефолт (кнопка скрыта — не тупик, игра решается и без
-     подсказки по спеке). */
-  async function isRewardedAvailable() {
-    if (!ready) return false;
-    try {
-      const res = await withTimeout(
-        vkBridge.send('VKWebAppCheckNativeAds', { ad_format: 'reward' }),
-        CHECK_ADS_TIMEOUT_MS
-      );
-      return !!res.result;
-    } catch (e) {
-      console.warn('[vk_platform] VKWebAppCheckNativeAds недоступен:', e);
-      return false;
-    }
-  }
-
-  function hideHintIfAdsUnavailable() {
-    isRewardedAvailable().then((available) => {
-      if (available) return;
-      const wrap = document.querySelector('.hint-wrap');
-      if (wrap) wrap.classList.add('hidden');
-    });
-  }
-
-  return { init, gameReady, getLang, save, load, showInterstitial, showRewarded, isRewardedAvailable };
+  return { init, gameReady, getLang, save, load, showInterstitial, showRewarded };
 })();
