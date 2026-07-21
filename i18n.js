@@ -23,7 +23,8 @@ const I18N = {
     statSlowest: 'Дольше всего',
     levels: 'Уровни',
     chapter: 'Глава',
-    chapterComplete: 'пройдена'
+    chapterComplete: 'пройдена',
+    of: 'из'
   },
   en: {
     title: 'Sort: Color & Shape', // карточное имя (п.5.1.3, решение основателя 2026-07-17)
@@ -44,7 +45,8 @@ const I18N = {
     statSlowest: 'Slowest',
     levels: 'Levels',
     chapter: 'Chapter',
-    chapterComplete: 'complete'
+    chapterComplete: 'complete',
+    of: 'of'
   }
 };
 

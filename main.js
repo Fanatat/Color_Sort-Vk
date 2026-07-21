@@ -33,6 +33,8 @@
   const boardCanvas = document.getElementById('board-canvas');
   const gameHeader  = document.querySelector('#screen-game .game-header');
   const winOverlay  = document.getElementById('win-overlay');
+  const winProgressFill  = document.getElementById('win-progress-fill');
+  const winProgressLabel = document.getElementById('win-progress-label');
   const levelIndicator = document.getElementById('level-indicator');
   const hintToast   = document.getElementById('hint-toast');
   const confettiCanvas = document.getElementById('confetti-canvas');
@@ -179,7 +181,13 @@
     if (cssW <= 0 || cssH <= 0) return;
     const count = LEVELS.length;
     const GAP = 8;
-    const MIN_TILE = 26;
+    // MIN_TILE поднят с 26 до 36 (решение основателя, п.1.8 требований
+    // площадки): 26px (~4мм) заметно ниже отраслевых ориентиров
+    // 44pt/48dp для минимальной цели касания — риск промаха/усталости
+    // пальца на 156 плитках. Шрифт номера уже привязан к tilePx
+    // (см. ниже) — с ростом MIN_TILE читаемость растёт вместе с ним,
+    // отдельно трогать не нужно.
+    const MIN_TILE = 36;
     const MAX_TILE = 60;
 
     let bestTile = MIN_TILE, bestCols = count, fitsWithoutScroll = false;
@@ -298,12 +306,60 @@
     );
   });
 
-  /* ---------- Победа / переход уровней ---------- */
+  /* ---------- Победа / переход уровней ----------
+     pendingWinTransition — что делать по клику «Дальше», решено ЗДЕСЬ,
+     в момент победы, а не пересчитано заново в обработчике клика. Это
+     не стиль, а необходимость (см. краевой случай ниже, фаза 3): для
+     обычного перехода state.levelIndex продвигается уже в
+     showWinOverlay(), и если бы btnNext пересчитывал «какой уровень
+     следующий» из ТЕКУЩЕГО state.levelIndex в момент клика, он бы
+     получил уже сдвинутое значение и промахнулся на один уровень
+     вперёд. */
+  let pendingWinTransition = null;
+
   function showWinOverlay() {
     // Активное время уровня (Вариант Б, stats.js) фиксируется РОВНО в
     // момент победы — до этого таймер нигде не показывается игроку.
     const seconds = Stats.finishLevel();
-    state.levelTimes[state.levelIndex] = seconds;
+    const finishedIdx = state.levelIndex; // 0-индексный, только что пройденный
+    state.levelTimes[finishedIdx] = seconds;
+
+    const finishedLevelNumber = finishedIdx + 1;
+    const nextIdx = finishedIdx + 1;
+    const isChapterEnd = finishedLevelNumber % CHAPTER_SIZE === 0;
+    const isCampaignEnd = nextIdx >= LEVELS.length;
+    pendingWinTransition = { nextIdx, isChapterEnd, isCampaignEnd, chapterNum: finishedLevelNumber / CHAPTER_SIZE };
+
+    // Полоса прогресса главы: N из 12, N = позиция ВНУТРИ текущей главы
+    // (1..12), из levelIndex — новых полей сейва не заводим.
+    const posInChapter = ((finishedLevelNumber - 1) % CHAPTER_SIZE) + 1;
+    winProgressFill.style.width = (posInChapter / CHAPTER_SIZE * 100) + '%';
+    winProgressLabel.textContent = `${posInChapter} ${t('of')} ${CHAPTER_SIZE}`;
+
+    /* КРАЕВОЙ СЛУЧАЙ (задача фаза 3): точка «Продолжить» продвигается
+       ЗДЕСЬ, в момент завершения уровня — не по клику «Дальше» и не по
+       факту предзагрузки следующего. Иначе выход в меню/перезагрузка
+       страницы с этого экрана (до клика «Дальше») вернули бы игрока на
+       ТОЛЬКО ЧТО пройденный уровень (state.levelIndex ещё не сдвинут) —
+       он решал бы пройденный уровень заново (не «пропуск», но и не
+       корректное продолжение). Сдвигаем levelIndex/maxUnlocked и
+       сохраняем ПОЛНЫЙ объект одним действием — это и есть «сейв по
+       факту завершения уровня». ТОЛЬКО для обычного перехода: глава/
+       финал остаются как есть (их продвижение — штатная логика
+       goToNextLevel/loadLevel по клику «Дальше» на СВОИХ оверлеях). */
+    if (!isChapterEnd && !isCampaignEnd) {
+      state.levelIndex = nextIdx;
+      state.maxUnlocked = Math.max(state.maxUnlocked, nextIdx);
+      // Следующий уровень виден ПОД полупрозрачным оверлеем — ТОЛЬКО
+      // визуально (Board.setLevel рисует, больше ничего не трогает).
+      // Game.setLevel НЕ вызываем — Game.solved остаётся true (см.
+      // game.js), ввод на канвасе заблокирован железно вне зависимости
+      // от того, что нарисовано; сам оверлей поверх тоже не пропускает
+      // тапы к канвасу. Активация (Game.setLevel/Stats.startLevel) —
+      // по клику «Дальше», в loadLevel(), как и раньше.
+      Board.setLevel(LEVELS[nextIdx]);
+    }
+
     Platform.save({ ...state }); // полный объект — переживает закрытие вкладки отсюда же
     winOverlay.classList.remove('hidden');
     Confetti.burst(); // «вау»-момент; сама уважает prefers-reduced-motion
@@ -410,12 +466,13 @@
   }
 
   btnNext.addEventListener('click', () => {
-    // 1-индексный номер уровня, который ТОЛЬКО ЧТО пройден (state.levelIndex
-    // ещё не продвинут) — численно совпадает с nextIdx (0-индексная позиция
-    // следующего уровня в массиве), но это разные по смыслу величины.
-    const finishedLevelNumber = state.levelIndex + 1;
-    const nextIdx = state.levelIndex + 1;
-    if (nextIdx >= LEVELS.length) {
+    // Решение принято в showWinOverlay() (см. pendingWinTransition
+    // выше) — не пересчитываем заново из state.levelIndex, он для
+    // обычного перехода уже продвинут к этому моменту.
+    const transition = pendingWinTransition;
+    pendingWinTransition = null;
+    if (!transition) return; // защита: клик без предшествующего showWinOverlay быть не должен
+    if (transition.isCampaignEnd) {
       // Кампания пройдена целиком — экран завершения вместо тихого
       // возврата в меню (levelIndex остаётся на последнем уровне,
       // сохранён уже в showWinOverlay). Проверяется ПЕРВЫМ — уровень
@@ -423,11 +480,11 @@
       showCampaignCompleteOverlay();
       return;
     }
-    if (finishedLevelNumber % CHAPTER_SIZE === 0) {
-      showChapterCompleteOverlay(finishedLevelNumber / CHAPTER_SIZE);
+    if (transition.isChapterEnd) {
+      showChapterCompleteOverlay(transition.chapterNum);
       return;
     }
-    goToNextLevel(nextIdx);
+    goToNextLevel(transition.nextIdx);
   });
 
   btnChapterNext.addEventListener('click', () => {
