@@ -45,6 +45,18 @@
   const statFastestEl    = document.getElementById('stat-fastest');
   const statSlowestEl    = document.getElementById('stat-slowest');
 
+  /* Экран завершения ГЛАВЫ (каждые CHAPTER_SIZE уровней, кроме
+     последнего уровня массива — там срабатывает финал выше). Легче
+     финального: короче конфетти, без фанфары — см. showChapterCompleteOverlay. */
+  const CHAPTER_SIZE     = 12;
+  const chapterOverlay      = document.getElementById('chapter-overlay');
+  const btnChapterNext      = document.getElementById('btn-chapter-next');
+  const chapterTitleEl      = document.getElementById('chapter-title');
+  const chapterStatTotalEl   = document.getElementById('chapter-stat-total');
+  const chapterStatAverageEl = document.getElementById('chapter-stat-average');
+  const chapterStatFastestEl = document.getElementById('chapter-stat-fastest');
+  const chapterStatSlowestEl = document.getElementById('chapter-stat-slowest');
+
   /* Сейв: ВСЕГДА полный объект (стандарт студии).
      levelTimes[i] — активное время (сек) на уровень i, пишется при
      победе (Stats.finishLevel, Вариант Б — см. stats.js).
@@ -118,9 +130,15 @@
 
   /* ---------- Сетка уровней (прогресс + прыжок на уже открытый) ----------
      Раскладка считается сама, как в Board.computeLayout — плитки
-     подбирают наибольший размер, при котором ВСЕ LEVELS.length
-     помещаются без скролла (анти-скролл — стандарт студии, скролл
-     внутри отдельного экрана не заводим). */
+     подбирают наибольший размер, при котором помещается МАКСИМУМ
+     строк без переполнения по ширине. Если ни при каком числе колонок
+     тайл не дотягивает до MIN_TILE (156 плиток на узком экране) —
+     сетка становится выше экрана и скроллится ВНУТРИ #grid-wrap
+     (overflow-y:auto в style.css), страница (html,body) по-прежнему
+     не скроллится (стандарт студии, шрам ВК-порта: 100vh раздувает
+     iframe площадки — см. журнал). Решение основателя (вариант A):
+     вертикальный скролл + подмотка к текущему уровню, не карта глав
+     и не страницы. */
   function renderGrid() {
     levelGridEl.innerHTML = '';
     for (let i = 0; i < LEVELS.length; i++) {
@@ -164,24 +182,60 @@
     const MIN_TILE = 26;
     const MAX_TILE = 60;
 
-    let bestTile = MIN_TILE, bestCols = count;
+    let bestTile = MIN_TILE, bestCols = count, fitsWithoutScroll = false;
     for (let cols = 1; cols <= count; cols++) {
       const rows = Math.ceil(count / cols);
       const tileW = (cssW - GAP * (cols - 1)) / cols;
       const tileH = (cssH - GAP * (rows - 1)) / rows;
       const tile = Math.min(tileW, tileH, MAX_TILE);
-      if (tile > bestTile) { bestTile = tile; bestCols = cols; }
+      if (tile > bestTile) { bestTile = tile; bestCols = cols; fitsWithoutScroll = true; }
     }
-    const tilePx = Math.max(MIN_TILE, Math.floor(bestTile));
+
+    let tilePx;
+    if (fitsWithoutScroll) {
+      tilePx = Math.max(MIN_TILE, Math.floor(bestTile));
+    } else {
+      // Ни одна раскладка не даёт тайл больше MIN_TILE в пределах
+      // высоты экрана (156 плиток на узком экране) — подбираем колонки
+      // ТОЛЬКО по ширине, высоту не учитываем. Сетка становится выше
+      // экрана — это нормально, #grid-wrap скроллит её внутри себя.
+      bestCols = Math.min(count, Math.max(1, Math.floor((cssW + GAP) / (MIN_TILE + GAP))));
+      tilePx = MIN_TILE;
+    }
     levelGridEl.style.gridTemplateColumns = `repeat(${bestCols}, ${tilePx}px)`;
     levelGridEl.style.gridAutoRows = `${tilePx}px`;
     levelGridEl.style.fontSize = Math.max(10, Math.floor(tilePx * 0.4)) + 'px';
+  }
+
+  /* Подмотка сетки к текущему уровню — примерно на трети высоты
+     контейнера сверху, не впритык к краю (решение основателя, вариант
+     A). Считается вручную через getBoundingClientRect (НЕ scrollIntoView
+     — шрам Словохода: scrollIntoView молча не срабатывает, если
+     контейнер ещё display:none/нулевой высоты). Если высота нулевая —
+     это ошибка вызова (экран должен быть уже показан и отрисован),
+     проговариваем в консоль, а не проглатываем молча. */
+  function scrollGridToCurrent() {
+    const wrap = document.getElementById('grid-wrap');
+    if (wrap.clientHeight === 0) {
+      console.error('[grid] scrollGridToCurrent: контейнер сетки имеет нулевую высоту — подмотка невозможна (вызвано до показа экрана?)');
+      return;
+    }
+    const tiles = levelGridEl.querySelectorAll('.grid-tile');
+    const currentTile = tiles[state.levelIndex];
+    if (!currentTile) return;
+    const wrapRect = wrap.getBoundingClientRect();
+    const tileRect = currentTile.getBoundingClientRect();
+    const tileCenterInScroll = wrap.scrollTop + (tileRect.top - wrapRect.top) + tileRect.height / 2;
+    const targetScrollTop = tileCenterInScroll - wrap.clientHeight / 3;
+    const maxScrollTop = wrap.scrollHeight - wrap.clientHeight;
+    wrap.scrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
   }
 
   btnLevels.addEventListener('click', () => {
     show('grid');
     syncHeaderSpace();
     renderGrid();
+    scrollGridToCurrent();
   });
   btnGridBack.addEventListener('click', () => show('menu'));
 
@@ -288,6 +342,42 @@
     return { total, average, fastest, slowest };
   }
 
+  /* Те же 4 цифры, но СРЕЗ ТОЛЬКО по уровням этой главы (CHAPTER_SIZE
+     штук) — chapterNum считается от 1 (глава 1 = уровни 1-12). Ничего
+     нового в сейве не заводим: и это, и computeCampaignStats читают
+     один и тот же state.levelTimes[]. */
+  function computeChapterStats(chapterNum) {
+    const startIdx = (chapterNum - 1) * CHAPTER_SIZE;
+    const endIdx = startIdx + CHAPTER_SIZE;
+    const times = state.levelTimes.slice(startIdx, endIdx).filter(v => typeof v === 'number' && v >= 0);
+    const total = times.reduce((a, b) => a + b, 0);
+    const average = times.length ? total / times.length : 0;
+    const fastest = times.length ? Math.min(...times) : 0;
+    const slowest = times.length ? Math.max(...times) : 0;
+    return { total, average, fastest, slowest };
+  }
+
+  function hideChapterOverlay() {
+    chapterOverlay.classList.add('hidden');
+  }
+
+  /* Экран «Глава N пройдена» — вызывается из btnNext ПЕРЕД переходом на
+     следующий уровень (сам win-overlay уровня, showWinOverlay выше, не
+     трогаем и не меняем — это отдельный, более лёгкий оверлей поверх
+     той же механики паузы/сохранения). Фанфары нет (эксклюзив финала,
+     решение постановки), конфетти короче (см. confetti.js opts). */
+  function showChapterCompleteOverlay(chapterNum) {
+    hideWinOverlay();
+    const stats = computeChapterStats(chapterNum);
+    chapterTitleEl.textContent = `${t('chapter')} ${chapterNum} ${t('chapterComplete')}`;
+    chapterStatTotalEl.textContent = formatTime(stats.total);
+    chapterStatAverageEl.textContent = formatTime(stats.average);
+    chapterStatFastestEl.textContent = formatTime(stats.fastest);
+    chapterStatSlowestEl.textContent = formatTime(stats.slowest);
+    chapterOverlay.classList.remove('hidden');
+    Confetti.burst({ count: 18, durationMs: 1200 }); // короче и реже финальных — глава легче
+  }
+
   function showCampaignCompleteOverlay() {
     hideWinOverlay();
     const stats = computeCampaignStats();
@@ -305,16 +395,11 @@
     updateContinueVisibility();
   });
 
-  btnNext.addEventListener('click', () => {
-    const nextIdx = state.levelIndex + 1;
-    if (nextIdx >= LEVELS.length) {
-      // Кампания пройдена целиком — экран завершения вместо тихого
-      // возврата в меню (levelIndex остаётся на последнем уровне,
-      // сохранён уже в showWinOverlay).
-      showCampaignCompleteOverlay();
-      return;
-    }
+  /* Общий переход «на следующий уровень» — используется и обычным
+     btnNext (см. ниже), и кнопкой «Дальше» экрана главы. */
+  function goToNextLevel(nextIdx) {
     hideWinOverlay();
+    hideChapterOverlay();
     // Interstitial (с кулдауном) — в паузе ПОСЛЕ оверлея, ДО загрузки уровня.
     maybeShowInterstitial(() => {
       loadLevel(nextIdx);
@@ -322,6 +407,31 @@
       // НЕ сохраняем на каждый ход/кадр — только на переходе уровня и звуке.
       Platform.save({ ...state });
     });
+  }
+
+  btnNext.addEventListener('click', () => {
+    // 1-индексный номер уровня, который ТОЛЬКО ЧТО пройден (state.levelIndex
+    // ещё не продвинут) — численно совпадает с nextIdx (0-индексная позиция
+    // следующего уровня в массиве), но это разные по смыслу величины.
+    const finishedLevelNumber = state.levelIndex + 1;
+    const nextIdx = state.levelIndex + 1;
+    if (nextIdx >= LEVELS.length) {
+      // Кампания пройдена целиком — экран завершения вместо тихого
+      // возврата в меню (levelIndex остаётся на последнем уровне,
+      // сохранён уже в showWinOverlay). Проверяется ПЕРВЫМ — уровень
+      // 156 кратен CHAPTER_SIZE, но здесь это финал, не глава.
+      showCampaignCompleteOverlay();
+      return;
+    }
+    if (finishedLevelNumber % CHAPTER_SIZE === 0) {
+      showChapterCompleteOverlay(finishedLevelNumber / CHAPTER_SIZE);
+      return;
+    }
+    goToNextLevel(nextIdx);
+  });
+
+  btnChapterNext.addEventListener('click', () => {
+    goToNextLevel(state.levelIndex + 1);
   });
 
   /* ---------- Кнопки меню ----------

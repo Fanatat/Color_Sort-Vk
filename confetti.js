@@ -20,8 +20,14 @@ const Confetti = (() => {
     ctx = canvas.getContext('2d');
   }
 
-  function burst() {
+  /* opts.count/opts.durationMs — опциональны, по умолчанию поведение
+     ИДЕНТИЧНО прежнему (44 частицы, ~2.6с). Используется экраном главы
+     (main.js) для заведомо более лёгкого всплеска — финал остаётся
+     единственным с полноразмерным конфетти. */
+  function burst(opts) {
     if (!canvas || reduceMotion) return;
+    const count = (opts && opts.count) || 44;
+    const durationMs = (opts && opts.durationMs) || 2600;
     const dpr = window.devicePixelRatio || 1;
     const cssW = canvas.clientWidth, cssH = canvas.clientHeight;
     canvas.width = cssW * dpr;
@@ -29,7 +35,7 @@ const Confetti = (() => {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const particles = [];
-    for (let i = 0; i < 44; i++) {
+    for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * cssW,
         y: -20 - Math.random() * cssH * 0.6,
@@ -73,7 +79,7 @@ const Confetti = (() => {
         ctx.restore();
       }
 
-      if (now - t0 < 2600) {
+      if (now - t0 < durationMs) {
         rafId = requestAnimationFrame(frame);
       } else {
         ctx.clearRect(0, 0, cssW, cssH);

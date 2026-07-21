@@ -128,15 +128,38 @@ body {
   transform: rotate(-40deg);
 }
 
-/* ---------- Экран сетки уровней ---------- */
+/* ---------- Экран сетки уровней ----------
+   Высота #grid-wrap ограничена реальной вёрсткой экрана (top:
+   var(--header-h) до низа .screen), НЕ 100vh — на ВК Web игра живёт в
+   iframe фиксированной высоты, 100vh раздувает страницу площадки
+   (шрам порта нонограмм). Если сетка не помещается без скролла
+   (156 плиток на узком экране), она скроллится ВНУТРИ этого
+   контейнера (overflow-y), html/body остаются overflow:hidden —
+   страница целиком не двигается (анти-скролл, стандарт студии).
+
+   ВАЖНО: резерв под шапку — через position/top (граница СОБСТВЕННОГО
+   бокса контейнера), а НЕ через padding-top. Padding — часть
+   прокручиваемого содержимого: при скролле он "уезжает" вместе с
+   тайлами, и первая же строка сетки заезжает ПОД полупрозрачную
+   .game-header (шапка position:absolute, рисуется поверх, а не
+   раздвигает поток) — проверено скриншотом, где plaque "2 3 4" вылезала
+   из-под шапки при scrollTop=88 (это и есть высота старого padding-top).
+   top: var(--header-h) держит верхнюю границу бокса НИЖЕ шапки всегда,
+   вне зависимости от scrollTop. */
 .grid-wrap {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
+  position: absolute;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* было center — при скролле центрирование даёт "уезжающий вверх" контент до отрицательного scrollTop */
   justify-content: center;
-  padding: calc(var(--header-h) + 16px) 12px 28px;
+  padding: 16px 12px 28px;
+  overflow-y: auto;
+  overscroll-behavior: contain; /* доп. страховка поверх overflow:hidden html/body — скролл сетки не должен утекать на страницу */
+  touch-action: pan-y; /* разрешаем вертикальный тач-скролл именно здесь, поверх touch-action:none на html/body */
+  -webkit-overflow-scrolling: touch;
 }
 .level-grid {
   display: grid;
@@ -343,6 +366,21 @@ body {
 }
 .stat-value { font-size: 1.3rem; font-weight: bold; }
 .stat-label { font-size: 0.75rem; color: var(--ink-soft); text-align: center; }
+
+/* ---------- Оверлей завершения главы (легче финального: слабее
+   затемнение фона, без вспышки/попа, компактнее карточка — если
+   не отличать на глаз от campaign-overlay, финал перестаёт быть
+   событием) ---------- */
+.chapter-overlay {
+  background: rgba(43, 39, 35, 0.26);
+  animation: none;
+}
+.chapter-box {
+  max-width: 280px;
+  padding: 26px 24px;
+  animation: none;
+}
+.chapter-title { font-size: 1.3rem; }
 
 @keyframes winPop {
   0%   { transform: scale(0.7); opacity: 0; }

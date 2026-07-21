@@ -8,7 +8,7 @@
    Элемент: { color: 'c1'|'c2'|'c3', shape: 'circle'|'square' }.
    Заполненные колбы — СЛУЧАЙНАЯ СМЕСЬ слоёв (не один тип на колбу).
 
-   72 уровней. Уровни 1-2 — ДВА ОБУЧАЮЩИХ, вшиты вручную
+   156 уровней. Уровни 1-2 — ДВА ОБУЧАЮЩИХ, вшиты вручную
    (T=1/1 ход и T=2 одноцветный-разноформенный/2 хода — учат «тап
    источник → тап цель» и «форма считается наравне с цветом» без
    единого слова текста, см. buildTutorialLevel в gen_levels.js).
@@ -6238,6 +6238,9548 @@ const LEVELS = [
         {
           "color": "c1",
           "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      []
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        }
+      ]
+    ]
+  },
+  {
+    "vials": [
+      [
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "square"
+        },
+        {
+          "color": "c3",
+          "shape": "circle"
+        }
+      ],
+      [
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
+        },
+        {
+          "color": "c2",
+          "shape": "square"
+        }
+      ],
+      [
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c2",
+          "shape": "circle"
+        },
+        {
+          "color": "c3",
+          "shape": "square"
+        },
+        {
+          "color": "c1",
+          "shape": "circle"
         }
       ]
     ]
