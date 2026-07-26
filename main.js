@@ -72,11 +72,75 @@
     onboardingSeen: false,
     muted: false,
     levelTimes: [],
-    maxUnlocked: 0
+    maxUnlocked: 0,
+    themeOwned: false
   };
 
   function isLevelUnlocked(idx) {
     return devUnlockAll || idx <= state.maxUnlocked;
+  }
+
+  /* ---------- Косметика (Task C, ЗАДАЧА_..._VK.md) ----------
+     _STUB_ на переподачу 2026-07-26: Platform.buyCosmetic сейчас
+     отключён флагом COSMETIC_SHOP_ENABLED_VK в vk_platform.js (нет
+     сервер-колбэка для VKWebAppShowOrderBox) — typeof-проверка ниже
+     срабатывает так же, как на Яндекс-сборке, и весь блок ниже
+     остаётся мёртвым кодом до включения флага там. Код здесь не
+     трогаем — расцепление живёт в адаптере, не здесь.
+     Единственная покупка v1: альтернативная («морская») палитра трёх
+     цветов элементов вместо тёплой студийной. Board.COLORS (board.js) —
+     обычный мутируемый объект, читается на каждой отрисовке
+     (ctx.fillStyle = COLORS[el.color]) — подмена применяется без единой
+     правки board.js. Платность/сама покупка — ТОЛЬКО через
+     Platform.buyCosmetic (существует только в vk_platform.js, на
+     Яндексе фичи физически нет — см. typeof-проверку ниже, как у
+     DEV_UNLOCK_ALL выше). Разблокировка входа в покупку — после
+     COSMETIC_UNLOCK_LEVEL пройденных уровней (диапазон ТЗ 2-5). */
+  const COSMETIC_UNLOCK_LEVEL = 3;
+  const COSMETIC_THEME = { c1: '#2a6f77', c2: '#3f8f5f', c3: '#39527a' };
+  const cosmeticRow      = document.getElementById('cosmetic-row');
+  const btnCosmeticBuy   = document.getElementById('btn-cosmetic-buy');
+  const cosmeticOwnedEl  = document.getElementById('cosmetic-owned-label');
+
+  function applyCosmeticTheme() {
+    Object.assign(Board.COLORS, COSMETIC_THEME);
+  }
+
+  function updateCosmeticUI() {
+    if (!cosmeticRow) return; // разметки нет (не должно случиться, но не падаем)
+    if (typeof Platform.buyCosmetic !== 'function') {
+      cosmeticRow.classList.add('hidden'); // Яндекс-сборка — фичи физически нет
+      return;
+    }
+    if (state.themeOwned) {
+      cosmeticRow.classList.remove('hidden');
+      btnCosmeticBuy.classList.add('hidden');
+      cosmeticOwnedEl.classList.remove('hidden');
+      return;
+    }
+    if (state.maxUnlocked >= COSMETIC_UNLOCK_LEVEL) {
+      cosmeticRow.classList.remove('hidden');
+      btnCosmeticBuy.classList.remove('hidden');
+      cosmeticOwnedEl.classList.add('hidden');
+      return;
+    }
+    cosmeticRow.classList.add('hidden');
+  }
+
+  if (btnCosmeticBuy) {
+    btnCosmeticBuy.addEventListener('click', () => {
+      Platform.buyCosmetic(
+        () => { // покупка подтверждена ВК
+          state.themeOwned = true;
+          applyCosmeticTheme();
+          updateCosmeticUI();
+          Platform.save({ ...state }); // полный объект
+        },
+        (reason) => { // отмена/сбой/товар недоступен — тихо, без краша
+          console.warn('[main] покупка косметики не завершена:', reason);
+        }
+      );
+    });
   }
 
   function show(name) {
@@ -449,6 +513,7 @@
     campaignOverlay.classList.add('hidden');
     show('menu');
     updateContinueVisibility();
+    updateCosmeticUI();
   });
 
   /* Общий переход «на следующий уровень» — используется и обычным
@@ -512,6 +577,7 @@
     Stats.stop(); // ушли с уровня без победы — незавершённый отрезок не считаем
     show('menu');
     updateContinueVisibility();
+    updateCosmeticUI();
   });
 
   /* Любой тап по игровому экрану — сигнал активности для таймера
@@ -560,7 +626,9 @@
       state.maxUnlocked = state.levelIndex; // сейв старее этого поля — считаем открытым хотя бы то, что уже пройдено
     }
     if (state.maxUnlocked >= LEVELS.length) state.maxUnlocked = LEVELS.length - 1;
+    if (state.themeOwned) applyCosmeticTheme(); // переживает перезагрузку
     updateContinueVisibility();
+    updateCosmeticUI();
     applyMuteIcon();
 
     show('menu');
