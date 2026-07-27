@@ -118,25 +118,71 @@ body {
 }
 .hidden { display: none !important; }
 
-/* Косметическая покупка в меню (Task C, ВК-only) — переиспользует
-   .btn/.hidden, отдельный ряд внутри .menu-box (flex column уже даёт
-   вертикальный gap, здесь только внутренняя раскладка ряда). */
-.cosmetic-row {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding-top: 8px;
-  border-top: 1.5px dashed var(--ink-soft);
-  width: 100%;
-}
-.cosmetic-preview { display: flex; gap: 6px; }
+/* Косметика (Task C/7, ВК-only) — переиспользуется внутри магазина
+   (.shop-item-preview) и индикатора текущей палитры (.shop-current-preview). */
 .cosmetic-dot {
   width: 16px; height: 16px;
   border-radius: 50%;
   border: 1.5px solid var(--ink);
 }
 .cosmetic-label { font-size: 0.9rem; color: var(--ink-soft); }
+
+/* ---------- Магазин (Task 7) ----------
+   Тот же приём анти-скролла и резерва под шапку, что у .grid-wrap
+   выше (top: var(--header-h), НЕ padding-top, НЕ 100vh — см. журнал
+   там же). Список карточек — вертикальный flex, рассчитан на рост
+   ассортимента (main.js рендерит из SHOP_ITEMS), при переполнении
+   скроллится ВНУТРИ контейнера, страница целиком не двигается. */
+.shop-wrap {
+  position: absolute;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 16px 28px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+.shop-current-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 340px;
+}
+.shop-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 var(--shadow);
+}
+.shop-item-preview { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+.shop-item-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.shop-item-caption { font-size: 0.78rem; color: var(--ink-soft); }
+.shop-item-btn { min-width: 0; padding: 10px 14px; font-size: 0.95rem; flex-shrink: 0; }
+.shop-empty {
+  color: var(--ink-soft);
+  text-align: center;
+  padding: 24px 12px;
+  font-size: 0.95rem;
+}
 
 /* Перечёркнутая нота — CSS-чертой, не символом (стандарт студии) */
 .btn-icon.muted::after {

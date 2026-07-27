@@ -24,22 +24,12 @@
       <h1 class="game-title" data-i18n="title">Сортировка: Цвет и Форма</h1>
       <button id="btn-play" class="btn btn-primary" data-i18n="play">Играть</button>
       <button id="btn-levels" class="btn" data-i18n="levels">Уровни</button>
+      <!-- Магазин (Task 7, ВК-only): показывается только когда
+           Platform.COSMETIC_PREVIEW_VK выставлен (main.js) — на Яндексе
+           фичи физически нет. Не гейтится прогрессом (в отличие от
+           отдельных тем внутри) — сама вкладка есть всегда на ВК. -->
+      <button id="btn-shop" class="btn hidden" data-i18n="shop">Магазин</button>
       <button id="btn-sound" class="btn btn-icon" aria-label="sound">♪</button>
-
-      <!-- Косметика-превью (Task C/4, ВК-only): показывается только когда
-           Platform.COSMETIC_PREVIEW_VK выставлен (main.js) и после
-           COSMETIC_UNLOCK_LEVEL пройденных уровней. Скрыта по умолчанию.
-           Кнопка КРАСИТ, не продаёт (покупка отключена — см. main.js) —
-           подпись не должна обещать то, чего нет. -->
-      <div id="cosmetic-row" class="cosmetic-row hidden">
-        <div class="cosmetic-preview" aria-hidden="true">
-          <span class="cosmetic-dot" style="background:#2a6f77"></span>
-          <span class="cosmetic-dot" style="background:#3f8f5f"></span>
-          <span class="cosmetic-dot" style="background:#39527a"></span>
-        </div>
-        <span class="cosmetic-label">Морская тема колб</span>
-        <button id="btn-cosmetic-preview" class="btn" data-i18n="cosmeticPreview">Посмотреть тему</button>
-      </div>
     </div>
   </div>
 
@@ -52,6 +42,27 @@
     </header>
     <div id="grid-wrap" class="grid-wrap">
       <div id="level-grid" class="level-grid"></div>
+    </div>
+  </div>
+
+  <!-- Магазин (Task 7): список тем-превью, расширяемый (main.js рендерит
+       из SHOP_ITEMS, не хардкод одной темы). Превью применяет палитру
+       визуально и НЕ персистится — см. main.js, revertCosmeticTheme. -->
+  <div id="screen-shop" class="screen">
+    <header class="game-header">
+      <button id="btn-shop-back" class="btn btn-icon">←</button>
+      <div class="level-indicator" data-i18n="shop">Магазин</div>
+      <span class="btn btn-icon spacer" aria-hidden="true"></span>
+    </header>
+    <div id="shop-wrap" class="shop-wrap">
+      <div class="shop-current-preview">
+        <span data-i18n="shopCurrentLabel">Текущая палитра:</span>
+        <span class="cosmetic-dot" id="shop-current-dot-1"></span>
+        <span class="cosmetic-dot" id="shop-current-dot-2"></span>
+        <span class="cosmetic-dot" id="shop-current-dot-3"></span>
+      </div>
+      <div id="shop-list" class="shop-list"></div>
+      <div id="shop-empty" class="shop-empty hidden" data-i18n="shopEmpty">Темы открываются по мере прохождения уровней</div>
     </div>
   </div>
 

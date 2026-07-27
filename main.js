@@ -13,6 +13,7 @@
     loading: document.getElementById('screen-loading'),
     menu:    document.getElementById('screen-menu'),
     grid:    document.getElementById('screen-grid'),
+    shop:    document.getElementById('screen-shop'),
     game:    document.getElementById('screen-game')
   };
 
@@ -79,47 +80,132 @@
     return devUnlockAll || idx <= state.maxUnlocked;
   }
 
-  /* ---------- Косметика (Task C, ЗАДАЧА_..._VK.md) ----------
-     ПЕРЕСМОТРЕНО на переподачу 2026-07-26 (Задача 4): покупка
-     (Platform.buyCosmetic, VKWebAppShowOrderBox) остаётся ОТКЛЮЧЕНА
-     флагом COSMETIC_SHOP_ENABLED_VK в vk_platform.js — сервер-колбэка
-     для подтверждения транзакции у студии нет (см. комментарий у
-     флага там). Вместо покупки — превью: клик красит колбы визуально,
-     НЕ персистится (state.themeOwned не трогаем, Platform.save не
-     вызываем), выход в меню и перезагрузка возвращают исходную
-     палитру. Board.COLORS (board.js) — обычный мутируемый объект,
-     читается на каждой отрисовке (ctx.fillStyle = COLORS[el.color]) —
-     подмена/откат применяются без единой правки board.js.
-     Доступность самого превью (не покупки) — отдельный флаг адаптера
+  /* ---------- Магазин / Косметика (Task C, ЗАДАЧА_..._VK.md) ----------
+     ПЕРЕСМОТРЕНО на переподачу 2026-07-26 (Задача 4 → Задача 7):
+     покупка (Platform.buyCosmetic, VKWebAppShowOrderBox) остаётся
+     ОТКЛЮЧЕНА флагом COSMETIC_SHOP_ENABLED_VK в vk_platform.js —
+     сервер-колбэка для подтверждения транзакции у студии нет (см.
+     комментарий у флага там). Вместо покупки — превью: клик красит
+     колбы визуально, НЕ персистится (state.themeOwned не трогаем,
+     Platform.save не вызываем), выход в меню и перезагрузка возвращают
+     исходную палитру. Board.COLORS (board.js) — обычный мутируемый
+     объект, читается на каждой отрисовке (ctx.fillStyle =
+     COLORS[el.color]) — подмена/откат применяются без единой правки
+     board.js.
+     Задача 7: промо убрано из меню в отдельную вкладку «Магазин».
+     SHOP_ITEMS — список тем, рассчитанный на рост ассортимента (сейчас
+     одна позиция) — renderShop() строит DOM из массива, не хардкодит
+     разметку одной темы. Доступность самой вкладки — флаг адаптера
      Platform.COSMETIC_PREVIEW_VK (типа AD_LEVELS_INTERVAL выше:
      платформенное решение живёт в адаптере, main.js площадку не
      знает) — на Яндексе не экспортирован, там фичи физически нет.
-     Разблокировка входа — после COSMETIC_UNLOCK_LEVEL пройденных
-     уровней (диапазон ТЗ 2-5), как и раньше. */
-  const COSMETIC_UNLOCK_LEVEL = 3;
-  const COSMETIC_THEME = { c1: '#2a6f77', c2: '#3f8f5f', c3: '#39527a' };
+     Разблокировка КОНКРЕТНОЙ темы внутри магазина — по unlockLevel
+     позиции (диапазон ТЗ 2-5 для морской темы), не самой вкладки —
+     вкладка «Магазин» есть в меню всегда (на ВК), пуста до разблокировки
+     первой темы. */
   const ORIGINAL_THEME = { ...Board.COLORS }; // снимок ДО любых мутаций — превью обратимо
-  const cosmeticRow       = document.getElementById('cosmetic-row');
-  const btnCosmeticPreview = document.getElementById('btn-cosmetic-preview');
+  /* Морская палитра — та же правка светлоты, что у Board.COLORS (задача
+     5): бирюзовый/зелёный раньше читались почти одинаково тёмными.
+     Разрывы (grayscale-лума): c3→c1 31.9%, c1→c2 27.2% — оба ≥25%. */
+  const SHOP_ITEMS = [
+    {
+      id: 'sea_theme',
+      labelKey: 'shopSeaThemeLabel',
+      theme: { c1: '#3a8891', c2: '#8fd0a0', c3: '#16232e' },
+      unlockLevel: 3
+    }
+  ];
 
-  function applyCosmeticTheme() {
-    Object.assign(Board.COLORS, COSMETIC_THEME);
+  const btnShop      = document.getElementById('btn-shop');
+  const btnShopBack  = document.getElementById('btn-shop-back');
+  const shopListEl   = document.getElementById('shop-list');
+  const shopEmptyEl  = document.getElementById('shop-empty');
+  const shopDots     = [1, 2, 3].map(n => document.getElementById(`shop-current-dot-${n}`));
+
+  function applyCosmeticTheme(theme) {
+    Object.assign(Board.COLORS, theme);
   }
   function revertCosmeticTheme() {
     Object.assign(Board.COLORS, ORIGINAL_THEME);
   }
 
-  function updateCosmeticUI() {
-    if (!cosmeticRow) return; // разметки нет (не должно случиться, но не падаем)
-    if (!Platform.COSMETIC_PREVIEW_VK) {
-      cosmeticRow.classList.add('hidden'); // Яндекс-сборка — фичи физически нет
-      return;
-    }
-    cosmeticRow.classList.toggle('hidden', state.maxUnlocked < COSMETIC_UNLOCK_LEVEL);
+  /* Кнопка «Магазин» в меню — гейтится ТОЛЬКО наличием фичи у площадки
+     (Platform.COSMETIC_PREVIEW_VK), не прогрессом: сама вкладка видна
+     всегда на ВК, содержимое внутри гейтится по каждой теме отдельно. */
+  function updateShopButtonVisibility() {
+    if (!btnShop) return;
+    btnShop.classList.toggle('hidden', !Platform.COSMETIC_PREVIEW_VK);
   }
 
-  if (btnCosmeticPreview) {
-    btnCosmeticPreview.addEventListener('click', applyCosmeticTheme);
+  /* Живой индикатор «превью видно не выходя из магазина» (критерий
+     приёмки задачи 7) — читает ТЕКУЩИЙ Board.COLORS (не список тем),
+     обновляется сразу после клика «Посмотреть», без перехода на другой
+     экран. */
+  function refreshShopCurrentPreview() {
+    const keys = ['c1', 'c2', 'c3'];
+    shopDots.forEach((dot, i) => { if (dot) dot.style.background = Board.COLORS[keys[i]]; });
+  }
+
+  function renderShop() {
+    if (!shopListEl) return;
+    shopListEl.innerHTML = '';
+    const unlockedItems = SHOP_ITEMS.filter(item => state.maxUnlocked >= item.unlockLevel);
+    shopEmptyEl.classList.toggle('hidden', unlockedItems.length > 0);
+    unlockedItems.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'shop-item';
+
+      const preview = document.createElement('div');
+      preview.className = 'shop-item-preview';
+      preview.setAttribute('aria-hidden', 'true');
+      ['c1', 'c2', 'c3'].forEach(k => {
+        const dot = document.createElement('span');
+        dot.className = 'cosmetic-dot';
+        dot.style.background = item.theme[k];
+        preview.appendChild(dot);
+      });
+
+      const info = document.createElement('div');
+      info.className = 'shop-item-info';
+      const labelEl = document.createElement('span');
+      labelEl.className = 'cosmetic-label';
+      labelEl.setAttribute('data-i18n', item.labelKey);
+      labelEl.textContent = t(item.labelKey);
+      const captionEl = document.createElement('span');
+      captionEl.className = 'shop-item-caption';
+      captionEl.setAttribute('data-i18n', 'shopPreviewCaption');
+      captionEl.textContent = t('shopPreviewCaption');
+      info.appendChild(labelEl);
+      info.appendChild(captionEl);
+
+      const btn = document.createElement('button');
+      btn.className = 'btn shop-item-btn';
+      btn.setAttribute('data-i18n', 'cosmeticPreview');
+      btn.textContent = t('cosmeticPreview');
+      btn.addEventListener('click', () => {
+        applyCosmeticTheme(item.theme);
+        refreshShopCurrentPreview(); // видно сразу здесь, без выхода из магазина
+      });
+
+      row.appendChild(preview);
+      row.appendChild(info);
+      row.appendChild(btn);
+      shopListEl.appendChild(row);
+    });
+  }
+
+  if (btnShop) {
+    btnShop.addEventListener('click', () => {
+      show('shop');
+      renderShop();
+      refreshShopCurrentPreview();
+    });
+  }
+  if (btnShopBack) {
+    btnShopBack.addEventListener('click', () => {
+      revertCosmeticTheme(); // превью не персистится — выход в меню возвращает исходную палитру
+      show('menu');
+    });
   }
 
   function show(name) {
@@ -493,7 +579,6 @@
     campaignOverlay.classList.add('hidden');
     revertCosmeticTheme(); // превью не персистится — выход в меню возвращает исходную палитру
     show('menu');
-    updateCosmeticUI();
   });
 
   /* Общий переход «на следующий уровень» — используется и обычным
@@ -550,7 +635,6 @@
     Stats.stop(); // ушли с уровня без победы — незавершённый отрезок не считаем
     revertCosmeticTheme(); // превью не персистится — выход в меню возвращает исходную палитру
     show('menu');
-    updateCosmeticUI();
   });
 
   /* Любой тап по игровому экрану — сигнал активности для таймера
@@ -599,8 +683,7 @@
       state.maxUnlocked = state.levelIndex; // сейв старее этого поля — считаем открытым хотя бы то, что уже пройдено
     }
     if (state.maxUnlocked >= LEVELS.length) state.maxUnlocked = LEVELS.length - 1;
-    if (state.themeOwned) applyCosmeticTheme(); // переживает перезагрузку
-    updateCosmeticUI();
+    updateShopButtonVisibility();
     applyMuteIcon();
 
     show('menu');
