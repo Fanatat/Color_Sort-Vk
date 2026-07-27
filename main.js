@@ -130,6 +130,7 @@
   const shopListEl   = document.getElementById('shop-list');
   const shopEmptyEl  = document.getElementById('shop-empty');
   const shopDots     = [1, 2, 3].map(n => document.getElementById(`shop-current-dot-${n}`));
+  const buildBadgeEl = document.getElementById('build-badge');
 
   function applyCosmeticTheme(theme) {
     Object.assign(Board.COLORS, theme);
@@ -144,6 +145,21 @@
   function updateShopButtonVisibility() {
     if (!btnShop) return;
     btnShop.classList.toggle('hidden', !Platform.COSMETIC_PREVIEW_VK);
+  }
+
+  /* Задача 14: плашка номера билда — ТОЛЬКО когда адаптер реально
+     экспортирует Platform.BUILD строкой (ВК-сборка, build.py подменил
+     плейсхолдер). На Яндексе (platform.js) поля нет — typeof-гейт,
+     тот же приём, что у COSMETIC_PREVIEW_VK — плашка остаётся hidden.
+     ?nobuild=1 в адресе — ручной способ спрятать плашку перед промо-
+     скриншотом (критерий приёмки задачи 14), без обращения к платформе. */
+  function updateBuildBadge() {
+    if (!buildBadgeEl) return;
+    if (typeof Platform.BUILD !== 'string') return;
+    const hideForScreenshot = new URLSearchParams(location.search).has('nobuild');
+    if (hideForScreenshot) return;
+    buildBadgeEl.textContent = Platform.BUILD;
+    buildBadgeEl.classList.remove('hidden');
   }
 
   /* Живой индикатор «превью видно не выходя из магазина» (критерий
@@ -164,16 +180,16 @@
       const row = document.createElement('div');
       row.className = 'shop-item';
 
-      /* Задача 10: было 3 абстрактных кружка (.cosmetic-dot) — заменено
-         на узнаваемый мини-макет колбы (тот же силуэт, что рисует
-         board.js — скруглённое дно, открытый верх) с 3 стопкой фигур
-         круг/квадрат/круг в цветах темы, чтобы было видно, КАК это
-         будет выглядеть в игре, а не абстрактную палитру. Под макетом —
-         некликабельная кнопка «Скоро…» (сама покупка ещё не подключена,
-         см. vk_platform.js COSMETIC_SHOP_ENABLED_VK) — даёт понять, что
-         тема будет продаваться, не обещая рабочую кнопку. */
-      const previewCol = document.createElement('div');
-      previewCol.className = 'shop-item-previewcol';
+      /* Задача 13: карточка — верхний ряд (превью крупнее слева +
+         название/описание колонкой справа) и нижний ряд из двух кнопок
+         одной высоты. Раньше превью-колба и «Скоро…» были одной flex-
+         колонкой слева, а «Посмотреть» — третьим соседом справа от
+         info — из-за этого info сжимался до узкого потока и текст
+         сминался. Мини-макет колбы — тот же силуэт, что рисует board.js
+         (скруглённое дно, открытый верх), с фигурами круг/квадрат/круг
+         в цветах темы — видно, КАК это будет выглядеть в игре. */
+      const topRow = document.createElement('div');
+      topRow.className = 'shop-item-top';
 
       const vial = document.createElement('div');
       vial.className = 'shop-vial-preview';
@@ -185,17 +201,6 @@
         el.style.background = item.theme[k];
         vial.appendChild(el);
       });
-
-      const soonBtn = document.createElement('button');
-      soonBtn.type = 'button';
-      soonBtn.className = 'shop-item-soon';
-      soonBtn.disabled = true; // некликабельная — товар в кабинете ВК ещё не подключён
-      soonBtn.setAttribute('aria-disabled', 'true');
-      soonBtn.setAttribute('data-i18n', 'comingSoon');
-      soonBtn.textContent = t('comingSoon');
-
-      previewCol.appendChild(vial);
-      previewCol.appendChild(soonBtn);
 
       const info = document.createElement('div');
       info.className = 'shop-item-info';
@@ -210,8 +215,14 @@
       info.appendChild(labelEl);
       info.appendChild(captionEl);
 
+      topRow.appendChild(vial);
+      topRow.appendChild(info);
+
+      const actionsRow = document.createElement('div');
+      actionsRow.className = 'shop-item-actions';
+
       const btn = document.createElement('button');
-      btn.className = 'btn shop-item-btn';
+      btn.className = 'btn btn-primary shop-item-btn';
       btn.setAttribute('data-i18n', 'cosmeticPreview');
       btn.textContent = t('cosmeticPreview');
       btn.addEventListener('click', () => {
@@ -219,9 +230,19 @@
         refreshShopCurrentPreview(); // видно сразу здесь, без выхода из магазина
       });
 
-      row.appendChild(previewCol);
-      row.appendChild(info);
-      row.appendChild(btn);
+      const soonBtn = document.createElement('button');
+      soonBtn.type = 'button';
+      soonBtn.className = 'btn shop-item-soon';
+      soonBtn.disabled = true; // некликабельная — товар в кабинете ВК ещё не подключён
+      soonBtn.setAttribute('aria-disabled', 'true');
+      soonBtn.setAttribute('data-i18n', 'comingSoon');
+      soonBtn.textContent = t('comingSoon');
+
+      actionsRow.appendChild(btn);
+      actionsRow.appendChild(soonBtn);
+
+      row.appendChild(topRow);
+      row.appendChild(actionsRow);
       shopListEl.appendChild(row);
     });
   }
@@ -486,6 +507,10 @@
       // здесь недоступность не техническая, а по лимиту, но принцип
       // тот же). Кнопка НЕ прячется — просто эта конкретная подсказка
       // тихо идёт по бесплатному пути, как при adblock/отсутствии филла.
+      // Задача 15: единственный путь исхода rewarded, что решается ЗДЕСЬ,
+      // до вызова Platform.showRewarded — адаптер про лимит не знает,
+      // поэтому лог тут же, а не в vk_platform.js.
+      console.log(`[rewarded] запрос — исчерпан суточный лимит ${state.rewardedCount}/${REWARDED_DAILY_LIMIT}, подсказка выдана бесплатно`);
       Board.showHint(hint.from, hint.to);
       return;
     }
@@ -764,7 +789,12 @@
     if (typeof state.rewardedCount !== 'number' || state.rewardedCount < 0) state.rewardedCount = 0;
     if (typeof state.rewardedDay !== 'string') state.rewardedDay = '';
     checkRewardedDailyReset(); // сейв мог пролежать со вчера — обнулить счётчик при заходе в новый день
+    // Задача 15: диагностика — основатель наблюдал подсказки без рекламы
+    // и не мог отличить причину. Состояние счётчика на старте — первая
+    // подсказка при разборе живого лога устройства.
+    console.log(`[rewarded] состояние при старте: ${state.rewardedCount}/${REWARDED_DAILY_LIMIT}, дата последнего засчитанного показа: ${state.rewardedDay || '(нет — ещё не показывали)'}`);
     updateShopButtonVisibility();
+    updateBuildBadge();
     applyMuteIcon();
 
     show('menu');

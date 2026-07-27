@@ -118,6 +118,28 @@ body {
 }
 .hidden { display: none !important; }
 
+/* Плашка номера билда (задача 14, ВК-only) — position:fixed (не
+   привязана к конкретному .screen, видна поверх активного экрана без
+   правки разметки каждого из них), крайний нижний левый угол с учётом
+   safe-area. pointer-events:none — неинтерактивна, не перехватывает тап
+   по .undo-btn (тот же угол экрана, но выше: bottom:18px против
+   bottom предельно у края здесь) и не мешает антискроллу страницы. */
+.build-badge {
+  position: fixed;
+  left: max(4px, env(safe-area-inset-left));
+  bottom: max(2px, env(safe-area-inset-bottom));
+  padding: 1px 5px;
+  font-family: inherit;
+  font-size: 9px;
+  line-height: 1.4;
+  color: var(--ink);
+  opacity: 0.32;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 9999;
+}
+
 /* Косметика (Task C/7, ВК-only) — переиспользуется внутри магазина
    (.shop-item-preview) и индикатора текущей палитры (.shop-current-preview). */
 .cosmetic-dot {
@@ -149,13 +171,19 @@ body {
   touch-action: pan-y;
   -webkit-overflow-scrolling: touch;
 }
+/* Задача 13: было наравне по размеру с остальным текстом экрана —
+   теперь мелкая приглушённая подпись над списком карточек, дальше
+   от заголовка "Магазин" в шапке. */
 .shop-current-preview {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  gap: 6px;
+  font-size: 0.76rem;
   color: var(--ink-soft);
+  width: 100%;
+  max-width: 340px;
 }
+.shop-current-preview .cosmetic-dot { width: 12px; height: 12px; }
 .shop-list {
   display: flex;
   flex-direction: column;
@@ -163,57 +191,82 @@ body {
   width: 100%;
   max-width: 340px;
 }
+/* Задача 13: карточка — 2 ряда (не одна flex-строка из 3 соседей,
+   где превью+«Скоро…» слева сминали инфоколонку до узкого потока
+   текста). Верхний ряд — превью + название/описание, нижний —
+   обе кнопки одной высоты. */
 .shop-item {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 12px;
-  padding: 12px;
+  padding: 14px;
   background: var(--card);
   border: 2px solid var(--ink);
   border-radius: 10px;
   box-shadow: 3px 3px 0 var(--shadow);
 }
-/* Задача 10: мини-макет колбы вместо трёх абстрактных точек — тот же
-   силуэт, что рисует board.js (открытый верх, скруглённое дно), с
-   фигурами круг/квадрат/круг в цветах темы. column-reverse укладывает
-   первый добавленный элемент (c1) в НИЗ макета — как элементы реально
-   лежат в колбе снизу вверх. */
-.shop-item-previewcol { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+.shop-item-top { display: flex; align-items: center; gap: 14px; }
+/* Мини-макет колбы — тот же силуэт, что рисует board.js (открытый
+   верх, скруглённое дно), с фигурами круг/квадрат/круг в цветах темы.
+   column-reverse укладывает первый добавленный элемент (c1) в НИЗ
+   макета — как элементы реально лежат в колбе снизу вверх. Крупнее
+   прежнего (было 34×58) — по спеке задачи 13 превью слева акцентное. */
 .shop-vial-preview {
-  width: 34px;
-  height: 58px;
+  width: 44px;
+  height: 76px;
+  flex-shrink: 0;
   border: 2px solid var(--ink);
   border-top: none;
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 12px 12px;
   background: rgba(43, 39, 35, 0.04);
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
   justify-content: flex-start;
-  gap: 3px;
-  padding: 4px 0;
+  gap: 4px;
+  padding: 5px 0;
 }
-.shop-vial-el { width: 19px; height: 19px; border: 1.5px solid var(--ink); flex-shrink: 0; }
+.shop-vial-el { width: 24px; height: 24px; border: 1.5px solid var(--ink); flex-shrink: 0; }
 .shop-vial-el.circle { border-radius: 50%; }
 .shop-vial-el.square { border-radius: 4px; }
-/* Некликабельная — товар в кабинете ВК ещё не подключён (см.
-   vk_platform.js COSMETIC_SHOP_ENABLED_VK). Отдельный класс, БЕЗ .btn —
-   не наследует min-width:200px/cursor:pointer общей кнопки. */
-.shop-item-soon {
-  font-family: inherit;
+.shop-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
   min-width: 0;
-  padding: 3px 10px;
-  font-size: 0.68rem;
+}
+.cosmetic-label { font-weight: 700; }
+.shop-item-caption {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Нижний ряд — обе кнопки в одну строку, одинаковая высота (flex:1
+   каждая делит ширину поровну, min-width:0 — иначе .btn тянет
+   min-width:200px и переполняет узкую карточку на 320px). */
+.shop-item-actions { display: flex; gap: 10px; }
+.shop-item-btn, .shop-item-soon {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 8px;
+  font-size: 0.92rem;
+}
+/* Некликабельная — товар в кабинете ВК ещё не подключён (см.
+   vk_platform.js COSMETIC_SHOP_ENABLED_VK). Использует .btn для той же
+   высоты/паддинга, что у активной кнопки ряда, но приглушена и не
+   реагирует на ввод. */
+.shop-item-soon {
   color: var(--ink-soft);
   background: transparent;
-  border: 1.5px dashed var(--ink-soft);
-  border-radius: 8px;
+  border-style: dashed;
+  border-color: var(--ink-soft);
+  box-shadow: none;
   cursor: default;
   pointer-events: none;
 }
-.shop-item-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.shop-item-caption { font-size: 0.78rem; color: var(--ink-soft); }
-.shop-item-btn { min-width: 0; padding: 10px 14px; font-size: 0.95rem; flex-shrink: 0; }
 .shop-empty {
   color: var(--ink-soft);
   text-align: center;

@@ -345,39 +345,57 @@ const Platform = (() => {
      здесь нет ни в одном исходе. finish() — единая точка выхода,
      settled защищает от двойного вызова (штатный ответ ПОСЛЕ того,
      как уже сработал таймаут-предохранитель). */
+  /* Задача 15 (диагностика): основатель наблюдал подсказки без рекламы
+     и не мог отличить причину — здесь ЕДИНСТВЕННАЯ строка на каждый
+     запрос rewarded (кроме исхода «лимит», который решается в main.js
+     ДО вызова этой функции — адаптер про суточный лимит не знает).
+     Причины исхода:
+       показан         — VKWebAppShowNativeAds резолвится (ролик закрыт штатно);
+       нет филла/отказ моста — Promise отклонён (документированный исход
+                          пакета: юнит не настроен/нет заполнения/мост
+                          потерял сообщение о закрытии), включая наш
+                          собственный withTimeout-таймаут — с точки
+                          зрения основателя это тот же симптом «рекламы
+                          не было»;
+       ошибка           — синхронное исключение ДО/ВОКРУГ самого вызова
+                          (неожиданное, не задокументированный исход API). */
+  function logRewardedOutcome(reason, detail) {
+    const line = `[rewarded] ${reason}`;
+    if (detail !== undefined) console.log(line, detail);
+    else console.log(line);
+  }
+
   function showRewarded(onRewarded, onPause, onResume) {
     if (!ADS_CONNECTED_VK) {
       // Аварийный откат (см. комментарий у ADS_CONNECTED_VK выше) — при
       // действующем умолчании (true) сюда не заходим, попытка показа
       // (VKWebAppShowNativeAds) идёт безусловно ниже; сбой ловится
       // catch()'ем withTimeout ниже и всё равно выдаёт награду.
-      console.log('[vk_platform] rewarded: аварийный откат — подсказка сразу и бесплатно');
+      logRewardedOutcome('запрос — аварийный откат (ADS_CONNECTED_VK=false), подсказка сразу и бесплатно');
       if (onRewarded) onRewarded();
       return;
     }
     if (!ready) {
-      console.warn('[vk_platform] dev: rewarded → награда выдана');
+      logRewardedOutcome('запрос — dev-режим (нет vkBridge), подсказка выдана без рекламы');
       if (onRewarded) onRewarded();
       if (onResume) onResume();
       return;
     }
     if (onPause) onPause();
     let settled = false;
-    const finish = (grantReward, reason) => {
+    const finish = (grantReward, reason, detail) => {
       if (settled) return;
       settled = true;
       // Видимый эффект — строго после onResume(), как в platform.js.
       if (onResume) onResume();
-      console.log('[vk_platform] rewarded завершён:', reason, '| награда:', grantReward);
+      logRewardedOutcome(reason, detail);
       if (grantReward && onRewarded) {
         // На мобильном ВК onRewarded() (внутри — Board.showHint(), общий
         // код) не должен стартовать, пока экран ещё реально перекрыт
         // рекламным оверлеем — см. журнал наверху. Ждём подтверждённой
         // видимости, форсируем пересчёт лэйаута на случай смены
         // размеров вьюпорта за время рекламы, и только потом отдаём
-        // награду вызывающей стороне. Два лога раздельно (решение vs.
-        // фактический показ) — на живом устройстве через remote-debug
-        // будет видно, если когда-нибудь разъедутся снова.
+        // награду вызывающей стороне.
         const waitStartedAt = performance.now();
         waitVisibleAndSettled().then(() => {
           if (typeof Board !== 'undefined' && Board.resize) Board.resize();
@@ -386,14 +404,27 @@ const Platform = (() => {
         });
       }
     };
-    withTimeout(
-      vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' }),
-      REWARD_AD_TIMEOUT_MS
-    )
-      .then(() => finish(true, 'ролик закрыт (resolve)'))
+    let sendPromise;
+    try {
+      sendPromise = withTimeout(
+        vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' }),
+        REWARD_AD_TIMEOUT_MS
+      );
+    } catch (e) {
+      // Синхронное исключение до отправки — не задокументированный
+      // исход API, отдельная категория «ошибка» (не путать с штатным
+      // отказом/отсутствием филла ниже).
+      finish(true, 'ошибка — подсказка выдана бесплатно', e);
+      return;
+    }
+    sendPromise
+      .then(() => finish(true, 'показан — ролик закрыт, награда выдаётся'))
       .catch((e) => {
-        console.warn('[vk_platform] rewarded недоступна/зависла — выдаём подсказку бесплатно:', e);
-        finish(true, 'ошибка/таймаут — выдано бесплатно');
+        const isTimeout = e instanceof Error && e.message === 'timeout';
+        const reason = isTimeout
+          ? `нет филла/отказ моста — мост не ответил за ${REWARD_AD_TIMEOUT_MS}мс, подсказка выдана бесплатно`
+          : 'нет филла/отказ моста — подсказка выдана бесплатно';
+        finish(true, reason, e);
       });
   }
 
@@ -432,6 +463,17 @@ const Platform = (() => {
   const COSMETIC_PREVIEW_VK = true; // превью не требует OrderBox — включено независимо от покупки
   const COSMETIC_ITEM_ID = 'sea_theme';
 
+  /* ---------- Плашка номера билда (задача 14) ----------
+     Плейсхолдер на диске — build.py подставляет реальное значение
+     ('vk-b<счётчик>-<git-хэш>-<дата>') ТОЛЬКО в копию для ВК-сборки
+     (см. build_vk(), тот же приём точечной замены байт в собранном
+     файле, что у 2 тегов index.html — исходник на диске не трогается).
+     Локальный запуск без сборки покажет плейсхолдер как есть — это
+     нормально, значит билд не собирался через build.py. main.js читает
+     через typeof (тот же приём, что COSMETIC_PREVIEW_VK) — на Яндексе
+     (platform.js) поля физически нет, там плашка не показывается. */
+  const BUILD = 'vk-b7-023dc49-20260727';
+
   async function buyCosmetic(onSuccess, onFail) {
     if (!ready) {
       console.warn('[vk_platform] dev: buyCosmetic — нет vkBridge, покупка не выполняется');
@@ -458,7 +500,7 @@ const Platform = (() => {
 
   return {
     init, gameReady, getLang, save, load, showInterstitial, showRewarded,
-    AD_LEVELS_INTERVAL, AD_MIN_GAP_MS, COSMETIC_PREVIEW_VK,
+    AD_LEVELS_INTERVAL, AD_MIN_GAP_MS, COSMETIC_PREVIEW_VK, BUILD,
     // _STUB_: buyCosmetic попадает в контракт ТОЛЬКО когда
     // COSMETIC_SHOP_ENABLED_VK = true (см. комментарий у флага выше) —
     // сейчас false, метод физически отсутствует на объекте Platform.
