@@ -113,6 +113,16 @@ const Platform = (() => {
      ролик, но и не держать игрока в паузе вечно, если мост потерял
      сообщение о закрытии. */
   const REWARD_AD_TIMEOUT_MS = 40000;
+  /* Тот же предохранитель, для interstitial — тот же нативный API
+     (VKWebAppShowNativeAds), та же документированная нестабильность
+     моста (см. журнал выше). Раньше showInterstitial() не был обёрнут
+     в withTimeout — если Promise зависал, onResume() не вызывался
+     НИКОГДА, goToNextLevel() (main.js) не доходил до loadLevel(), и
+     игрок оставался запертым на оверлее победы/главы навсегда — живой
+     Playwright-тест (зависший мок VKWebAppShowNativeAds) воспроизвёл
+     именно это. Значение то же, что у rewarded — общий показ той же
+     API, тот же ожидаемый диапазон длительности ролика. */
+  const INTERSTITIAL_AD_TIMEOUT_MS = 40000;
   /* Страховка ожидания видимости после закрытия рекламного оверлея
      (см. журнал выше, второе решение). НЕ про сам показ рекламы —
      это отдельная, короткая пауза ПОСЛЕ того, как Promise уже
@@ -120,6 +130,14 @@ const Platform = (() => {
      причине не придёт (не все нативные оверлеи гарантированно её
      шлют) — тогда просто продолжаем, не блокируя награду вечно. */
   const VISIBILITY_WAIT_TIMEOUT_MS = 3000;
+  /* Каданс interstitial (Task 3, ЗАДАЧА VK-переподачи 2026-07-26):
+     реже, чем дефолт main.js (раз в 3 уровня / 90с) — раз в 4 уровня /
+     120с. main.js читает эти поля через Platform.AD_LEVELS_INTERVAL/
+     AD_MIN_GAP_MS (типа buyCosmetic выше — платформенное решение живёт
+     в адаптере, не в общем коде); Яндекс-сборка (platform.js) их не
+     экспортирует — там каданс остаётся прежним. */
+  const AD_LEVELS_INTERVAL = 4;
+  const AD_MIN_GAP_MS = 120000;
 
   let ready = false; // true только после успешного VKWebAppInit
 
@@ -308,7 +326,10 @@ const Platform = (() => {
       return;
     }
     if (onPause) onPause();
-    vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'interstitial' })
+    withTimeout(
+      vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'interstitial' }),
+      INTERSTITIAL_AD_TIMEOUT_MS
+    )
       .then(() => { if (onResume) onResume(true); })
       .catch((e) => {
         console.error('[vk_platform] interstitial:', e);
@@ -386,22 +407,29 @@ const Platform = (() => {
      включить обратно (COSMETIC_SHOP_ENABLED_VK = true), когда появится
      сервер-колбэк.
 
+     Task 4 (та же переподача 2026-07-26): раз покупки нет, строка в
+     меню возвращена как ПРЕВЬЮ — main.js красит колбы кликом БЕЗ
+     обращения к buyCosmetic/OrderBox и без персистентности (см.
+     main.js, revertCosmeticTheme). Доступность превью гейтится ОТДЕЛЬНЫМ
+     флагом COSMETIC_PREVIEW_VK ниже (не завязан на
+     COSMETIC_SHOP_ENABLED_VK — превью не требует сервер-колбэка вообще,
+     ничего не покупается) — экспортируется безусловно как обычное поле
+     объекта Platform (тот же приём, что AD_LEVELS_INTERVAL выше), на
+     Яндексе (platform.js) не экспортировано, там фичи физически нет.
+
      8-й метод СВЕРХ общего 7-методного контракта — существует ТОЛЬКО
      здесь (Яндекс platform.js его не экспортирует физически), main.js
      проверяет наличие через typeof перед вызовом (тот же приём, что и
-     DEV_UNLOCK_ALL) — контракт main.js/game.js «не знает площадку» не
-     нарушается, просто фича молча отсутствует там, где её нет. Флаг
-     ниже управляет именно этим typeof-гейтом: пока false, buyCosmetic
-     не попадает в возвращаемый объект Platform вообще — main.js видит
-     ровно то же самое отсутствие метода, что и на Яндекс-сборке, и
-     строка покупки в меню остаётся скрытой без единой правки main.js/
-     index.html/style.css.
+     DEV_UNLOCK_ALL). Флаг ниже управляет именно этим typeof-гейтом:
+     пока false, buyCosmetic не попадает в возвращаемый объект Platform
+     вообще.
      item ДОЛЖЕН точно совпадать со строкой, заведённой в каталоге
      товаров кабинета ВК (см. отчёт/предусловие основателя) — сама цена
      и карточка товара настраиваются ТОЛЬКО в кабинете, не в коде
      (OrderRequestOptions пакета не несёт цены). Верифицировано по
      packages/src/types/data.ts пакета @vkontakte/vk-bridge@3.0.2. */
   const COSMETIC_SHOP_ENABLED_VK = false; // _STUB_: см. комментарий выше — нет сервер-колбэка для OrderBox
+  const COSMETIC_PREVIEW_VK = true; // превью не требует OrderBox — включено независимо от покупки
   const COSMETIC_ITEM_ID = 'sea_theme';
 
   async function buyCosmetic(onSuccess, onFail) {
@@ -430,6 +458,7 @@ const Platform = (() => {
 
   return {
     init, gameReady, getLang, save, load, showInterstitial, showRewarded,
+    AD_LEVELS_INTERVAL, AD_MIN_GAP_MS, COSMETIC_PREVIEW_VK,
     // _STUB_: buyCosmetic попадает в контракт ТОЛЬКО когда
     // COSMETIC_SHOP_ENABLED_VK = true (см. комментарий у флага выше) —
     // сейчас false, метод физически отсутствует на объекте Platform.

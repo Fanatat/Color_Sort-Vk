@@ -7,7 +7,6 @@ const I18N = {
   ru: {
     title: 'Сортировка: Цвет и Форма', // карточное имя (п.5.1.3, решение основателя 2026-07-17)
     play: 'Играть',
-    continue: 'Продолжить',
     restart: 'Начать сначала',
     level: 'Уровень',
     win: 'Уровень пройден!',
@@ -24,12 +23,12 @@ const I18N = {
     levels: 'Уровни',
     chapter: 'Глава',
     chapterComplete: 'пройдена',
-    of: 'из'
+    of: 'из',
+    cosmeticPreview: 'Посмотреть тему'
   },
   en: {
     title: 'Sort: Color & Shape', // карточное имя (п.5.1.3, решение основателя 2026-07-17)
     play: 'Play',
-    continue: 'Continue',
     restart: 'Restart',
     level: 'Level',
     win: 'Level complete!',
@@ -46,7 +45,8 @@ const I18N = {
     levels: 'Levels',
     chapter: 'Chapter',
     chapterComplete: 'complete',
-    of: 'of'
+    of: 'of',
+    cosmeticPreview: 'View theme'
   }
 };
 

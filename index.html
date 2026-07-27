@@ -22,14 +22,15 @@
   <div id="screen-menu" class="screen">
     <div class="menu-box">
       <h1 class="game-title" data-i18n="title">Сортировка: Цвет и Форма</h1>
-      <button id="btn-continue" class="btn btn-primary hidden" data-i18n="continue">Продолжить</button>
       <button id="btn-play" class="btn btn-primary" data-i18n="play">Играть</button>
       <button id="btn-levels" class="btn" data-i18n="levels">Уровни</button>
       <button id="btn-sound" class="btn btn-icon" aria-label="sound">♪</button>
 
-      <!-- Косметическая покупка (Task C, ВК-only): показывается только когда
-           Platform.buyCosmetic существует (main.js, typeof-проверка) и после
-           COSMETIC_UNLOCK_LEVEL пройденных уровней. Скрыта по умолчанию. -->
+      <!-- Косметика-превью (Task C/4, ВК-only): показывается только когда
+           Platform.COSMETIC_PREVIEW_VK выставлен (main.js) и после
+           COSMETIC_UNLOCK_LEVEL пройденных уровней. Скрыта по умолчанию.
+           Кнопка КРАСИТ, не продаёт (покупка отключена — см. main.js) —
+           подпись не должна обещать то, чего нет. -->
       <div id="cosmetic-row" class="cosmetic-row hidden">
         <div class="cosmetic-preview" aria-hidden="true">
           <span class="cosmetic-dot" style="background:#2a6f77"></span>
@@ -37,8 +38,7 @@
           <span class="cosmetic-dot" style="background:#39527a"></span>
         </div>
         <span class="cosmetic-label">Морская тема колб</span>
-        <button id="btn-cosmetic-buy" class="btn">Купить</button>
-        <span id="cosmetic-owned-label" class="cosmetic-owned-label hidden">Применена ✓</span>
+        <button id="btn-cosmetic-preview" class="btn" data-i18n="cosmeticPreview">Посмотреть тему</button>
       </div>
     </div>
   </div>

@@ -22,7 +22,6 @@
   const devUnlockAll = typeof DEV_UNLOCK_ALL !== 'undefined' && DEV_UNLOCK_ALL === true;
 
   const btnPlay     = document.getElementById('btn-play');
-  const btnContinue = document.getElementById('btn-continue');
   const btnLevels   = document.getElementById('btn-levels');
   const btnGridBack = document.getElementById('btn-grid-back');
   const levelGridEl = document.getElementById('level-grid');
@@ -81,78 +80,51 @@
   }
 
   /* ---------- Косметика (Task C, ЗАДАЧА_..._VK.md) ----------
-     _STUB_ на переподачу 2026-07-26: Platform.buyCosmetic сейчас
-     отключён флагом COSMETIC_SHOP_ENABLED_VK в vk_platform.js (нет
-     сервер-колбэка для VKWebAppShowOrderBox) — typeof-проверка ниже
-     срабатывает так же, как на Яндекс-сборке, и весь блок ниже
-     остаётся мёртвым кодом до включения флага там. Код здесь не
-     трогаем — расцепление живёт в адаптере, не здесь.
-     Единственная покупка v1: альтернативная («морская») палитра трёх
-     цветов элементов вместо тёплой студийной. Board.COLORS (board.js) —
-     обычный мутируемый объект, читается на каждой отрисовке
-     (ctx.fillStyle = COLORS[el.color]) — подмена применяется без единой
-     правки board.js. Платность/сама покупка — ТОЛЬКО через
-     Platform.buyCosmetic (существует только в vk_platform.js, на
-     Яндексе фичи физически нет — см. typeof-проверку ниже, как у
-     DEV_UNLOCK_ALL выше). Разблокировка входа в покупку — после
-     COSMETIC_UNLOCK_LEVEL пройденных уровней (диапазон ТЗ 2-5). */
+     ПЕРЕСМОТРЕНО на переподачу 2026-07-26 (Задача 4): покупка
+     (Platform.buyCosmetic, VKWebAppShowOrderBox) остаётся ОТКЛЮЧЕНА
+     флагом COSMETIC_SHOP_ENABLED_VK в vk_platform.js — сервер-колбэка
+     для подтверждения транзакции у студии нет (см. комментарий у
+     флага там). Вместо покупки — превью: клик красит колбы визуально,
+     НЕ персистится (state.themeOwned не трогаем, Platform.save не
+     вызываем), выход в меню и перезагрузка возвращают исходную
+     палитру. Board.COLORS (board.js) — обычный мутируемый объект,
+     читается на каждой отрисовке (ctx.fillStyle = COLORS[el.color]) —
+     подмена/откат применяются без единой правки board.js.
+     Доступность самого превью (не покупки) — отдельный флаг адаптера
+     Platform.COSMETIC_PREVIEW_VK (типа AD_LEVELS_INTERVAL выше:
+     платформенное решение живёт в адаптере, main.js площадку не
+     знает) — на Яндексе не экспортирован, там фичи физически нет.
+     Разблокировка входа — после COSMETIC_UNLOCK_LEVEL пройденных
+     уровней (диапазон ТЗ 2-5), как и раньше. */
   const COSMETIC_UNLOCK_LEVEL = 3;
   const COSMETIC_THEME = { c1: '#2a6f77', c2: '#3f8f5f', c3: '#39527a' };
-  const cosmeticRow      = document.getElementById('cosmetic-row');
-  const btnCosmeticBuy   = document.getElementById('btn-cosmetic-buy');
-  const cosmeticOwnedEl  = document.getElementById('cosmetic-owned-label');
+  const ORIGINAL_THEME = { ...Board.COLORS }; // снимок ДО любых мутаций — превью обратимо
+  const cosmeticRow       = document.getElementById('cosmetic-row');
+  const btnCosmeticPreview = document.getElementById('btn-cosmetic-preview');
 
   function applyCosmeticTheme() {
     Object.assign(Board.COLORS, COSMETIC_THEME);
   }
+  function revertCosmeticTheme() {
+    Object.assign(Board.COLORS, ORIGINAL_THEME);
+  }
 
   function updateCosmeticUI() {
     if (!cosmeticRow) return; // разметки нет (не должно случиться, но не падаем)
-    if (typeof Platform.buyCosmetic !== 'function') {
+    if (!Platform.COSMETIC_PREVIEW_VK) {
       cosmeticRow.classList.add('hidden'); // Яндекс-сборка — фичи физически нет
       return;
     }
-    if (state.themeOwned) {
-      cosmeticRow.classList.remove('hidden');
-      btnCosmeticBuy.classList.add('hidden');
-      cosmeticOwnedEl.classList.remove('hidden');
-      return;
-    }
-    if (state.maxUnlocked >= COSMETIC_UNLOCK_LEVEL) {
-      cosmeticRow.classList.remove('hidden');
-      btnCosmeticBuy.classList.remove('hidden');
-      cosmeticOwnedEl.classList.add('hidden');
-      return;
-    }
-    cosmeticRow.classList.add('hidden');
+    cosmeticRow.classList.toggle('hidden', state.maxUnlocked < COSMETIC_UNLOCK_LEVEL);
   }
 
-  if (btnCosmeticBuy) {
-    btnCosmeticBuy.addEventListener('click', () => {
-      Platform.buyCosmetic(
-        () => { // покупка подтверждена ВК
-          state.themeOwned = true;
-          applyCosmeticTheme();
-          updateCosmeticUI();
-          Platform.save({ ...state }); // полный объект
-        },
-        (reason) => { // отмена/сбой/товар недоступен — тихо, без краша
-          console.warn('[main] покупка косметики не завершена:', reason);
-        }
-      );
-    });
+  if (btnCosmeticPreview) {
+    btnCosmeticPreview.addEventListener('click', applyCosmeticTheme);
   }
 
   function show(name) {
     Object.values(screens).forEach(s => s.classList.remove('active'));
     screens[name].classList.add('active');
-  }
-
-  /* Видимость «Продолжить» зависит от ТЕКУЩЕГО state.levelIndex, а не
-     только от сейва при старте — иначе кнопка не появится, если пройти
-     уровни и вернуться в меню в рамках той же сессии (без перезагрузки). */
-  function updateContinueVisibility() {
-    btnContinue.classList.toggle('hidden', state.levelIndex === 0);
   }
 
   /* ---------- Звук: тумблёр ---------- */
@@ -309,7 +281,10 @@
     renderGrid();
     scrollGridToCurrent();
   });
-  btnGridBack.addEventListener('click', () => show('menu'));
+  btnGridBack.addEventListener('click', () => {
+    revertCosmeticTheme(); // превью не персистится — выход в меню возвращает исходную палитру
+    show('menu');
+  });
 
   /* ---------- Пауза геймплея/звука ----------
      Единая точка для ДВУХ триггеров: реклама (Фаза 5, колбэки
@@ -327,10 +302,15 @@
   }
 
   /* ---------- Interstitial между уровнями: двойной кулдаун ----------
-     Не чаще раза в 3 пройденных уровня И не чаще раза в 90 секунд —
-     оба условия вместе, чтобы не докучать рекламой аудитории 35+. */
-  const AD_LEVELS_INTERVAL = 3;
-  const AD_MIN_GAP_MS = 90000;
+     Оба условия вместе, чтобы не докучать рекламой аудитории 35+.
+     Каданс — платформенное решение (main.js площадку не знает, см.
+     CLAUDE.md): читаем из Platform.AD_LEVELS_INTERVAL/AD_MIN_GAP_MS,
+     если адаптер их не экспортирует (Яндекс, platform.js) — дефолт
+     раз в 3 уровня / 90с, как и было. ВК-адаптер (vk_platform.js,
+     решение основателя 2026-07-26) переопределяет на раз в 4 уровня /
+     120с — реже, тише для той же аудитории. */
+  const AD_LEVELS_INTERVAL = Platform.AD_LEVELS_INTERVAL || 3;
+  const AD_MIN_GAP_MS = Platform.AD_MIN_GAP_MS || 90000;
   let levelsSinceAd = 0;
   let lastAdAt = 0;
 
@@ -511,8 +491,8 @@
   }
   btnCampaignMenu.addEventListener('click', () => {
     campaignOverlay.classList.add('hidden');
+    revertCosmeticTheme(); // превью не персистится — выход в меню возвращает исходную палитру
     show('menu');
-    updateContinueVisibility();
     updateCosmeticUI();
   });
 
@@ -557,26 +537,19 @@
   });
 
   /* ---------- Кнопки меню ----------
-     «Играть» — всегда новая игра с уровня 1 (сбрасывает прогресс).
-     «Продолжить» — с сохранённого места (видна только если есть прогресс). */
-  function startNewGame() {
-    state.levelIndex = 0;
-    state.levelTimes = []; // новый прогон кампании — старые времена не мешают статистике
-    state.maxUnlocked = 0; // «Играть» — честный новый прогон, грид запирается заново
-    show('game');
-    loadLevel(0);
-    Platform.save({ ...state }); // сброс — тоже «обновился levelIndex», сохраняем сразу
-  }
-  function continueGame() {
+     «Играть» — единственный вход в игру, ведёт на state.levelIndex
+     (бывшее поведение «Продолжить»). Решение основателя: путь,
+     стирающий прогресс без подтверждения, из UI убран целиком —
+     отдельной кнопки «Продолжить»/сброса больше нет. */
+  function playGame() {
     show('game');
     loadLevel(state.levelIndex);
   }
-  btnPlay.addEventListener('click', startNewGame);
-  btnContinue.addEventListener('click', continueGame);
+  btnPlay.addEventListener('click', playGame);
   btnBack.addEventListener('click', () => {
     Stats.stop(); // ушли с уровня без победы — незавершённый отрезок не считаем
+    revertCosmeticTheme(); // превью не персистится — выход в меню возвращает исходную палитру
     show('menu');
-    updateContinueVisibility();
     updateCosmeticUI();
   });
 
@@ -627,7 +600,6 @@
     }
     if (state.maxUnlocked >= LEVELS.length) state.maxUnlocked = LEVELS.length - 1;
     if (state.themeOwned) applyCosmeticTheme(); // переживает перезагрузку
-    updateContinueVisibility();
     updateCosmeticUI();
     applyMuteIcon();
 

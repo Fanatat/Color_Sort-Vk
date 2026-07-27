@@ -137,7 +137,6 @@ body {
   border: 1.5px solid var(--ink);
 }
 .cosmetic-label { font-size: 0.9rem; color: var(--ink-soft); }
-.cosmetic-owned-label { font-size: 0.95rem; color: var(--ink); }
 
 /* Перечёркнутая нота — CSS-чертой, не символом (стандарт студии) */
 .btn-icon.muted::after {
