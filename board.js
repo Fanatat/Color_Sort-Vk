@@ -29,6 +29,45 @@ const Board = (() => {
 
   const INK = '#2b2723';
   const ACCENT = '#b7502e';
+  /* Задача 12: обводка фигур по умолчанию — INK (тёмная), но на ОЧЕНЬ
+     тёмной заливке (тёмная слива c3 в обеих палитрах — грайскейл-тест
+     проекта, check_palette.py) она почти сливается с силуэтом (контраст
+     WCAG ~1.1:1 — обводка практически не видна). OUTLINE_LIGHT — тот
+     же кремовый, что --paper в style.css, применяется ТОЛЬКО когда
+     контраст заливка/INK ниже DARK_FILL_OUTLINE_THRESHOLD. Порог 2.0
+     выбран НЕ как формальный WCAG-минимум (тот — 3:1, для интерактивных
+     UI-компонентов) — здесь между чётко провальными случаями (~1.1:1)
+     и заведомо нормальными (≥2.96:1 у остальных цветов палитры) большой
+     зазор, 2.0 лежит ровно посередине и не задевает погранично годные
+     цвета. Силуэт фигуры и без обводки всегда читаем — контраст
+     заливка/--paper огромен при любом из цветов палитры; обводка — это
+     полировка чёткости края, не единственный способ различить форму. */
+  const OUTLINE_LIGHT = '#f3ead6';
+  const DARK_FILL_OUTLINE_THRESHOLD = 2.0;
+
+  function srgbChannel(c) {
+    c /= 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  }
+  function relLuminance(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return 0.2126 * srgbChannel(r) + 0.7152 * srgbChannel(g) + 0.0722 * srgbChannel(b);
+  }
+  function contrastRatio(hexA, hexB) {
+    const la = relLuminance(hexA), lb = relLuminance(hexB);
+    const lighter = Math.max(la, lb), darker = Math.min(la, lb);
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+  // Заливка меняется в рантайме (косметическое превью, main.js мутирует
+  // Board.COLORS) — считаем контраст на каждую отрисовку элемента
+  // (несколько float-операций, отрисовка и так идёт каждый кадр при
+  // анимациях), НЕ кешируем по цвету, чтобы смена темы подхватывалась
+  // без отдельной инвалидации.
+  function outlineFor(fillHex) {
+    return contrastRatio(fillHex, INK) < DARK_FILL_OUTLINE_THRESHOLD ? OUTLINE_LIGHT : INK;
+  }
 
   function sameType(a, b) {
     return !!a && !!b && a.color === b.color && a.shape === b.shape;
@@ -233,8 +272,9 @@ const Board = (() => {
 
   /* ---------- Один элемент (круг или квадрат в цвете) ---------- */
   function drawElement(cx, cy, size, el) {
-    ctx.fillStyle = COLORS[el.color];
-    ctx.strokeStyle = INK;
+    const fill = COLORS[el.color];
+    ctx.fillStyle = fill;
+    ctx.strokeStyle = outlineFor(fill); // задача 12: светлая обводка на слишком тёмной заливке
     ctx.lineWidth = Math.max(1.5, size * 0.06);
 
     if (el.shape === SHAPE.CIRCLE) {

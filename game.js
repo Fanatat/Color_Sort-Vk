@@ -116,7 +116,10 @@ const Game = (() => {
     selectedIndex = -1;
     Board.setSelected(-1);
     busy = true;
-    Sound.playPour();
+    // Задача 9: высота тона перелива растёт с заполненностью колбы-цели
+    // ПОСЛЕ этого хода — считаем от актуальных length'ов ДО splice (модель
+    // ещё не изменена в этот момент, см. комментарий у animatePour в board.js).
+    Sound.playPour((targetVial.length + count) / Board.VIAL_CAPACITY);
 
     Board.animatePour({
       fromIdx, toIdx, count,
@@ -126,7 +129,13 @@ const Game = (() => {
         lastMove = { from: fromIdx, to: toIdx, elements: moved.slice() };
         busy = false;
         updateUndoButton();
-        Sound.playSettle();
+        // Задача 9: колба-цель только что стала полностью собрана —
+        // отдельный «щелчок-замок» ВМЕСТО обычного «оседания».
+        if (isCollected(targetVial)) {
+          Sound.playLock();
+        } else {
+          Sound.playSettle();
+        }
 
         if (isLevelSolved(level.vials)) {
           solved = true;

@@ -173,7 +173,44 @@ body {
   border-radius: 10px;
   box-shadow: 3px 3px 0 var(--shadow);
 }
-.shop-item-preview { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+/* Задача 10: мини-макет колбы вместо трёх абстрактных точек — тот же
+   силуэт, что рисует board.js (открытый верх, скруглённое дно), с
+   фигурами круг/квадрат/круг в цветах темы. column-reverse укладывает
+   первый добавленный элемент (c1) в НИЗ макета — как элементы реально
+   лежат в колбе снизу вверх. */
+.shop-item-previewcol { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+.shop-vial-preview {
+  width: 34px;
+  height: 58px;
+  border: 2px solid var(--ink);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  background: rgba(43, 39, 35, 0.04);
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  padding: 4px 0;
+}
+.shop-vial-el { width: 19px; height: 19px; border: 1.5px solid var(--ink); flex-shrink: 0; }
+.shop-vial-el.circle { border-radius: 50%; }
+.shop-vial-el.square { border-radius: 4px; }
+/* Некликабельная — товар в кабинете ВК ещё не подключён (см.
+   vk_platform.js COSMETIC_SHOP_ENABLED_VK). Отдельный класс, БЕЗ .btn —
+   не наследует min-width:200px/cursor:pointer общей кнопки. */
+.shop-item-soon {
+  font-family: inherit;
+  min-width: 0;
+  padding: 3px 10px;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1.5px dashed var(--ink-soft);
+  border-radius: 8px;
+  cursor: default;
+  pointer-events: none;
+}
 .shop-item-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .shop-item-caption { font-size: 0.78rem; color: var(--ink-soft); }
 .shop-item-btn { min-width: 0; padding: 10px 14px; font-size: 0.95rem; flex-shrink: 0; }
@@ -302,6 +339,14 @@ body {
   /* сверху — реальная высота шапки (--header-h, меряется в JS) + зазор;
      снизу резерв под будущую кнопку подсказки (урок филворда) */
   padding: calc(var(--header-h) + 16px) 12px 90px;
+  /* Задача 8: смена уровня подмышивается плавным fade — данные
+     подменяются, пока поле уже невидимо (main.js добавляет/снимает
+     board-fade вокруг loadLevel), игрок не видит момент подмены. */
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.board-wrap.board-fade {
+  opacity: 0;
+  transform: translateY(8px);
 }
 #board-canvas {
   display: block;
@@ -494,4 +539,5 @@ body {
   .btn { transition: none; }
   .win-box { animation: none; }
   .win-overlay { animation: none; }
+  .board-wrap { transition: none; }
 }

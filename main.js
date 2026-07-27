@@ -31,6 +31,7 @@
   const btnHint     = document.getElementById('btn-hint');
   const soundBtns   = document.querySelectorAll('#btn-sound, #btn-sound-game');
   const boardCanvas = document.getElementById('board-canvas');
+  const boardWrap   = document.getElementById('board-wrap');
   const gameHeader  = document.querySelector('#screen-game .game-header');
   const winOverlay  = document.getElementById('win-overlay');
   const winProgressFill  = document.getElementById('win-progress-fill');
@@ -73,7 +74,15 @@
     muted: false,
     levelTimes: [],
     maxUnlocked: 0,
-    themeOwned: false
+    themeOwned: false,
+    // Задача 11: суточный лимит показов rewarded (рекомендация доки ВК,
+    // защита от накрутки). rewardedDay — календарная дата ('YYYY-MM-DD',
+    // ЛОКАЛЬНАЯ, не UTC) последнего засчитанного показа; rewardedCount
+    // обнуляется, как только текущая дата отличается от rewardedDay —
+    // см. checkRewardedDailyReset(). Добавляет ~20 байт к сейву, лимит
+    // (~2236Б, см. память студии) не под угрозой.
+    rewardedCount: 0,
+    rewardedDay: ''
   };
 
   function isLevelUnlocked(idx) {
@@ -155,15 +164,38 @@
       const row = document.createElement('div');
       row.className = 'shop-item';
 
-      const preview = document.createElement('div');
-      preview.className = 'shop-item-preview';
-      preview.setAttribute('aria-hidden', 'true');
-      ['c1', 'c2', 'c3'].forEach(k => {
-        const dot = document.createElement('span');
-        dot.className = 'cosmetic-dot';
-        dot.style.background = item.theme[k];
-        preview.appendChild(dot);
+      /* Задача 10: было 3 абстрактных кружка (.cosmetic-dot) — заменено
+         на узнаваемый мини-макет колбы (тот же силуэт, что рисует
+         board.js — скруглённое дно, открытый верх) с 3 стопкой фигур
+         круг/квадрат/круг в цветах темы, чтобы было видно, КАК это
+         будет выглядеть в игре, а не абстрактную палитру. Под макетом —
+         некликабельная кнопка «Скоро…» (сама покупка ещё не подключена,
+         см. vk_platform.js COSMETIC_SHOP_ENABLED_VK) — даёт понять, что
+         тема будет продаваться, не обещая рабочую кнопку. */
+      const previewCol = document.createElement('div');
+      previewCol.className = 'shop-item-previewcol';
+
+      const vial = document.createElement('div');
+      vial.className = 'shop-vial-preview';
+      vial.setAttribute('aria-hidden', 'true');
+      const shapes = ['circle', 'square', 'circle'];
+      ['c1', 'c2', 'c3'].forEach((k, i) => {
+        const el = document.createElement('span');
+        el.className = `shop-vial-el ${shapes[i]}`;
+        el.style.background = item.theme[k];
+        vial.appendChild(el);
       });
+
+      const soonBtn = document.createElement('button');
+      soonBtn.type = 'button';
+      soonBtn.className = 'shop-item-soon';
+      soonBtn.disabled = true; // некликабельная — товар в кабинете ВК ещё не подключён
+      soonBtn.setAttribute('aria-disabled', 'true');
+      soonBtn.setAttribute('data-i18n', 'comingSoon');
+      soonBtn.textContent = t('comingSoon');
+
+      previewCol.appendChild(vial);
+      previewCol.appendChild(soonBtn);
 
       const info = document.createElement('div');
       info.className = 'shop-item-info';
@@ -187,7 +219,7 @@
         refreshShopCurrentPreview(); // видно сразу здесь, без выхода из магазина
       });
 
-      row.appendChild(preview);
+      row.appendChild(previewCol);
       row.appendChild(info);
       row.appendChild(btn);
       shopListEl.appendChild(row);
@@ -423,12 +455,42 @@
     clearTimeout(showHintToast._t);
     showHintToast._t = setTimeout(() => hintToast.classList.add('hidden'), 1800);
   }
+
+  /* ---------- Суточный лимит rewarded (задача 11) ----------
+     30 показов/сутки — рекомендация доки ВК, защита от накрутки.
+     Сутки — КАЛЕНДАРНЫЕ по локальному времени устройства (не UTC и не
+     скользящее окно 24ч) — простая, предсказуемая для игрока модель. */
+  const REWARDED_DAILY_LIMIT = 30;
+  function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  function checkRewardedDailyReset() {
+    const today = todayKey();
+    if (state.rewardedDay !== today) {
+      state.rewardedDay = today;
+      state.rewardedCount = 0;
+    }
+  }
+
   btnHint.addEventListener('click', () => {
     const hint = Game.findHint();
     if (!hint) {
       showHintToast(); // мягкое сообщение — ролик не показываем зря
       return;
     }
+    checkRewardedDailyReset();
+    if (state.rewardedCount >= REWARDED_DAILY_LIMIT) {
+      // Лимит исчерпан — подсказка ВСЁ РАВНО бесплатна, БЕЗ попытки
+      // показа рекламы (стандарт п.190: недоступная реклама не тупик;
+      // здесь недоступность не техническая, а по лимиту, но принцип
+      // тот же). Кнопка НЕ прячется — просто эта конкретная подсказка
+      // тихо идёт по бесплатному пути, как при adblock/отсутствии филла.
+      Board.showHint(hint.from, hint.to);
+      return;
+    }
+    state.rewardedCount++;
+    Platform.save({ ...state }); // полный объект — считаем показ сразу, не дожидаясь колбэка рекламы
     Platform.showRewarded(
       () => Board.showHint(hint.from, hint.to), // награда получена — подсвечиваем ход
       pauseGame,
@@ -476,18 +538,17 @@
        сохраняем ПОЛНЫЙ объект одним действием — это и есть «сейв по
        факту завершения уровня». ТОЛЬКО для обычного перехода: глава/
        финал остаются как есть (их продвижение — штатная логика
-       goToNextLevel/loadLevel по клику «Дальше» на СВОИХ оверлеях). */
+       goToNextLevel/loadLevel по клику «Дальше» на СВОИХ оверлеях).
+       ПЕРЕСМОТРЕНО (задача 8): Board.setLevel(LEVELS[nextIdx]) здесь
+       БОЛЬШЕ НЕ ВЫЗЫВАЕТСЯ — раньше следующий уровень отрисовывался
+       ПОД оверлеем победы, пока ещё летит конфетти, и игрок видел
+       смену поля до того, как понял, что уровень сменился. Канвас
+       остаётся на ТОЛЬКО ЧТО пройденном (собранном) уровне до самого
+       клика «Дальше»; фактическая смена данных — в loadLevel(), внутри
+       goToNextLevel(), с видимым fade-переходом (см. ниже). */
     if (!isChapterEnd && !isCampaignEnd) {
       state.levelIndex = nextIdx;
       state.maxUnlocked = Math.max(state.maxUnlocked, nextIdx);
-      // Следующий уровень виден ПОД полупрозрачным оверлеем — ТОЛЬКО
-      // визуально (Board.setLevel рисует, больше ничего не трогает).
-      // Game.setLevel НЕ вызываем — Game.solved остаётся true (см.
-      // game.js), ввод на канвасе заблокирован железно вне зависимости
-      // от того, что нарисовано; сам оверлей поверх тоже не пропускает
-      // тапы к канвасу. Активация (Game.setLevel/Stats.startLevel) —
-      // по клику «Дальше», в loadLevel(), как и раньше.
-      Board.setLevel(LEVELS[nextIdx]);
     }
 
     Platform.save({ ...state }); // полный объект — переживает закрытие вкладки отсюда же
@@ -561,6 +622,7 @@
     chapterStatFastestEl.textContent = formatTime(stats.fastest);
     chapterStatSlowestEl.textContent = formatTime(stats.slowest);
     chapterOverlay.classList.remove('hidden');
+    Sound.playChapterWin(); // задача 9: чуть богаче обычного playWin, короче playFanfare
     Confetti.burst({ count: 18, durationMs: 1200 }); // короче и реже финальных — глава легче
   }
 
@@ -581,18 +643,34 @@
     show('menu');
   });
 
+  /* ---------- Fade-переход между уровнями (задача 8) ----------
+     Смена данных уровня (loadLevel → Board.setLevel) физически
+     происходит ПОСРЕДИ короткого fade-out, пока канвас уже невидим —
+     игрок не видит момент подмены, только плавное затемнение старого
+     поля и появление нового. BOARD_FADE_MS — половина общего перехода
+     (CSS-transition той же длительности на возврат класса) — итог
+     около 2×180=360мс, в диапазоне ~300-400мс из ТЗ. Спешить некуда
+     (решение основателя) — задержка не про производительность. */
+  const BOARD_FADE_MS = 180;
+
   /* Общий переход «на следующий уровень» — используется и обычным
      btnNext (см. ниже), и кнопкой «Дальше» экрана главы. */
   function goToNextLevel(nextIdx) {
     hideWinOverlay();
     hideChapterOverlay();
-    // Interstitial (с кулдауном) — в паузе ПОСЛЕ оверлея, ДО загрузки уровня.
-    maybeShowInterstitial(() => {
-      loadLevel(nextIdx);
-      // Точка сохранения (Фаза 4): levelIndex обновился — прогресс продвинулся.
-      // НЕ сохраняем на каждый ход/кадр — только на переходе уровня и звуке.
-      Platform.save({ ...state });
-    });
+    boardWrap.classList.add('board-fade');
+    setTimeout(() => {
+      // Interstitial (с кулдауном) — в паузе ПОСЛЕ оверлея, ДО загрузки уровня.
+      maybeShowInterstitial(() => {
+        loadLevel(nextIdx);
+        // Точка сохранения (Фаза 4): levelIndex обновился — прогресс продвинулся.
+        // НЕ сохраняем на каждый ход/кадр — только на переходе уровня и звуке.
+        Platform.save({ ...state });
+        // Убираем класс на следующем кадре — иначе браузер может схлопнуть
+        // add+remove в один рендер и transition не проиграется.
+        requestAnimationFrame(() => boardWrap.classList.remove('board-fade'));
+      });
+    }, BOARD_FADE_MS);
   }
 
   btnNext.addEventListener('click', () => {
@@ -683,6 +761,9 @@
       state.maxUnlocked = state.levelIndex; // сейв старее этого поля — считаем открытым хотя бы то, что уже пройдено
     }
     if (state.maxUnlocked >= LEVELS.length) state.maxUnlocked = LEVELS.length - 1;
+    if (typeof state.rewardedCount !== 'number' || state.rewardedCount < 0) state.rewardedCount = 0;
+    if (typeof state.rewardedDay !== 'string') state.rewardedDay = '';
+    checkRewardedDailyReset(); // сейв мог пролежать со вчера — обнулить счётчик при заходе в новый день
     updateShopButtonVisibility();
     applyMuteIcon();
 

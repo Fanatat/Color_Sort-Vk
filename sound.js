@@ -68,11 +68,30 @@ const Sound = (() => {
   }
 
   /* ---------- Игровые звуки ---------- */
-  function playPour() {
-    tone({ freq: 520, freqEnd: 380, duration: 0.14, type: 'sine', gain: 0.12 });
+  /* fillRatio — насколько заполнена колба-ПРИЁМНИК ПОСЛЕ этого перелива
+     (0..1, задача 9): выше заполненность → выше высота тона. Диапазон
+     340-720 Гц подобран так, чтобы даже соседние ступени (перелив по
+     одному элементу, capacity=4 → шаг 0.25) были на слух различимы.
+     game.js вызывает ДО фактического splice — считает по актуальным
+     length'ам источника/цели и count хода, здесь чистая функция от
+     готового числа. */
+  function playPour(fillRatio = 0.5) {
+    const r = Math.max(0, Math.min(1, fillRatio));
+    const freq = 340 + r * 380;
+    tone({ freq, freqEnd: freq * 0.73, duration: 0.14, type: 'sine', gain: 0.12 });
   }
   function playSettle() {
     tone({ freq: 300, freqEnd: 160, duration: 0.09, type: 'triangle', gain: 0.14 });
+  }
+  /* «Щелчок-замок» (задача 9) — колба-приёмник только что стала
+     ПОЛНОСТЬЮ собрана (заполнена, один тип элементов). Намеренно другой
+     тембр, чем playSettle (мягкий triangle-спад): короткий square-клик
+     + отдельная более высокая sine-нота следом — звучит как «защёлкнулось»,
+     не спутать с обычным приземлением. Вызывается ВМЕСТО playSettle для
+     этого хода (game.js), не вместе с ним. */
+  function playLock() {
+    tone({ freq: 900, duration: 0.035, type: 'square', gain: 0.09 });
+    tone({ freq: 880, duration: 0.12, type: 'sine', gain: 0.12, delay: 0.03 });
   }
   function playInvalid() {
     tone({ freq: 180, duration: 0.16, type: 'square', gain: 0.05 });
@@ -94,6 +113,20 @@ const Sound = (() => {
   function playClick() {
     tone({ freq: 700, duration: 0.05, type: 'sine', gain: 0.07 });
   }
+  /* Экран завершения ГЛАВЫ (задача 9) — «чуть богаче» обычного playWin
+     (пятая нота в арпеджио, на полтона шире финальный аккорд), но
+     короче и тише playFanfare ниже: глава — промежуточная награда,
+     не финал кампании. */
+  function playChapterWin() {
+    const arpeggio = [523.25, 659.25, 783.99, 987.77, 1174.66];
+    arpeggio.forEach((freq, i) => {
+      tone({ freq, duration: 0.15, type: 'sine', gain: 0.13, delay: i * 0.06 });
+    });
+    const chordDelay = arpeggio.length * 0.06 + 0.02;
+    [523.25, 659.25, 783.99, 987.77].forEach(freq => {
+      tone({ freq, duration: 0.55, type: 'triangle', gain: 0.1, delay: chordDelay });
+    });
+  }
   /* Экран завершения ВСЕЙ кампании (не отдельного уровня) — тот же
      язык, что и playWin, но шире и с более длинным финальным
      аккордом: разовый момент заслуживает более заметную награду. */
@@ -108,5 +141,5 @@ const Sound = (() => {
     });
   }
 
-  return { setMuted, suspend, resume, playPour, playSettle, playInvalid, playWin, playClick, playFanfare };
+  return { setMuted, suspend, resume, playPour, playSettle, playLock, playInvalid, playWin, playChapterWin, playClick, playFanfare };
 })();

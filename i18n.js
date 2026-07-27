@@ -29,7 +29,8 @@ const I18N = {
     shopCurrentLabel: 'Текущая палитра:',
     shopPreviewCaption: 'Превью — видно только до выхода в меню',
     shopEmpty: 'Темы открываются по мере прохождения уровней',
-    shopSeaThemeLabel: 'Морская тема колб'
+    shopSeaThemeLabel: 'Морская тема колб',
+    comingSoon: 'Скоро…'
   },
   en: {
     title: 'Sort: Color & Shape', // карточное имя (п.5.1.3, решение основателя 2026-07-17)
@@ -56,7 +57,8 @@ const I18N = {
     shopCurrentLabel: 'Current palette:',
     shopPreviewCaption: 'Preview — visible only until you leave for the menu',
     shopEmpty: 'Themes unlock as you clear more levels',
-    shopSeaThemeLabel: 'Sea theme vials'
+    shopSeaThemeLabel: 'Sea theme vials',
+    comingSoon: 'Coming soon…'
   }
 };
 
