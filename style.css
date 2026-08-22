@@ -2,19 +2,157 @@
    Color Sort
    Палитра стандарта студии: кремовый фон + чернила.
    Все цвета в :root — перекраска дешёвая.
-   ============================================================ */
+
+   ТЗ №4, задача B: тема больше не {c1,c2,c3} — полный набор токенов,
+   покрывающий ВСЁ, что раньше было захардкожено (фон страницы, фон
+   панели/карточек, текст, второстепенный текст, рамки, акцентная
+   кнопка, фон игрового поля). Смена темы = смена значений этих
+   переменных на :root через атрибут [data-theme] (main.js applyTheme) —
+   ни один экран/обработчик тему не знает (B3). «Тёплая» (этот блок,
+   без атрибута) — лицо студии, НЕ переделывается (B1), кроме c3
+   (задача A, board.js). Остальные три темы — блоки
+   :root[data-theme="..."] ниже, полностью свободны по цвету (B4).
+
+   --ink-rgb/--card-rgb — те же цвета ink/card, но «R, G, B» без #, для
+   rgba(var(--ink-rgb), альфа) в полупрозрачных подложках (задача B3:
+   ни одного захардкоженного rgba(число,число,число,...) в файле).
+   --board-bg — фон игрового поля (подложка под колбами, board.js
+   канвас) — НАРОЧНО отдельный от --paper токен (B2): у трёх платных
+   тем это заметно другой (умеренный «поднос»), у Тёплой оставлен РАВНЫМ
+   --paper (нулевое визуальное изменение, B1) — известное исключение,
+   см. check_palette.py и отчёт (с max()-метрикой фигура/поле, ТЗ №5
+   задача B, все проверки B5 зелёные и у Тёплой — старое несоответствие
+   этого коммента снято).
+
+   ТЗ №9, задача C: --texture-dot/--texture-size/--texture-gap —
+   параметры бумажной крупки (см. правило body ниже), токены темы, как
+   и цвета. У Тёплой значения совпадают с исторической константой
+   (0.5px точка/22px шаг/rgba(ink,0.18)) — визуально не меняются. */
 :root {
   --paper:   #f3ead6;  /* кремовый фон */
   --ink:     #2b2723;  /* чернила */
   --ink-soft:#6b6258;
   --card:    #fbf5e9;
-  --accent:  #b7502e;  /* тёплый акцент кнопок */
-  --accent-ink: #fff8ef;
-  --shadow:  rgba(43, 39, 35, 0.18);
+  /* ТЗ №10, задача C: акцент приведён к c1 базовой темы (board.js,
+     #d25c35, сдвинутому ТЗ №9) — раньше кнопка «Играть» и терракотовая
+     фигура на поле читались как два разных оттенка одного цвета.
+     --accent-ink затемнён (#fff8ef → #1a1108, тёмно-коричневый вместо
+     кремового): против ПОЛНОГО сдвига акцента кремовый текст проваливал
+     контраст (4.74:1 → 3.74:1, ниже WCAG 4.5:1) — частичный сдвиг акцента
+     держал контраст, но оставлял видимое рассогласование с фигурой c1
+     (см. отчёт, оба варианта с числами). Решение основателя: полный сдвиг
+     + тёмный текст (5.32:1). Меняет цвет текста ВСЕХ акцентных кнопок
+     игры (не только «Играть») — единый токен, как и было. */
+  --accent:  #d25c35;
+  --accent-ink: #1a1108;
+  --board-bg: #f3ead6; /* = --paper (см. коммент выше — Тёплая не переделывается) */
+  --ink-rgb:  43, 39, 35;
+  --card-rgb: 251, 245, 233;
+  /* ТЗ №10, задача B: скрим оверлея победы/главы — ОТДЕЛЬНЫЙ токен, не
+     rgba(--ink-rgb, ...) напрямую. --ink лечит контраст ТЕКСТА и поэтому
+     СВЕТЛЫЙ у тёмных тем (Морская/Ягодная — читаемый текст на тёмном
+     фоне) — тонировка экрана этим цветом на тёмной теме высветляет его
+     до блёклого серого, роняя тон палитры (жалоба: «у Морской просто
+     серый», без узнаваемого оттенка). --scrim-rgb всегда ТЁМНЫЙ и свой
+     на тему (см. блоки ниже) — держит палитру при любом направлении
+     темы, тот же класс урока, что «фон резко сменяется на другой цвет»
+     (ТЗ №9). У Тёплой совпадает со старым ink-rgb — она уже читалась
+     верно (тёплая обводка тёмным чернильным тоном), трогать не нужно. */
+  --scrim-rgb: 43, 39, 35;
+  --shadow:  rgba(var(--ink-rgb), 0.18);
+  --texture-dot: rgba(var(--ink-rgb), 0.18);
+  --texture-size: 0.5px;
+  --texture-gap: 22px;
   --header-h: 72px; /* фактическая высота .game-header — обновляется из main.js */
+  /* ТЗ №10, задача E: ОДНА длительность на все переходы игры (экраны,
+     тема, уровень) — ориентир ТЗ 150-250мс, «мягко», а не «медленно».
+     Токен, а не голое число в каждом правиле, — ускорить/замедлить всю
+     игру разом, не собирая правки по файлу. Не зависит от темы (одна
+     запись в :root, темы её не переопределяют). */
+  --transition-ms: 200ms;
+}
+
+/* Морская — тёмная (ночной океан), ТЗ №4 задача B4 (решение основателя).
+   ТЗ №9, задача C: крупка реже и светлее прозрачностью Тёплой — на
+   тёмном фоне частые/яркие точки читались бы как шум, не бумага. */
+:root[data-theme="sea"] {
+  --paper:   #091016;
+  --card:    #17232c;
+  --ink:     #e8f3f1;
+  --ink-soft:#9fb7bc;
+  --accent:  #e8bb5c;
+  --accent-ink: #241a0d;
+  --board-bg: #3f738d;
+  --ink-rgb:  232, 243, 241;
+  --card-rgb: 23, 35, 44;
+  /* Задача B, ТЗ №10: --ink тут светлый (232,243,241 — текст на тёмном
+     фоне), скрим на нём светлел бы до блёклого серого — берём вместо
+     этого --paper (#091016, уже тёмный ночной океан) под свой токен. */
+  --scrim-rgb: 9, 16, 22;
+  --texture-dot: rgba(var(--ink-rgb), 0.10);
+  --texture-size: 0.6px;
+  --texture-gap: 26px;
+}
+
+/* Лесная — светлая (дневной луг), ТЗ №4 задача B4: единственная светлая
+   из трёх платных (решение основателя по вариантам исполнителя). ТЗ №9,
+   задача C: светлая тема — крупка близка по духу к Тёплой. */
+:root[data-theme="forest"] {
+  --paper:   #e6eedd;
+  --card:    #f5f8f2;
+  --ink:     #1d2e19;
+  --ink-soft:#5c6f52;
+  --accent:  #b7502e;
+  --accent-ink: #fff8ef;
+  --board-bg: #54763d;
+  --ink-rgb:  29, 46, 25;
+  --card-rgb: 245, 248, 242;
+  /* Задача B, ТЗ №10: светлая тема — --ink уже тёмный (совпадает с тем,
+     что нужно скриму), отдельного цвета не требуется, но токен явный. */
+  --scrim-rgb: 29, 46, 25;
+  --texture-dot: rgba(var(--ink-rgb), 0.16);
+  --texture-size: 0.5px;
+  --texture-gap: 20px;
+}
+
+/* Ягодная — тёмная (винный погреб), ТЗ №4 задача B4. ТЗ №9, задача C:
+   та же логика, что у Морской — тёмный фон, крупка тише Тёплой. */
+:root[data-theme="berry"] {
+  --paper:   #170814;
+  --card:    #2e142c;
+  --ink:     #f5eaf0;
+  --ink-soft:#c2a3b8;
+  --accent:  #e8bb5c;
+  --accent-ink: #2b1130;
+  --board-bg: #913b85;
+  --ink-rgb:  245, 234, 240;
+  --texture-dot: rgba(var(--ink-rgb), 0.12);
+  --texture-size: 0.6px;
+  --texture-gap: 24px;
+  --card-rgb: 46, 20, 44;
+  /* Задача B, ТЗ №10: та же логика, что у Морской — --ink светлый,
+     скрим берёт --paper (#170814, уже тёмный винный погреб) отдельным
+     токеном. */
+  --scrim-rgb: 23, 8, 20;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ТЗ №10, задача E: смена темы — перекрашивание, не скачок. Токены
+   темы (--paper/--card/--ink/--accent/--board-bg/...) меняются ОДНИМ
+   атрибутом [data-theme] на <html> (applyTheme(), main.js) — без этого
+   правила любой background/color/border/box-shadow, читающий их,
+   переключался бы мгновенно. Универсально на *, а не по списку
+   селекторов — темой красится весь интерфейс, перечислять каждый класс
+   отдельно означало бы гарантированно забыть один при следующей правке
+   стиля. Свойства, у которых УЖЕ есть собственный transition (.btn,
+   .grid-tile, .board-wrap, .screen — их transition-шорткод замещает
+   ЭТОТ целиком, шорткоды не суммируются в CSS), несут те же токены
+   явным списком у себя — см. эти правила. */
+* {
+  transition: background-color var(--transition-ms) ease, color var(--transition-ms) ease,
+    border-color var(--transition-ms) ease, box-shadow var(--transition-ms) ease;
+}
 
 html, body {
   height: 100%;
@@ -44,21 +182,40 @@ body {
   font-family: Georgia, 'Times New Roman', serif; /* системный serif — стандарт студии */
   background-color: var(--paper);
   color: var(--ink);
-  /* бумажная крупка — как в филворде/нонограммах */
-  background-image: radial-gradient(var(--shadow) 0.5px, transparent 0.5px);
-  background-size: 22px 22px;
+  /* Бумажная крупка — как в филворде/нонограммах. ТЗ №9, задача C: цвет
+     точки/её размер/шаг сетки — токены темы (--texture-*, см. :root
+     блоки выше), не общая на все темы константа — раньше сюда попадал
+     только цвет (через --shadow), а плотность/размер точки у платных
+     тем оставались параметрами Тёплой, из-за чего текстура выглядела
+     заимствованной, а не частью темы. */
+  background-image: radial-gradient(var(--texture-dot) var(--texture-size), transparent var(--texture-size));
+  background-size: var(--texture-gap) var(--texture-gap);
 }
 
 /* ---------- Экраны ---------- */
+/* ТЗ №10, задача E: раньше .screen { display:none/flex } переключался
+   мгновенно (main.js show()) — резкая смена экрана. Теперь ВСЕ экраны
+   всегда в потоке рендера (display:flex), видимость и интерактивность —
+   через opacity/pointer-events, оба на CSS-transition: main.js show()
+   по-прежнему просто снимает/ставит один класс .active, а кроссфейд
+   (старый экран гаснет, новый проявляется поверх) получается сам —
+   классы у ВСЕХ экранов меняются в одном синхронном проходе show().
+   pointer-events:none у неактивных — БЕЗ задержки (в отличие от
+   классического opacity+visibility-паттерна): погашенный экран не
+   должен ловить тапы уже в момент начала fade-out, иначе быстрый
+   повторный тап в area, где раньше была кнопка, срабатывает на ней. */
 .screen {
   position: absolute;
   inset: 0;
-  display: none;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-ms) ease;
 }
-.screen.active { display: flex; }
+.screen.active { opacity: 1; pointer-events: auto; }
 
 /* ---------- Загрузка ---------- */
 .loading-box { text-align: center; }
@@ -103,11 +260,38 @@ body {
   color: var(--ink);
   cursor: pointer;
   box-shadow: 3px 3px 0 var(--shadow);
-  transition: transform 0.06s ease;
+  /* Собственный transition замещает универсальный (* выше) целиком —
+     перечисляем цветовые свойства тут же, иначе кнопка потеряла бы
+     плавную перекраску темы (ТЗ №10, задача E). box-shadow НАРОЧНО не
+     включён сюда: у него уже есть своя, БЫСТРАЯ роль — мгновенный
+     сдвиг тени на :active (нажатие), 200мс сделали бы отклик на тап
+     вялым. Тень на смену темы просто щёлкнет мгновенно — цена малая
+     (тонкий 3px акцент, не поле цвета). */
+  transition: transform 0.06s ease, background-color var(--transition-ms) ease,
+    color var(--transition-ms) ease, border-color var(--transition-ms) ease;
   min-width: 200px;
 }
 .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--shadow); }
 .btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--ink); }
+
+/* ТЗ №14, этап 3, п.3.1: «Играть» — единственное доминирующее действие
+   главного экрана (деконструкция каталога Яндекса, 22.08 — у лидеров
+   одно доминирующее действие, путь до первого хода короче). Классы
+   СВОИ, не правка .btn-primary/.btn — та же пара классов несёт кнопки
+   магазина и оверлеев победы/главы/кампании в других местах игры,
+   трогать их вес здесь не нужно и не просили. */
+.btn-play-hero {
+  font-size: 1.35rem;
+  padding: 18px 44px;
+  min-width: 240px;
+}
+.btn-menu-secondary {
+  font-size: 0.9rem;
+  padding: 8px 18px;
+  min-width: 140px;
+  box-shadow: 2px 2px 0 var(--shadow);
+  background: transparent;
+}
 .btn-icon {
   min-width: 0;
   width: 48px; height: 48px;
@@ -118,12 +302,20 @@ body {
 }
 .hidden { display: none !important; }
 
-/* Плашка номера билда (задача 14, ВК-only) — position:fixed (не
-   привязана к конкретному .screen, видна поверх активного экрана без
-   правки разметки каждого из них), крайний нижний левый угол с учётом
+/* Плашка номера билда (задача 14, перенесено из feature/vk-resubmit —
+   свой аналог для Яндекс-адаптера) — position:fixed (не привязана к
+   конкретному .screen, видна поверх активного экрана без правки
+   разметки каждого из них), крайний нижний левый угол с учётом
    safe-area. pointer-events:none — неинтерактивна, не перехватывает тап
    по .undo-btn (тот же угол экрана, но выше: bottom:18px против
-   bottom предельно у края здесь) и не мешает антискроллу страницы. */
+   bottom предельно у края здесь) и не мешает антискроллу страницы.
+   ТЗ №4, задача B6: раньше плашка была рассчитана только на светлый
+   фон (голый var(--ink) при opacity 0.32 — на тёмных темах читалась бы
+   еле-еле поверх произвольного фона экрана). Добавлена собственная
+   полупрозрачная подложка цвета панели (--card-rgb) — контраст
+   текст/подложка тот же var(--ink)/var(--card), что у обычных карточек
+   (уже проверен check_palette.py, ≥4.5:1 на всех темах), а не
+   var(--ink) поверх ЧЕГО ПРИДЁТСЯ. */
 .build-badge {
   position: fixed;
   left: max(4px, env(safe-area-inset-left));
@@ -133,28 +325,83 @@ body {
   font-size: 9px;
   line-height: 1.4;
   color: var(--ink);
-  opacity: 0.32;
+  background: rgba(var(--card-rgb), 0.55);
+  border-radius: 3px;
+  opacity: 0.55;
   pointer-events: none;
   user-select: none;
   white-space: nowrap;
   z-index: 9999;
 }
 
-/* Косметика (Task C/7, ВК-only) — переиспользуется внутри магазина
-   (.shop-item-preview) и индикатора текущей палитры (.shop-current-preview). */
-.cosmetic-dot {
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  border: 1.5px solid var(--ink);
+/* ---------- Модуль удержания (ТЗ №14, этап 2, retention.js) ----------
+   .retention-line — общий стиль для строки серии (меню, ВСЕГДА видна) и
+   строки раздатчика (сетка уровней) — обычный второстепенный текст,
+   тот же токен --ink-soft, что у .stat-label/.hint-ad-label.
+   .game-header-grid — ТОЛЬКО у шапки экрана сетки: строка кнопок/
+   заголовка (.game-header-row) остаётся горизонтальной, ниже — drip-
+   строка + rewarded-кнопка отдельными рядами. Высота растёт сама,
+   syncHeaderSpace() (main.js) меряет реальный рендер и прокидывает в
+   --header-h — grid-wrap подстраивается без отдельной правки. */
+.retention-line {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  text-align: center;
+  margin: 0;
 }
-.cosmetic-label { font-size: 0.9rem; color: var(--ink-soft); }
+.game-header-grid {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding-bottom: 10px;
+}
+.game-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.retention-rewarded-btn {
+  align-self: center;
+  min-width: 0;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+}
 
-/* ---------- Магазин (Task 7) ----------
+/* Тост отклика (п.2.4 контракта модуля — «тихих улучшений не бывает»):
+   поверх ЛЮБОГО активного экрана (не привязан к .screen), тот же приём
+   translateX(-50%)-центрирования, что у .hint-toast, но фиксирован
+   относительно вьюпорта (rewarded-выдача может случиться с любого
+   экрана — меню, сетка). hidden управляет main.js, .is-visible — CSS-
+   переход на opacity/transform (перезапускается requestAnimationFrame
+   в showRetentionToast, тот же приём, что и winFlash/board-fade). */
+.retention-toast {
+  position: fixed;
+  left: 50%;
+  top: max(14px, env(safe-area-inset-top));
+  transform: translateX(-50%) translateY(-8px);
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  box-shadow: 3px 3px 0 var(--shadow);
+  white-space: nowrap;
+  z-index: 9998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-ms) ease, transform var(--transition-ms) ease;
+}
+.retention-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ---------- Магазин (ТЗ №2 — вкладка вместо карточки в меню) ----------
    Тот же приём анти-скролла и резерва под шапку, что у .grid-wrap
-   выше (top: var(--header-h), НЕ padding-top, НЕ 100vh — см. журнал
-   там же). Список карточек — вертикальный flex, рассчитан на рост
-   ассортимента (main.js рендерит из SHOP_ITEMS), при переполнении
-   скроллится ВНУТРИ контейнера, страница целиком не двигается. */
+   (top: var(--header-h), НЕ padding-top, НЕ 100vh — шрам ВК-порта, см.
+   журнал). Список карточек — вертикальный flex, рассчитан на рост
+   ассортимента (main.js рендерит из SHOP_THEMES, не хардкод одной
+   темы), при переполнении скроллится ВНУТРИ контейнера. */
 .shop-wrap {
   position: absolute;
   top: var(--header-h);
@@ -164,26 +411,13 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding: 16px 16px 28px;
   overflow-y: auto;
   overscroll-behavior: contain;
   touch-action: pan-y;
   -webkit-overflow-scrolling: touch;
 }
-/* Задача 13: было наравне по размеру с остальным текстом экрана —
-   теперь мелкая приглушённая подпись над списком карточек, дальше
-   от заголовка "Магазин" в шапке. */
-.shop-current-preview {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.76rem;
-  color: var(--ink-soft);
-  width: 100%;
-  max-width: 340px;
-}
-.shop-current-preview .cosmetic-dot { width: 12px; height: 12px; }
 .shop-list {
   display: flex;
   flex-direction: column;
@@ -191,10 +425,6 @@ body {
   width: 100%;
   max-width: 340px;
 }
-/* Задача 13: карточка — 2 ряда (не одна flex-строка из 3 соседей,
-   где превью+«Скоро…» слева сминали инфоколонку до узкого потока
-   текста). Верхний ряд — превью + название/описание, нижний —
-   обе кнопки одной высоты. */
 .shop-item {
   display: flex;
   flex-direction: column;
@@ -205,12 +435,14 @@ body {
   border-radius: 10px;
   box-shadow: 3px 3px 0 var(--shadow);
 }
+/* Активная (сейчас применённая) тема — акцентная рамка, без лишней
+   разметки: одна и та же карточка, другой бордер. */
+.shop-item.active { border-color: var(--accent); }
 .shop-item-top { display: flex; align-items: center; gap: 14px; }
 /* Мини-макет колбы — тот же силуэт, что рисует board.js (открытый
    верх, скруглённое дно), с фигурами круг/квадрат/круг в цветах темы.
    column-reverse укладывает первый добавленный элемент (c1) в НИЗ
-   макета — как элементы реально лежат в колбе снизу вверх. Крупнее
-   прежнего (было 34×58) — по спеке задачи 13 превью слева акцентное. */
+   макета — как элементы реально лежат в колбе снизу вверх. */
 .shop-vial-preview {
   width: 44px;
   height: 76px;
@@ -218,7 +450,7 @@ body {
   border: 2px solid var(--ink);
   border-top: none;
   border-radius: 0 0 12px 12px;
-  background: rgba(43, 39, 35, 0.04);
+  background: rgba(var(--ink-rgb), 0.04);
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
@@ -236,43 +468,22 @@ body {
   flex: 1;
   min-width: 0;
 }
-.cosmetic-label { font-weight: 700; }
-.shop-item-caption {
-  font-size: 0.78rem;
-  color: var(--ink-soft);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-/* Нижний ряд — обе кнопки в одну строку, одинаковая высота (flex:1
-   каждая делит ширину поровну, min-width:0 — иначе .btn тянет
-   min-width:200px и переполняет узкую карточку на 320px). */
-.shop-item-actions { display: flex; gap: 10px; }
-.shop-item-btn, .shop-item-soon {
-  flex: 1;
-  min-width: 0;
-  padding: 10px 8px;
-  font-size: 0.92rem;
-}
-/* Некликабельная — товар в кабинете ВК ещё не подключён (см.
-   vk_platform.js COSMETIC_SHOP_ENABLED_VK). Использует .btn для той же
-   высоты/паддинга, что у активной кнопки ряда, но приглушена и не
-   реагирует на ввод. */
-.shop-item-soon {
-  color: var(--ink-soft);
-  background: transparent;
-  border-style: dashed;
-  border-color: var(--ink-soft);
-  box-shadow: none;
-  cursor: default;
-  pointer-events: none;
-}
-.shop-empty {
-  color: var(--ink-soft);
-  text-align: center;
-  padding: 24px 12px;
-  font-size: 0.95rem;
-}
+.shop-item-label { font-weight: 700; font-size: 0.9rem; }
+/* Нижний ряд — кнопка («Купить»-с-ценой/«Применить») ИЛИ один из
+   статусных лейблов (активна/недоступно), одна ширина на всю карточку. */
+.shop-item-actions { display: flex; align-items: center; gap: 10px; }
+.shop-item-btn { flex: 1; min-width: 0; padding: 10px 8px; font-size: 0.92rem; }
+.shop-item-status { font-size: 0.95rem; color: var(--ink); }
+/* Иконка валюты (getPriceCurrencyImage, п.1.13.2) — вплотную к цене
+   внутри кнопки «Купить». ТЗ №8, задача A: элемент попадает в DOM
+   (main.js) только ПОСЛЕ подтверждённой загрузки, поэтому здесь
+   единственная забота CSS — не дать высокой/квадратной картинке
+   растянуться под высоту кнопки; ширина всегда пропорциональна height. */
+.shop-item-currency-icon { height: 1em; width: auto; max-width: 1.6em; vertical-align: -0.15em; }
+/* Отказ покупки (ТЗ №7, задача A) — текст внутри карточки, не alert()/
+   полноэкранный блок (п.1.16). Приглушённый цвет: сообщение нейтральное,
+   не пугающее — уместно и при отмене, и при техническом сбое. */
+.shop-item-message { font-size: 0.85rem; color: var(--ink-soft); }
 
 /* Перечёркнутая нота — CSS-чертой, не символом (стандарт студии) */
 .btn-icon.muted::after {
@@ -335,12 +546,16 @@ body {
   cursor: pointer;
   box-shadow: 2px 2px 0 var(--shadow);
   padding: 0;
-  transition: transform 0.06s ease;
+  /* См. коммент у .btn — собственный transition замещает универсальный,
+     box-shadow нарочно не включён (та же причина: :active должен щёлкать
+     мгновенно, не тянуться 200мс). */
+  transition: transform 0.06s ease, background-color var(--transition-ms) ease,
+    color var(--transition-ms) ease, border-color var(--transition-ms) ease;
 }
 .grid-tile:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--shadow); }
 .grid-tile.current { border-color: var(--accent); border-width: 3px; }
 .grid-tile.locked {
-  background: rgba(43, 39, 35, 0.06);
+  background: rgba(var(--ink-rgb), 0.06);
   color: var(--ink-soft);
   cursor: default;
   box-shadow: none;
@@ -394,8 +609,12 @@ body {
   padding: calc(var(--header-h) + 16px) 12px 90px;
   /* Задача 8: смена уровня подмышивается плавным fade — данные
      подменяются, пока поле уже невидимо (main.js добавляет/снимает
-     board-fade вокруг loadLevel), игрок не видит момент подмены. */
-  transition: opacity 180ms ease, transform 180ms ease;
+     board-fade вокруг loadLevel), игрок не видит момент подмены. ТЗ №10,
+     задача E: длительность — общий токен --transition-ms (было 180ms
+     хардкодом — единая длительность по игре); main.js BOARD_FADE_MS
+     держит то же число (200), иначе JS-таймер и CSS-переход разойдутся
+     и подмена уровня будет видна на полу-прозрачном холсте. */
+  transition: opacity var(--transition-ms) ease, transform var(--transition-ms) ease;
 }
 .board-wrap.board-fade {
   opacity: 0;
@@ -407,6 +626,24 @@ body {
   height: 100%;
   min-width: 0;
   min-height: 0; /* та же причина: canvas — тоже flex-item (в board-wrap) */
+  /* ТЗ №4, задача B2/B5: подложка игрового поля — отдельный токен
+     (--board-bg), НЕ равный --paper у трёх платных тем («поднос»
+     умеренного тона — только так фигуры/обводка проходят контраст
+     ≥2.0 против фона поля, см. check_palette.py). У Тёплой оставлен
+     равным --paper (задача B1, известное исключение — см. отчёт). */
+  background: var(--board-bg);
+  /* ТЗ №9, задача B: мягкий край — статичный (не пропорциональный
+     размеру, см. board.js resize()) радиус, специально небольшой:
+     живой прогон поймал, что крупный радиус срезает угол хит-теста у
+     границы padded-зоны колбы на тесных раскладках (Board.hitTest не
+     видит пиксели в скруглённом углу, см. отчёт) — 10px держит
+     большой запас против PAD (≥18px в board.js) с любым запасом
+     Board.hitTest (+8px). Растворение — box-shadow цветом поля наружу
+     за границу canvas; у Тёплой --board-bg = --paper (задача B1,
+     известное исключение), поэтому ореол сливается со страницей и
+     визуально не виден — это ожидаемо, не регрессия. */
+  border-radius: 10px;
+  box-shadow: 0 0 28px 6px var(--board-bg);
   touch-action: none;
 }
 /* Нижний ряд кнопок игрового экрана — зеркалит шапку (назад слева, звук справа). */
@@ -445,6 +682,31 @@ body {
   border: 1.5px solid var(--ink);
   pointer-events: none;
 }
+/* Бейдж остатка бесплатных подсказок (ТЗ №14, этап 3, п.3.2 — перенос
+   решения нонограмм ТЗ №03 модуля retention.js). Угол, ЗЕРКАЛЬНЫЙ
+   .hint-ad-badge (left вместо right) — оба бейджа независимы, не
+   перекрываются. pointer-events:none — тап достаётся кнопке, не
+   бейджу (сам бейдж не увеличивает и не уменьшает тап-таргет кнопки —
+   чистый overlay, .hint-btn/.btn-icon габариты не меняет). Скрыт
+   классом .hidden при нуле (main.js renderHintBonusBadge), min-width
+   вместо фиксированной ширины — двузначные числа не обрежутся. */
+.hint-bonus-badge {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 3px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.62rem;
+  font-weight: bold;
+  line-height: 18px;
+  text-align: center;
+  border: 1.5px solid var(--ink);
+  pointer-events: none;
+}
 .hint-ad-label {
   font-size: 0.68rem;
   color: var(--ink-soft);
@@ -476,7 +738,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(43, 39, 35, 0.4);
+  /* ТЗ №10, задача B: --scrim-rgb, не --ink-rgb — см. комментарий у
+     токена в :root (--ink светлый на тёмных темах, скрим на нём терял
+     оттенок темы, читался плоско-серым). */
+  background: rgba(var(--scrim-rgb), 0.4);
   /* Вспышка света при появлении — момент читается как награда,
      не просто смена экрана. Перезапускается сама (.hidden = display:none). */
   animation: winFlash 0.5s ease-out;
@@ -515,7 +780,7 @@ body {
 .progress-track {
   width: 100%;
   height: 10px;
-  background: rgba(43, 39, 35, 0.12);
+  background: rgba(var(--ink-rgb), 0.12);
   border: 1.5px solid var(--ink);
   border-radius: 6px;
   overflow: hidden;
@@ -567,7 +832,7 @@ body {
    не отличать на глаз от campaign-overlay, финал перестаёт быть
    событием) ---------- */
 .chapter-overlay {
-  background: rgba(43, 39, 35, 0.26);
+  background: rgba(var(--scrim-rgb), 0.26); /* ТЗ №10, задача B */
   animation: none;
 }
 .chapter-box {
@@ -583,8 +848,8 @@ body {
   100% { transform: scale(1); opacity: 1; }
 }
 @keyframes winFlash {
-  0%   { background: rgba(255, 248, 239, 0.9); }
-  100% { background: rgba(43, 39, 35, 0.4); }
+  0%   { background: rgba(var(--card-rgb), 0.9); }
+  100% { background: rgba(var(--scrim-rgb), 0.4); } /* ТЗ №10, задача B */
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -593,4 +858,13 @@ body {
   .win-box { animation: none; }
   .win-overlay { animation: none; }
   .board-wrap { transition: none; }
+  /* ТЗ №10, задача E: экраны/тема — тот же принцип, что у уже
+     существующих правил выше (анимация выключается целиком, не
+     ускоряется). Кастомное свойство обязано жить ВНУТРИ блока правила
+     (:root), голое объявление прямо в @media — синтаксическая ошибка,
+     браузер её молча проигнорирует. Обнуление --transition-ms в ОДНОМ
+     месте гасит СРАЗУ все места, что на него ссылаются (универсальный
+     * ниже, .screen, .board-wrap, .btn/.grid-tile) — перечислять их
+     здесь ещё раз не нужно. */
+  :root { --transition-ms: 0s; }
 }

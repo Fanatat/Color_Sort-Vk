@@ -19,54 +19,60 @@ const Board = (() => {
      что горчичный и сливовый читались почти одинаково темными на
      мобиле/при дальтонизме (яркость по каналу L различалась <25%
      между соседними ступенями). Проверено автотестом (grayscale-лума
-     ITU-R 601, тот же, что Pillow .convert('L')): c3→c1 разрыв 29.4%,
-     c1→c2 разрыв 32.4% — оба выше порога ≥25%. */
+     ITU-R 601, тот же, что Pillow .convert('L')): c3→c1 разрыв 37.2%,
+     c1→c2 разрыв 26.2% — оба выше порога ≥25%.
+
+     ТЗ №9, задача A: c1 сдвинут #b7502e→#d25c35 (luma601 107→123,
+     +15%) — единственный способ найти ОДИН цвет обводки темы,
+     проходящий ≥2.0:1 против ВСЕХ трёх заливок и фона поля одновременно
+     (см. THEME.outline и отчёт ТЗ №9 — c1 сидел ровно посередине между
+     «обводка должна быть темнее c3» и «обводка должна быть светлее
+     c2/paper», зазора не было ни при какой обводке без сдвига c1).
+     Это МИНИМАЛЬНЫЙ сдвиг: найден перебором как самая узкая правка,
+     сохраняющая luma-разрыв c1↔c2 ≥25% (получилось 26.2% — было 32.4%,
+     запас сузился, но порог не нарушен). Направление темы (терракота)
+     не изменено — c1 остался тем же оттенком, просто светлее. c2/c3 не
+     трогались. --accent в style.css (кнопки) от c1 НЕ зависит и
+     сохранил старое значение #b7502e — акцент интерфейса и заливка
+     фигуры-c1 теперь разные оттенки терракоты (см. отчёт). */
   const COLORS = {
-    c1: '#b7502e', // терракота (акцент студии) — средний тон, luma≈107
+    c1: '#d25c35', // терракота (ТЗ №9: сдвинута светлее ради обводки) — luma≈123
     c2: '#e8bb5c', // светлый горчично-золотой — luma≈190
-    c3: '#2e1729'  // тёмный сливовый (глубокий баклажан) — luma≈32
+    c3: '#2c1611'  // тёплый тёмный оксблад/слива (ТЗ №4 задача A — разведена
+                    // от Ягодной, см. check_palette.py межтемный ассерт)
   };
 
-  const INK = '#2b2723';
-  const ACCENT = '#b7502e';
-  /* Задача 12: обводка фигур по умолчанию — INK (тёмная), но на ОЧЕНЬ
-     тёмной заливке (тёмная слива c3 в обеих палитрах — грайскейл-тест
-     проекта, check_palette.py) она почти сливается с силуэтом (контраст
-     WCAG ~1.1:1 — обводка практически не видна). OUTLINE_LIGHT — тот
-     же кремовый, что --paper в style.css, применяется ТОЛЬКО когда
-     контраст заливка/INK ниже DARK_FILL_OUTLINE_THRESHOLD. Порог 2.0
-     выбран НЕ как формальный WCAG-минимум (тот — 3:1, для интерактивных
-     UI-компонентов) — здесь между чётко провальными случаями (~1.1:1)
-     и заведомо нормальными (≥2.96:1 у остальных цветов палитры) большой
-     зазор, 2.0 лежит ровно посередине и не задевает погранично годные
-     цвета. Силуэт фигуры и без обводки всегда читаем — контраст
-     заливка/--paper огромен при любом из цветов палитры; обводка — это
-     полировка чёткости края, не единственный способ различить форму. */
-  const OUTLINE_LIGHT = '#f3ead6';
-  const DARK_FILL_OUTLINE_THRESHOLD = 2.0;
+  /* ТЗ №4, задача B: THEME — canvas не читает CSS-переменные, поэтому
+     обводочные/акцентные цвета канвы держим отдельным мутируемым
+     объектом (тот же приём, что уже был у COLORS) — main.js applyTheme()
+     подменяет THEME.ink/accent/outline ВМЕСТЕ с COLORS.c1/c2/c3 на
+     каждую смену темы. Значения по умолчанию — Тёплая (совпадают с
+     style.css :root, но независимы: канва рисуется без DOM-стилей). */
+  const THEME = {
+    ink: '#2b2723',
+    // ТЗ №10, задача C: приведён к style.css --accent (#d25c35, = c1) —
+    // держим оба в синхроне, как гласит коммент к THEME выше. Раньше
+    // #b7502e совпадал со СТАРЫМ --accent; после правки CSS-токена он бы
+    // разошёлся сам по себе, если не тронуть здесь тоже.
+    accent: '#d25c35',
+    /* ТЗ №9, задача A: единая обводка фигур на тему — раньше outlineFor()
+       выбирала ink ИЛИ outlineLight под КАЖДУЮ заливку отдельно (тёмная
+       заливка получала белый контур, светлая — чёрный), из-за чего одно
+       поле показывало одновременно белые и чёрные обводки — разнобой,
+       читался как недоделка. THEME.outline — ОДИН цвет на тему,
+       используется для всех фигур без исключения (drawElement).
+       Подобран так, чтобы контраст ≥2.0:1 держался разом против ВСЕХ
+       трёх заливок И фона поля (см. check_palette.py, отчёт ТЗ №9):
+       outline vs c1 2.08:1, vs c2 4.56:1, vs c3 2.09:1, vs board-bg
+       6.84:1. */
+    outline: '#554e46'
+  };
 
-  function srgbChannel(c) {
-    c /= 255;
-    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-  }
-  function relLuminance(hex) {
+  function hexToRgbString(hex) {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
-    return 0.2126 * srgbChannel(r) + 0.7152 * srgbChannel(g) + 0.0722 * srgbChannel(b);
-  }
-  function contrastRatio(hexA, hexB) {
-    const la = relLuminance(hexA), lb = relLuminance(hexB);
-    const lighter = Math.max(la, lb), darker = Math.min(la, lb);
-    return (lighter + 0.05) / (darker + 0.05);
-  }
-  // Заливка меняется в рантайме (косметическое превью, main.js мутирует
-  // Board.COLORS) — считаем контраст на каждую отрисовку элемента
-  // (несколько float-операций, отрисовка и так идёт каждый кадр при
-  // анимациях), НЕ кешируем по цвету, чтобы смена темы подхватывалась
-  // без отдельной инвалидации.
-  function outlineFor(fillHex) {
-    return contrastRatio(fillHex, INK) < DARK_FILL_OUTLINE_THRESHOLD ? OUTLINE_LIGHT : INK;
+    return `${r}, ${g}, ${b}`;
   }
 
   function sameType(a, b) {
@@ -114,14 +120,91 @@ const Board = (() => {
     resize();
   }
 
+  // ТЗ №9, задача B (вариант 2 отчёта ТЗ №8 + мягкий край, решение
+  // основателя): раньше canvas всегда занимал ВЕСЬ board-wrap
+  // (CSS width/height:100%), из-за чего подложка поля была заметно
+  // крупнее реального содержимого (ratioH до 2.93× на уровне с одним
+  // рядом). Теперь resize() сначала «сухим» проходом (без ctx-вызовов)
+  // меряет bbox содержимого на ПОЛНОЙ доступной площади, затем ужимает
+  // сам <canvas> CSS-размером (inline style) под содержимое + отступ —
+  // .board-wrap уже flex/center, ужавшийся canvas центрируется сам.
+  function measureContentBox(cssW, cssH, vialCount) {
+    const layout = computeLayout(cssW, cssH, vialCount);
+    const { cols, rows, vw, GAP, ROW_GAP, vh } = layout;
+    const contentH = rows * vh + (rows - 1) * ROW_GAP;
+    let contentW = 0;
+    let remaining = vialCount;
+    for (let r = 0; r < rows; r++) {
+      const colsInRow = Math.min(cols, remaining);
+      contentW = Math.max(contentW, colsInRow * vw + (colsInRow - 1) * GAP);
+      remaining -= colsInRow;
+    }
+    return { layout, contentW, contentH };
+  }
+
+  // БАГ (см. docs/reports/BUG_board_canvas_width_padding_mismatch.md,
+  // ТЗ №10 задача A): `* { box-sizing: border-box }` (style.css) значит
+  // clientWidth/clientHeight родителя ВКЛЮЧАЮТ его собственный padding
+  // (#board-wrap: 12px слева/справа, calc(header-h+16px)/90px сверху/
+  // снизу) — content-box, реально доступный детям, у́же. Взятый «в лоб»
+  // clientWidth заставлял resize() ставить canvas шире, чем flexbox
+  // (min-width:0 на #board-canvas) готов был реально отрисовать: браузер
+  // визуально сжимал холст обратно до content-box, а пиксельный буфер
+  // (canvas.width) оставался настроен под завышенное число — рассинхрон
+  // рисовал грязный обрезанный край. Меряем content-box явно.
+  function contentBoxSize(el) {
+    const cs = getComputedStyle(el);
+    const w = el.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+    const h = el.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+    return { w, h };
+  }
+
+  // Отступ вокруг содержимого (вычисляется в resize(), см. комментарий
+  // там) — хранится отдельно от cssW/cssH, потому что draw() тоже обязан
+  // знать его: раскладка внутри draw() ведётся В БЮДЖЕТЕ (cssW/cssH минус
+  // отступ), а не во всей площади канвы (задача A, ТЗ №10).
+  let PAD = 18;
+
   function resize() {
     if (!canvas || !level) return;
-    // Размер берём у самого canvas (CSS width:100%/height:100% уже
-    // корректно вписывает его в контентную область board-wrap, за
-    // вычетом padding). JS только настраивает чёткость под DPI.
-    const cssW = canvas.clientWidth;
-    const cssH = canvas.clientHeight;
-    if (cssW === 0 || cssH === 0) return;
+    // Меряем РОДИТЕЛЯ (board-wrap), не сам canvas: после первого сжатия
+    // canvas.clientWidth уже меньше доступной площади — замер по canvas
+    // дал бы петлю (каждый resize сжимал бы холст ещё раз).
+    const wrap = canvas.parentElement;
+    const box = wrap ? contentBoxSize(wrap) : { w: canvas.clientWidth, h: canvas.clientHeight };
+    const availW = box.w;
+    const availH = box.h;
+    if (availW === 0 || availH === 0) return;
+
+    // Пробный проход на ПОЛНОЙ доступной площади — только чтобы оценить
+    // масштаб фигур (vw) и вывести отступ. Задача A, ТЗ №10: раньше
+    // отступ считался ПОСЛЕ раскладки (contentW + PAD*2) — на раскладках,
+    // где ряд упирается в доступную ширину впритык (типичный случай),
+    // computeLayout() тут же перевычислялся заново от этого же итогового
+    // cssW и СНОВА растягивал колонки на всю ширину, без остатка съедая
+    // добавленный отступ (по высоте эффекта не было — там раскладка не
+    // упирается в свой предел, слабина остаётся сама). Отступ теперь
+    // резервируется КАК БЮДЖЕТ до раскладки (PAD хранится в модульной
+    // переменной, draw() читает то же значение) — колонки/ряды заполняют
+    // урезанный бюджет, а не полный холст, отступ выживает на обеих осях.
+    const probe = computeLayout(availW, availH, level.vials.length);
+    PAD = Math.max(18, probe.vw * 0.22); // тот же отступ, что был у варианта 1 в отчёте ТЗ №8
+    const { contentW, contentH } = measureContentBox(
+      Math.max(1, availW - PAD * 2), Math.max(1, availH - PAD * 2), level.vials.length
+    );
+    const cssW = Math.min(availW, contentW + PAD * 2);
+    const cssH = Math.min(availH, contentH + PAD * 2);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    // Мягкий край — скругление (статичное, style.css #board-canvas) +
+    // растворение (box-shadow цветом --board-bg темы), оба декларативны,
+    // JS их не трогает. Радиус НЕ считаем пропорционально размеру: живой
+    // прогон (ТЗ №9, задача B) поймал, что крупный радиус (пробовали
+    // 12% от меньшей стороны) обрезает угол хит-теста у самой границы
+    // padded-зоны колбы на тесных раскладках (Board.hitTest перестаёт
+    // видеть пиксели в скруглённом углу) — см. отчёт. Небольшой
+    // фиксированный радиус (см. CSS) держит запас против PAD (≥18px в
+    // computeLayout выше) с большим отрывом.
 
     const dpr = window.devicePixelRatio || 1;
     canvas.width = Math.round(cssW * dpr);
@@ -133,7 +216,24 @@ const Board = (() => {
 
   function redraw() {
     if (!canvas || !level) return;
-    draw(canvas.clientWidth, canvas.clientHeight);
+    // Защита от рассинхрона (см. комментарий у resize()/contentBoxSize):
+    // redraw() не предполагает, что буфер (canvas.width/height, в
+    // девайс-пикселях) уже согласован с реальным CSS-размером холста —
+    // сверяет и пересобирает буфер САМ, если разошлось, а не только
+    // внутри resize(). Дешёвая проверка (canvas.clientWidth уже читается
+    // ниже в любом случае), но закрывает класс багов на будущее, а не
+    // только сегодняшний.
+    const cssW = canvas.clientWidth;
+    const cssH = canvas.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const expectedW = Math.round(cssW * dpr);
+    const expectedH = Math.round(cssH * dpr);
+    if (canvas.width !== expectedW || canvas.height !== expectedH) {
+      canvas.width = expectedW;
+      canvas.height = expectedH;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    draw(cssW, cssH);
   }
 
   // Высота колбы линейно зависит от её ширины (вместимость фиксирована),
@@ -178,17 +278,27 @@ const Board = (() => {
     return { cols, rows, vw, vh, GAP, ROW_GAP, elSize, elGap, tubeBottomMargin };
   }
 
+  // Габариты последнего кадра (ТЗ №8, задача B): холст (весь #board-canvas)
+  // против содержимого (bounding box реально нарисованных колб) — числа
+  // для diag-вывода (dev_board_diag.js) и для отчёта по подложке доски.
+  // НЕ используются самим рендером — только измерение постфактум.
+  let lastDiagMetrics = null;
+
   function draw(cssW, cssH) {
     ctx.clearRect(0, 0, cssW, cssH);
     if (!level) return;
 
     const vials = level.vials;
-    const layout = computeLayout(cssW, cssH, vials.length);
+    // Тот же бюджет (cssW/cssH минус PAD), что и при замере в resize() —
+    // раскладка не имеет права заново растянуться на весь холст (задача A,
+    // ТЗ №10, см. комментарий у PAD/resize()).
+    const layout = computeLayout(Math.max(1, cssW - PAD * 2), Math.max(1, cssH - PAD * 2), vials.length);
     lastLayout = layout;
     const { cols, rows, vw, vh, GAP, ROW_GAP } = layout;
 
     const gridH = rows * vh + (rows - 1) * ROW_GAP;
     let y = (cssH - gridH) / 2;
+    let maxRowW = 0;
 
     vialRects = [];
     let vialIndex = 0;
@@ -196,6 +306,7 @@ const Board = (() => {
       const remaining = vials.length - vialIndex;
       const colsInRow = Math.min(cols, remaining);
       const rowW = colsInRow * vw + (colsInRow - 1) * GAP;
+      maxRowW = Math.max(maxRowW, rowW);
       let x = (cssW - rowW) / 2;
 
       for (let c = 0; c < colsInRow; c++) {
@@ -216,6 +327,13 @@ const Board = (() => {
       }
       y += vh + ROW_GAP;
     }
+
+    lastDiagMetrics = {
+      canvasW: cssW, canvasH: cssH,
+      contentW: maxRowW, contentH: gridH,
+      ratioW: maxRowW > 0 ? cssW / maxRowW : 0,
+      ratioH: gridH > 0 ? cssH / gridH : 0
+    };
 
     if (floatingGroup) {
       let fy = floatingGroup.cy;
@@ -239,17 +357,17 @@ const Board = (() => {
     ctx.arcTo(x + vw, y + vh, x + vw, y + vh - r, r);
     ctx.lineTo(x + vw, y);
 
-    ctx.fillStyle = 'rgba(43, 39, 35, 0.05)';
+    ctx.fillStyle = `rgba(${hexToRgbString(THEME.ink)}, 0.05)`;
     ctx.fill();
     if (isSelected) {
-      ctx.strokeStyle = ACCENT;
+      ctx.strokeStyle = THEME.accent;
       ctx.lineWidth = Math.max(3, vw * 0.05);
     } else if (hintPulse > 0) {
       // Пульсирующая подсветка подсказки — отличима от статичного выбора игрока.
-      ctx.strokeStyle = ACCENT;
+      ctx.strokeStyle = THEME.accent;
       ctx.lineWidth = Math.max(2, vw * 0.035) + hintPulse * vw * 0.045;
     } else {
-      ctx.strokeStyle = INK;
+      ctx.strokeStyle = THEME.ink;
       ctx.lineWidth = Math.max(2, vw * 0.035);
     }
     ctx.lineJoin = 'round';
@@ -274,7 +392,7 @@ const Board = (() => {
   function drawElement(cx, cy, size, el) {
     const fill = COLORS[el.color];
     ctx.fillStyle = fill;
-    ctx.strokeStyle = outlineFor(fill); // задача 12: светлая обводка на слишком тёмной заливке
+    ctx.strokeStyle = THEME.outline; // ТЗ №9, задача A: одна обводка на тему, без per-заливки выбора
     ctx.lineWidth = Math.max(1.5, size * 0.06);
 
     if (el.shape === SHAPE.CIRCLE) {
@@ -439,9 +557,22 @@ const Board = (() => {
     if (hintState) { hintState = null; redraw(); }
   }
 
+  // ТЗ №8, задача B: геометрия последнего кадра для diag-вывода
+  // (dev_board_diag.js) — снимок, не пересчитывает и не форсирует рендер.
+  function getDiagMetrics() {
+    return lastDiagMetrics;
+  }
+
   return {
     init, setLevel, resize, redraw,
     hitTest, setSelected, shake, animatePour, showHint, clearHint,
-    sameType, SHAPE, COLORS, VIAL_CAPACITY
+    getDiagMetrics,
+    // computeLayout — диагностический экспорт (перенесено с
+    // fix/vk-remove-shop при сведении в main): координаты клика для
+    // Playwright-приёмки берутся из того, что реально нарисовано
+    // (computeLayout/getDiagMetrics), не калибруются через hitTest.
+    // Чистая функция, ничего не меняет в рендере.
+    computeLayout,
+    sameType, SHAPE, COLORS, THEME, VIAL_CAPACITY
   };
 })();

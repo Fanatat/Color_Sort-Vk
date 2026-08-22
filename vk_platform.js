@@ -77,26 +77,6 @@
    ============================================================ */
 const Platform = (() => {
   const SAVE_KEY = 'colorsort_save';
-  /* РЕШЕНИЕ 2026-07-26 (основатель): вызовы рекламы ВК Bridge
-     (баннер/interstitial/rewarded) идут БЕЗУСЛОВНО — не гадаем заранее,
-     подключены ли ads-юниты в кабинете ВК, а просто вызываем API и
-     доверяем catch-обработчикам ниже (они и раньше существовали и
-     проверены — см. showBannerAd/showInterstitial/showRewarded): сбой
-     вызова (юнит не настроен, сетевая ошибка) — задокументированный
-     ожидаемый исход для этих методов пакета @vkontakte/vk-bridge, а не
-     регрессия, и ни один catch не роняет игру (баннер — тихий
-     console.error без колбэка; interstitial — onResume(false), геймплей
-     разблокируется тем же кодом, что и при успехе; rewarded — награда
-     выдаётся всё равно, студийный стандарт «недоступная реклама не
-     оставляет тупик»). Флаг оставлен как ручной аварийный выключатель
-     (переключить на false), а не удалён — если модерация или сам ВК
-     Bridge потребуют временно откатиться на «не пытаться показывать»,
-     это одна строка, а не восстановление кода из истории git.
-     Раньше (до 26.07) флаг был false «до подключения юнитов в
-     кабинете» — это ручное решение отменено этой правкой: юниты либо
-     уже подключены, либо результат вызова(успех/сбой) сам расскажет
-     через catch, без необходимости знать это заранее. */
-  const ADS_CONNECTED_VK = true;
   /* Таймаут init подобран под ЖЕЛЕЗНОЕ правило студии: «платформа не
      отвечает» → меню за ≤3 с. Замер живого прогона: при 2500 мс меню
      появлялось за ~3060 мс (загрузка+парс бандла ~560 мс поверх
@@ -113,16 +93,6 @@ const Platform = (() => {
      ролик, но и не держать игрока в паузе вечно, если мост потерял
      сообщение о закрытии. */
   const REWARD_AD_TIMEOUT_MS = 40000;
-  /* Тот же предохранитель, для interstitial — тот же нативный API
-     (VKWebAppShowNativeAds), та же документированная нестабильность
-     моста (см. журнал выше). Раньше showInterstitial() не был обёрнут
-     в withTimeout — если Promise зависал, onResume() не вызывался
-     НИКОГДА, goToNextLevel() (main.js) не доходил до loadLevel(), и
-     игрок оставался запертым на оверлее победы/главы навсегда — живой
-     Playwright-тест (зависший мок VKWebAppShowNativeAds) воспроизвёл
-     именно это. Значение то же, что у rewarded — общий показ той же
-     API, тот же ожидаемый диапазон длительности ролика. */
-  const INTERSTITIAL_AD_TIMEOUT_MS = 40000;
   /* Страховка ожидания видимости после закрытия рекламного оверлея
      (см. журнал выше, второе решение). НЕ про сам показ рекламы —
      это отдельная, короткая пауза ПОСЛЕ того, как Promise уже
@@ -130,14 +100,23 @@ const Platform = (() => {
      причине не придёт (не все нативные оверлеи гарантированно её
      шлют) — тогда просто продолжаем, не блокируя награду вечно. */
   const VISIBILITY_WAIT_TIMEOUT_MS = 3000;
-  /* Каданс interstitial (Task 3, ЗАДАЧА VK-переподачи 2026-07-26):
-     реже, чем дефолт main.js (раз в 3 уровня / 90с) — раз в 4 уровня /
-     120с. main.js читает эти поля через Platform.AD_LEVELS_INTERVAL/
-     AD_MIN_GAP_MS (типа buyCosmetic выше — платформенное решение живёт
-     в адаптере, не в общем коде); Яндекс-сборка (platform.js) их не
-     экспортирует — там каданс остаётся прежним. */
-  const AD_LEVELS_INTERVAL = 4;
-  const AD_MIN_GAP_MS = 120000;
+
+  /* ---------- SHOP_SUPPORTED (ТЗ VK_remove_shop, задача A) ----------
+     ЕДИНСТВЕННЫЙ флаг, которым main.js решает, показывать ли витрину/
+     косметику (тот же контракт, что и в platform.js). Платежи на ВК не
+     подключены и не будут до появления сервера с белым IP и доменом
+     (решение Р6) — false. Возврат витрины в будущем = смена этой одной
+     константы, код магазина/тем в main.js не удаляется, просто не
+     запускается. */
+  const SHOP_SUPPORTED = false;
+
+  /* ---------- Сторож объёма сейва (ТЗ №14, этап 3, добор) ----------
+     3500 байт — тот же временный студийный бюджет, что уже в бою на
+     нонограммах (adapters/vk_bridge.js, VK_SAVE_SIZE_GUARD_BYTES) — НЕ
+     подтверждённое требование ВК дословно, консервативный запас под
+     реальный лимит VKWebAppStorageSet. main.js замеряет реальный JSON
+     перед КАЖДОЙ записью (persist()), не полагается на расчёт «влезет». */
+  const SAVE_SIZE_GUARD_BYTES = 3500;
 
   let ready = false; // true только после успешного VKWebAppInit
 
@@ -180,65 +159,12 @@ const Platform = (() => {
     });
   }
 
-  /* Применяется ТОЛЬКО если ADS_CONNECTED_VK вручную вернули в false
-     (аварийный откат, см. комментарий у флага выше) — при действующем
-     умолчании (true, решение 26.07) эта функция не вызывается вообще,
-     подпись кнопки остаётся штатной («▶ … за рекламу», i18n.js), потому
-     что реклама теперь действительно пытается показаться при каждом
-     клике. Снимает ▶-значок и меняет подпись на нейтральную, БЕЗ слова
-     «реклама» — на случай отката, чтобы подпись не врала, если решат
-     снова показывать «ролика не будет ни при каком клике». Атрибут
-     data-i18n у подписи снимаем — иначе она вернётся к «Подсказка за
-     рекламу» при следующем applyStrings() (общий код i18n.js, не
-     трогаем). Кнопка НЕ прячется (решение 18.07 выше остаётся в силе) —
-     просто перестаёт обещать то, чего не будет; сама подсказка всё
-     равно доступна и бесплатна (см. showRewarded). Вызывается из init()
-     ДО проверки vkBridge — это статический факт флага, не зависящий от
-     того, ответил мост или нет. */
-  function applyAdsDisconnectedHintUI() {
-    const badge = document.querySelector('.hint-ad-badge');
-    if (badge) badge.remove();
-    const label = document.querySelector('.hint-ad-label');
-    if (label) {
-      label.removeAttribute('data-i18n');
-      label.textContent = 'Подсказка';
-    }
-  }
-
-  /* ---------- Реклама: гарантированная поверхность (Task A, ЗАДАЧА
-     ..._VK.md) ----------
-     Модератор отклонил билд именно потому, что единственная рекламная
-     поверхность (rewarded) реактивно скрывалась/не показывалась без
-     филла — он не увидел рекламу вообще. Стики-баннер решает это:
-     показывается ОДИН РАЗ при старте и висит поверх страницы весь
-     сеанс, не завися от кликов игрока (в отличие от interstitial и
-     rewarded). Вызывается безусловно при успешном init() (решение
-     26.07, см. журнал у ADS_CONNECTED_VK выше) — сбой самого запроса
-     (юнит не настроен/сетевая ошибка) ловится catch() ниже и только
-     логируется, игру не роняет и ничего не блокирует.
-     banner_location:'top' — решение по умолчанию, НЕ проверено живым
-     ВК-клиентом (баннер нативный, в песочнице без vkBridge не
-     рендерится вообще). Игровые кнопки .hint-wrap/.undo-btn стоят по
-     НИЗУ экрана (style.css) — баннер снизу рисковал бы их перекрыть,
-     верх перекрывает только редко тапаемую шапку (назад/звук). Если
-     живой тест на телефоне покажет перекрытие — правка одной строки
-     ('top'->'bottom') здесь, слой вёрстки не трогаем. */
-  function showBannerAd() {
-    vkBridge.send('VKWebAppShowBannerAd', {
-      banner_location: 'top',
-      layout_type: 'overlay'
-    }).catch((e) => {
-      console.error('[vk_platform] showBannerAd:', e);
-    });
-  }
-
   /* ---------- Инициализация ----------
      Обязательный таймаут (шрам Словохода b7): вне ВК-клиента
      VKWebAppInit не отвечает — без таймаута игра вечно висит на
-     загрузке БЕЗ ошибок в консоли. При таймауте/ошибке — дев-режим,
+     загрузке БЕЗ ошибок в консоли. При таймауте/ошибке — dev-режим,
      игра обязана дойти до меню. */
   async function init() {
-    if (!ADS_CONNECTED_VK) applyAdsDisconnectedHintUI();
     if (typeof vkBridge === 'undefined') {
       console.warn('[vk_platform] Bridge не найден — dev-режим (mock)');
       return false;
@@ -254,7 +180,6 @@ const Platform = (() => {
     // Кнопка подсказки НЕ прячется здесь: VKWebAppCheckNativeAds
     // ненадёжен для превентивной проверки (см. журнал наверху, п.1) —
     // доступность рекламы обрабатывается реактивно, в showRewarded().
-    if (ADS_CONNECTED_VK) showBannerAd();
     return true;
   }
 
@@ -275,34 +200,49 @@ const Platform = (() => {
      VKWebAppStorageSet/Get, ключ colorsort_save. ВАЖНО (стандарт
      студии): объект сейва пишется ВСЕГДА ЦЕЛИКОМ — сюда прилетает
      уже готовый fullState из main.js, адаптер его не трогает,
-     только сериализует. */
+     только сериализует.
+
+     Обёртка {ok, data, error} (ТЗ unify_repo, фаза 4 — найдено живым
+     прогоном): main.js (boot()/retryLoadInBackground()) читает
+     loadResult.ok безусловно — этот контракт появился на platform.js
+     (Яндекс) в ТЗ №2 Фаза 3 позже, чем vk_platform.js в последний раз
+     правился, и адаптер остался на старом bare-value/null контракте.
+     vk_platform.js не собирался и не запускался как часть main.js до
+     unify_repo — расхождение не всплывало. Без этой обёртки
+     Platform.load() возвращает null, `loadResult.ok` бросает
+     TypeError, boot() падает целиком — игра зависает на экране
+     загрузки. Семантика — та же, что в platform.js: ok:true+data:null
+     — легитимно пусто (dev-режим/первый запуск), ok:false — вызов не
+     удался. */
   async function save(fullState) {
     if (!ready) {
       console.warn('[vk_platform] dev-режим: сейв пропущен', fullState);
-      return;
+      return { ok: true, error: null };
     }
     try {
       await vkBridge.send('VKWebAppStorageSet', {
         key: SAVE_KEY,
         value: JSON.stringify(fullState)
       });
+      return { ok: true, error: null };
     } catch (e) {
       console.error('[vk_platform] VKWebAppStorageSet ошибка:', e);
+      return { ok: false, error: e };
     }
   }
 
   async function load() {
-    if (!ready) return null;
+    if (!ready) return { ok: true, data: null, error: null };
     try {
       const res = await vkBridge.send('VKWebAppStorageGet', { keys: [SAVE_KEY] });
       const entry = res.keys.find((k) => k.key === SAVE_KEY);
       // Пустая строка — штатный ответ ВК для отсутствующего ключа
       // (первый запуск, не битый сейв) — не пытаемся её парсить.
-      if (!entry || !entry.value) return null;
-      return JSON.parse(entry.value);
+      if (!entry || !entry.value) return { ok: true, data: null, error: null };
+      return { ok: true, data: JSON.parse(entry.value), error: null };
     } catch (e) {
       console.error('[vk_platform] VKWebAppStorageGet/парсинг ошибка:', e);
-      return null;
+      return { ok: false, data: null, error: e };
     }
   }
 
@@ -311,25 +251,29 @@ const Platform = (() => {
      «показ открылся» — один Promise на весь показ (resolve/reject
      после закрытия). onPause вызываем синхронно перед send() —
      функционально то же самое (пауза звука/геймплея перед роликом,
-     снятие паузы после), просто без промежуточного колбэка от ВК. */
-  function showInterstitial(onPause, onResume) {
-    if (!ADS_CONNECTED_VK) {
-      // Аварийный откат (см. комментарий у ADS_CONNECTED_VK выше) — при
-      // действующем умолчании (true) сюда не заходим, вызов идёт
-      // безусловно ниже.
-      if (onResume) onResume(false);
-      return;
-    }
+     снятие паузы после), просто без промежуточного колбэка от ВК.
+
+     onBeforeShow (ТЗ shop_gate_and_ads, задача B — найдено сверкой
+     контракта, п.2.1/2.2): 3-й необязательный параметр, ЕСТЬ в
+     platform.js (Яндекс, ТЗ №1 задача C — onBeforeShow вызывается ПЕРВОЙ
+     инструкцией функции, до проверки SDK, см. platform.js), но раньше
+     ЗДЕСЬ отсутствовал в сигнатуре — расхождение с собственным
+     заявлением файла в шапке («сигнатуры БАЙТ-В-БАЙТ идентичны»).
+     main.js передаёт его на ОБЕИХ площадках одинаково (goToNextLevel →
+     advDiagMarkCall); функционально не критично — единственный
+     потребитель, dev_advdiag.js, DEV-ONLY и вырезается build.py из
+     ЛЮБОЙ сборки (Яндекс и ВК), поэтому отсутствие параметра раньше не
+     ломало ничего игроку видимого — но контракт обязан совпадать
+     буквально, чинится здесь. */
+  function showInterstitial(onPause, onResume, onBeforeShow) {
+    if (onBeforeShow) onBeforeShow();
     if (!ready) {
       console.warn('[vk_platform] dev: interstitial пропущен');
       if (onResume) onResume();
       return;
     }
     if (onPause) onPause();
-    withTimeout(
-      vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'interstitial' }),
-      INTERSTITIAL_AD_TIMEOUT_MS
-    )
+    vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'interstitial' })
       .then(() => { if (onResume) onResume(true); })
       .catch((e) => {
         console.error('[vk_platform] interstitial:', e);
@@ -345,57 +289,30 @@ const Platform = (() => {
      здесь нет ни в одном исходе. finish() — единая точка выхода,
      settled защищает от двойного вызова (штатный ответ ПОСЛЕ того,
      как уже сработал таймаут-предохранитель). */
-  /* Задача 15 (диагностика): основатель наблюдал подсказки без рекламы
-     и не мог отличить причину — здесь ЕДИНСТВЕННАЯ строка на каждый
-     запрос rewarded (кроме исхода «лимит», который решается в main.js
-     ДО вызова этой функции — адаптер про суточный лимит не знает).
-     Причины исхода:
-       показан         — VKWebAppShowNativeAds резолвится (ролик закрыт штатно);
-       нет филла/отказ моста — Promise отклонён (документированный исход
-                          пакета: юнит не настроен/нет заполнения/мост
-                          потерял сообщение о закрытии), включая наш
-                          собственный withTimeout-таймаут — с точки
-                          зрения основателя это тот же симптом «рекламы
-                          не было»;
-       ошибка           — синхронное исключение ДО/ВОКРУГ самого вызова
-                          (неожиданное, не задокументированный исход API). */
-  function logRewardedOutcome(reason, detail) {
-    const line = `[rewarded] ${reason}`;
-    if (detail !== undefined) console.log(line, detail);
-    else console.log(line);
-  }
-
   function showRewarded(onRewarded, onPause, onResume) {
-    if (!ADS_CONNECTED_VK) {
-      // Аварийный откат (см. комментарий у ADS_CONNECTED_VK выше) — при
-      // действующем умолчании (true) сюда не заходим, попытка показа
-      // (VKWebAppShowNativeAds) идёт безусловно ниже; сбой ловится
-      // catch()'ем withTimeout ниже и всё равно выдаёт награду.
-      logRewardedOutcome('запрос — аварийный откат (ADS_CONNECTED_VK=false), подсказка сразу и бесплатно');
-      if (onRewarded) onRewarded();
-      return;
-    }
     if (!ready) {
-      logRewardedOutcome('запрос — dev-режим (нет vkBridge), подсказка выдана без рекламы');
+      console.warn('[vk_platform] dev: rewarded → награда выдана');
       if (onRewarded) onRewarded();
       if (onResume) onResume();
       return;
     }
     if (onPause) onPause();
     let settled = false;
-    const finish = (grantReward, reason, detail) => {
+    const finish = (grantReward, reason) => {
       if (settled) return;
       settled = true;
       // Видимый эффект — строго после onResume(), как в platform.js.
       if (onResume) onResume();
-      logRewardedOutcome(reason, detail);
+      console.log('[vk_platform] rewarded завершён:', reason, '| награда:', grantReward);
       if (grantReward && onRewarded) {
         // На мобильном ВК onRewarded() (внутри — Board.showHint(), общий
         // код) не должен стартовать, пока экран ещё реально перекрыт
         // рекламным оверлеем — см. журнал наверху. Ждём подтверждённой
         // видимости, форсируем пересчёт лэйаута на случай смены
         // размеров вьюпорта за время рекламы, и только потом отдаём
-        // награду вызывающей стороне.
+        // награду вызывающей стороне. Два лога раздельно (решение vs.
+        // фактический показ) — на живом устройстве через remote-debug
+        // будет видно, если когда-нибудь разъедутся снова.
         const waitStartedAt = performance.now();
         waitVisibleAndSettled().then(() => {
           if (typeof Board !== 'undefined' && Board.resize) Board.resize();
@@ -404,106 +321,16 @@ const Platform = (() => {
         });
       }
     };
-    let sendPromise;
-    try {
-      sendPromise = withTimeout(
-        vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' }),
-        REWARD_AD_TIMEOUT_MS
-      );
-    } catch (e) {
-      // Синхронное исключение до отправки — не задокументированный
-      // исход API, отдельная категория «ошибка» (не путать с штатным
-      // отказом/отсутствием филла ниже).
-      finish(true, 'ошибка — подсказка выдана бесплатно', e);
-      return;
-    }
-    sendPromise
-      .then(() => finish(true, 'показан — ролик закрыт, награда выдаётся'))
+    withTimeout(
+      vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' }),
+      REWARD_AD_TIMEOUT_MS
+    )
+      .then(() => finish(true, 'ролик закрыт (resolve)'))
       .catch((e) => {
-        const isTimeout = e instanceof Error && e.message === 'timeout';
-        const reason = isTimeout
-          ? `нет филла/отказ моста — мост не ответил за ${REWARD_AD_TIMEOUT_MS}мс, подсказка выдана бесплатно`
-          : 'нет филла/отказ моста — подсказка выдана бесплатно';
-        finish(true, reason, e);
+        console.warn('[vk_platform] rewarded недоступна/зависла — выдаём подсказку бесплатно:', e);
+        finish(true, 'ошибка/таймаут — выдано бесплатно');
       });
   }
 
-  /* ---------- _STUB_ Косметическая покупка (Task C, ЗАДАЧА_..._VK.md) ----------
-     ОТКЛЮЧЕНО флагом COSMETIC_SHOP_ENABLED_VK ниже — решение основателя
-     2026-07-26: в переподачу идут ТОЛЬКО Task A (реклама) и Task B
-     (rewarded не прячется). VKWebAppShowOrderBox требует сервер-колбэк
-     подтверждения покупки (см. типы пакета) — бэкенда у студии нет,
-     подтвердить транзакцию нечем. Код НЕ удалён (правило студии —
-     незавершённый артефакт выключается/переименовывается, не стирается) —
-     включить обратно (COSMETIC_SHOP_ENABLED_VK = true), когда появится
-     сервер-колбэк.
-
-     Task 4 (та же переподача 2026-07-26): раз покупки нет, строка в
-     меню возвращена как ПРЕВЬЮ — main.js красит колбы кликом БЕЗ
-     обращения к buyCosmetic/OrderBox и без персистентности (см.
-     main.js, revertCosmeticTheme). Доступность превью гейтится ОТДЕЛЬНЫМ
-     флагом COSMETIC_PREVIEW_VK ниже (не завязан на
-     COSMETIC_SHOP_ENABLED_VK — превью не требует сервер-колбэка вообще,
-     ничего не покупается) — экспортируется безусловно как обычное поле
-     объекта Platform (тот же приём, что AD_LEVELS_INTERVAL выше), на
-     Яндексе (platform.js) не экспортировано, там фичи физически нет.
-
-     8-й метод СВЕРХ общего 7-методного контракта — существует ТОЛЬКО
-     здесь (Яндекс platform.js его не экспортирует физически), main.js
-     проверяет наличие через typeof перед вызовом (тот же приём, что и
-     DEV_UNLOCK_ALL). Флаг ниже управляет именно этим typeof-гейтом:
-     пока false, buyCosmetic не попадает в возвращаемый объект Platform
-     вообще.
-     item ДОЛЖЕН точно совпадать со строкой, заведённой в каталоге
-     товаров кабинета ВК (см. отчёт/предусловие основателя) — сама цена
-     и карточка товара настраиваются ТОЛЬКО в кабинете, не в коде
-     (OrderRequestOptions пакета не несёт цены). Верифицировано по
-     packages/src/types/data.ts пакета @vkontakte/vk-bridge@3.0.2. */
-  const COSMETIC_SHOP_ENABLED_VK = false; // _STUB_: см. комментарий выше — нет сервер-колбэка для OrderBox
-  const COSMETIC_PREVIEW_VK = true; // превью не требует OrderBox — включено независимо от покупки
-  const COSMETIC_ITEM_ID = 'sea_theme';
-
-  /* ---------- Плашка номера билда (задача 14) ----------
-     Плейсхолдер на диске — build.py подставляет реальное значение
-     ('vk-b<счётчик>-<git-хэш>-<дата>') ТОЛЬКО в копию для ВК-сборки
-     (см. build_vk(), тот же приём точечной замены байт в собранном
-     файле, что у 2 тегов index.html — исходник на диске не трогается).
-     Локальный запуск без сборки покажет плейсхолдер как есть — это
-     нормально, значит билд не собирался через build.py. main.js читает
-     через typeof (тот же приём, что COSMETIC_PREVIEW_VK) — на Яндексе
-     (platform.js) поля физически нет, там плашка не показывается. */
-  const BUILD = 'vk-b7-023dc49-20260727';
-
-  async function buyCosmetic(onSuccess, onFail) {
-    if (!ready) {
-      console.warn('[vk_platform] dev: buyCosmetic — нет vkBridge, покупка не выполняется');
-      if (onFail) onFail('dev-mode');
-      return;
-    }
-    try {
-      const res = await vkBridge.send('VKWebAppShowOrderBox', {
-        type: 'item',
-        item: COSMETIC_ITEM_ID
-      });
-      if (res.status === 'success') {
-        console.log('[vk_platform] buyCosmetic: успех, order_id', res.order_id);
-        if (onSuccess) onSuccess();
-      } else {
-        console.warn('[vk_platform] buyCosmetic: не завершена, статус', res.status);
-        if (onFail) onFail(res.status); // 'cancel' | 'fail'
-      }
-    } catch (e) {
-      console.error('[vk_platform] VKWebAppShowOrderBox ошибка (товар не настроен в кабинете?):', e);
-      if (onFail) onFail('error');
-    }
-  }
-
-  return {
-    init, gameReady, getLang, save, load, showInterstitial, showRewarded,
-    AD_LEVELS_INTERVAL, AD_MIN_GAP_MS, COSMETIC_PREVIEW_VK, BUILD,
-    // _STUB_: buyCosmetic попадает в контракт ТОЛЬКО когда
-    // COSMETIC_SHOP_ENABLED_VK = true (см. комментарий у флага выше) —
-    // сейчас false, метод физически отсутствует на объекте Platform.
-    ...(COSMETIC_SHOP_ENABLED_VK ? { buyCosmetic } : {})
-  };
+  return { init, gameReady, getLang, save, load, showInterstitial, showRewarded, SHOP_SUPPORTED, SAVE_SIZE_GUARD_BYTES };
 })();

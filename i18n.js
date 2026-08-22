@@ -24,13 +24,37 @@ const I18N = {
     chapter: 'Глава',
     chapterComplete: 'пройдена',
     of: 'из',
-    cosmeticPreview: 'Посмотреть',
     shop: 'Магазин',
-    shopCurrentLabel: 'Текущая палитра:',
-    shopPreviewCaption: 'Превью — видно только до выхода в меню',
-    shopEmpty: 'Темы открываются по мере прохождения уровней',
-    shopSeaThemeLabel: 'Морская тема колб',
-    comingSoon: 'Скоро…'
+    themeDefaultLabel: 'Тёплая тема',
+    themeSeaLabel: 'Морская тема',
+    themeForestLabel: 'Лесная тема',
+    themeBerryLabel: 'Ягодная тема',
+    shopApply: 'Применить',
+    shopActive: 'Активна ✓',
+    cosmeticBuy: 'Купить',
+    shopPurchaseNotCompleted: 'Покупка не завершена',
+    // ТЗ №14, этап 2: модуль удержания (retention.js), перенесён с
+    // нонограмм. «Пазл» -> «уровень» (в Color Sort нет пазлов).
+    retentionWaitingLine: 'Уровни ждут: {n}',
+    retentionNextAt:      'ещё +{n} в {time}',
+    retentionEmptyLine:   '+{n} {word} {verb} в {time}',
+    retentionFull:        'Уровни ждут — играйте!',
+    // ТЗ №14, этап 3 (добор): подпись обязана однозначно называть И
+    // рекламу, И награду (п.4.5.1 требований Яндекса) — прежний текст
+    // называл только результат (тот же приём, что renderRewardedButton
+    // нонограмм, но там не было этого требования площадки).
+    retentionRewardedBtn: 'Открыть ещё +{n} за рекламу',
+    levelWordOne:  'уровень',
+    levelWordFew:  'уровня',
+    levelWordMany: 'уровней',
+    levelArriveVerbOne:  'откроется',
+    levelArriveVerbMany: 'откроются',
+    retentionStreakLine:  'Серия входов: {n} из {m}',
+    retentionRewardHints: '+{n} подсказки бесплатно — серия входов!',
+    // Награда 3-го дня — конкретная тема (решение основателя 22.08):
+    // ягодная тема дарится бесплатно, минуя магазин/IAP.
+    retentionRewardStyle: 'Ягодная тема открыта — серия входов!',
+    retentionRewardDrip:  'Открыт новый уровень!'
   },
   en: {
     title: 'Sort: Color & Shape', // карточное имя (п.5.1.3, решение основателя 2026-07-17)
@@ -52,13 +76,29 @@ const I18N = {
     chapter: 'Chapter',
     chapterComplete: 'complete',
     of: 'of',
-    cosmeticPreview: 'View',
     shop: 'Shop',
-    shopCurrentLabel: 'Current palette:',
-    shopPreviewCaption: 'Preview — visible only until you leave for the menu',
-    shopEmpty: 'Themes unlock as you clear more levels',
-    shopSeaThemeLabel: 'Sea theme vials',
-    comingSoon: 'Coming soon…'
+    themeDefaultLabel: 'Warm theme',
+    themeSeaLabel: 'Sea theme',
+    themeForestLabel: 'Forest theme',
+    themeBerryLabel: 'Berry theme',
+    shopApply: 'Apply',
+    shopActive: 'Active ✓',
+    cosmeticBuy: 'Buy',
+    shopPurchaseNotCompleted: 'Purchase not completed',
+    retentionWaitingLine: 'Levels waiting: {n}',
+    retentionNextAt:      'plus {n} more at {time}',
+    retentionEmptyLine:   '+{n} {word} {verb} at {time}',
+    retentionFull:        'Levels are waiting — go play!',
+    retentionRewardedBtn: 'Watch an ad for +{n} more levels',
+    levelWordOne:  'level',
+    levelWordFew:  'levels',
+    levelWordMany: 'levels',
+    levelArriveVerbOne:  'unlocks',
+    levelArriveVerbMany: 'unlock',
+    retentionStreakLine:  'Login streak: {n} of {m}',
+    retentionRewardHints: '+{n} free hints — login streak!',
+    retentionRewardStyle: 'Berry theme unlocked — login streak!',
+    retentionRewardDrip:  'A new level unlocked!'
   }
 };
 
