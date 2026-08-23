@@ -14,7 +14,9 @@
     menu:    document.getElementById('screen-menu'),
     grid:    document.getElementById('screen-grid'),
     shop:    document.getElementById('screen-shop'),
-    game:    document.getElementById('screen-game')
+    oformlenie: document.getElementById('screen-oformlenie'), // ТЗ №17
+    game:    document.getElementById('screen-game'),
+    energyWall: document.getElementById('screen-energy-wall') // ТЗ №15, этап 1
   };
 
   /* DEV_UNLOCK_ALL — из dev_flags.js, который НЕ грузится в билде
@@ -146,17 +148,13 @@
     retention: null
   };
 
-  /* ТЗ №14, этап 2: замок теперь читается через retention.js
-     (Retention.isLevelOpen), не напрямую idx<=maxUnlocked — модуль сам
-     покрывает старое правило первым же приоритетом («уже достигнут»,
-     maxReachedIndex callback = state.maxUnlocked ниже), плюс добавляет
-     стартовый запас/раздатчик СВЕРХУ. До инициализации _retentionState
-     (например, самый первый кадр до boot() успел отработать) — старое
-     правило как безопасный дефолт, не блокирующий. */
+  /* ТЗ №15, этап 1, п.1.1: прогрессия — СНОВА idx<=maxUnlocked, как ДО
+     ТЗ №14. Раздатчик уровней (Retention.isLevelOpen) к прогрессии
+     отношения больше не имеет — энергия гейтит СТАРТ уровня, не
+     ДОСТУПНОСТЬ (см. requestStartLevel/canStartLevel ниже), это две
+     независимые вещи. */
   function isLevelUnlocked(idx) {
-    if (devUnlockAll) return true;
-    if (typeof Retention === 'undefined' || !_retentionState) return idx <= state.maxUnlocked;
-    return Retention.isLevelOpen(idx, _retentionState, RETENTION_CONFIG);
+    return devUnlockAll || idx <= state.maxUnlocked;
   }
 
   /* ---------- Гейт записи сейва (ТЗ №2, Фаза 3 — блокер модерации) ----------
@@ -374,6 +372,20 @@
     return id === 'default' || state.ownedThemes.includes(id) || state.giftedThemes.includes(id);
   }
 
+  /* ТЗ №17: два нейтральных доступа к тем же данным — для кода экрана
+     «Оформление», которому про торговлю знать нечего и НЕЛЬЗЯ (см.
+     OFORMLENIE-SCOPE ниже: guard сборки ВК валит участок, если тот
+     заговорит словарём витрины). THEME_DEFS — тот же массив определений
+     тем (цвета/подписи), просто под именем, отражающим, чем он является
+     для потребителя: данными о темах, а не каталогом товара.
+     paidThemesReachable() — тот же флаг площадки одним выражением
+     (заодно снимает его дублирование по файлу). */
+  const THEME_DEFS = SHOP_THEMES;
+
+  function paidThemesReachable() {
+    return typeof Platform.SHOP_SUPPORTED === 'boolean' && Platform.SHOP_SUPPORTED;
+  }
+
   /* ТЗ №4, задача B3: смена темы — ОДИН атрибут на корневом элементе,
      ничего больше. Для 'default' атрибут снимается — :root в style.css
      уже несёт значения базовой Тёплой темы (задача B1, не переделана),
@@ -420,7 +432,157 @@
     applyTheme(id);
     persist();
     renderShop();
+    renderOformlenie(); // ТЗ №17: экраны выбора и покупки живут отдельно, но зеркалят одно состояние
   }
+
+  /* OFORMLENIE-SCOPE-BEGIN — границы для guard'а сборки
+     (check_oformlenie_no_trade_vk в build.py). Внутри этих маркеров живёт
+     ВЕСЬ код экрана «Оформление». Guard проверяет ровно этот участок
+     собранного main.js и валит сборку ВК, если тут появится словарь
+     торговли (в любом виде — хоть в коде, хоть в комментарии) или если
+     источником карточек перестанет быть ownedThemeIds().
+
+     Строгость намеренная и до комментариев включительно: участок, которому
+     понадобилось РАССКАЗЫВАТЬ про оплату, почти наверняка начал её
+     ОБСЛУЖИВАТЬ. Нужен такой код — ему место на отдельном экране Яндекса,
+     не здесь. Нейтральные доступы к тем же данным объявлены выше:
+     THEME_DEFS и paidThemesReachable(). Двигать маркеры, не поправив
+     build.py, нельзя — сборка ВК упадёт. */
+  /* ---------- Оформление (ТЗ №17) ---------- */
+
+  /* ЕДИНСТВЕННЫЙ источник карточек экрана. Возвращает id-шники тем,
+     которые у игрока ЕСТЬ: базовая (есть у всех и всегда) плюс те из
+     THEME_DEFS, что прошли themeAvailableHere.
+
+     КРАСНАЯ ЛИНИЯ ТЗ №17: тема, которой у игрока нет, не попадает на этот
+     экран не потому, что «мы договорились её прятать», а потому что
+     единственный код, строящий карточки (renderOformlenie), ходит ТОЛЬКО
+     сюда — а сюда она не проходит по построению. Ни отметки «нет
+     доступа», ни серой карточки, ни display:none: состояние «оформление
+     видно, а получить нельзя» здесь невыразимо, а не запрещено
+     договорённостью. */
+  function ownedThemeIds() {
+    return ['default', ...THEME_DEFS.filter(th => themeAvailableHere(th.id)).map(th => th.id)];
+  }
+
+  /* Наличие темы, ЗАКОННОЕ НА ЭТОЙ ПЛОЩАДКЕ — уже, чем isThemeOwned.
+
+     isThemeOwned отвечает на вопрос «есть ли тема у игрока по данным
+     сейва» (ownedThemes ∪ giftedThemes) и нужен там, где важна
+     ЦЕЛОСТНОСТЬ СЕЙВА (normalizeState). Здесь вопрос другой: «мог ли
+     игрок получить её ЗДЕСЬ». Разница видна на ВК: платного канала там
+     нет вовсе (paidThemesReachable() === false), поэтому ownedThemes на
+     ВК не наполняется законным путём — непустым он бывает только у сейва,
+     приехавшего с другой площадки или подложенного. Такой сейв мы, как и
+     раньше, НЕ правим и НЕ перезаписываем (красная линия прежнего ТЗ по
+     чистке ВК — см. гейт в boot()), но и не отрисовываем.
+
+     giftedThemes законны на ОБЕИХ площадках: ягодная тема за серию входов
+     приходит от retention.js. Именно это делает подарок 3-го дня видимым
+     на ВК (ТЗ №17, раздел E). */
+  function themeAvailableHere(id) {
+    if (id === 'default') return true;
+    const ownedOnPlatform = paidThemesReachable() && state.ownedThemes.includes(id);
+    return ownedOnPlatform || state.giftedThemes.includes(id);
+  }
+
+  /* Подсказка выбирается по СОСТОЯНИЮ (три состояния ТЗ №17, раздел D).
+     Варианты V1..V3 — на выбор основателя одним заходом; активный номер
+     здесь один и меняется правкой этой константы, а не логикой.
+
+     Различие площадок — только через paidThemesReachable(). Ключи с
+     суффиксом Ya живут в блоке YANDEX-ONLY блоке i18n.js, который
+     build.py vk вырезает физически, поэтому на ВК их не существует;
+     гейт ниже — вторая линия обороны на случай, если блок когда-нибудь
+     туда уедет. */
+  /* Копирайт выбран основателем (22.08, ТЗ №17 — из трёх показанных
+     отчётом вариантов выбран V1; V2/V3 удалены из i18n.js как решённые,
+     см. историю коммитов при необходимости сверить формулировки). */
+  function oformlenieHintKey() {
+    const haveCount = ownedThemeIds().length;
+    const totalHere = 1 + THEME_DEFS.length;
+    if (haveCount >= totalHere) return 'oformlenieHintAll';              // состояние 3
+    if (haveCount === 1) return paidThemesReachable() ? 'oformlenieHintNoneYa' : 'oformlenieHintNone';
+    return paidThemesReachable() ? 'oformlenieHintSomeYa' : 'oformlenieHintSome';
+  }
+
+  /* Карточка экрана. НАРОЧНО не переиспользует карточку соседнего
+     экрана Яндекса: у той есть ветка, которой здесь не должно
+     существовать даже мёртвой.
+     Возможных состояния ровно два: «Применить» и отметка «Активна».
+     Кнопки «Выключить» нет (поправка основателя) — чтобы сменить
+     оформление, игрок жмёт «Применить» у другого.
+
+     Обработчик — onclick (не addEventListener): функция вызывается заново
+     на каждый renderOformlenie(), дубли обработчиков накопиться не могут
+     (урок нонограмм, тот же приём, что у карточек соседнего экрана). */
+  function buildOformlenieCard(id) {
+    const isDefault = id === 'default';
+    const def = isDefault ? null : THEME_DEFS.find(th => th.id === id);
+    if (!isDefault && !def) return null; // незнакомый id из чужого сейва — не рисуем
+    const colors = isDefault ? DEFAULT_THEME : def.colors;
+    const labelKey = isDefault ? 'themeDefaultLabel' : def.labelKey;
+
+    const card = document.createElement('div');
+    card.className = 'picker-item' + (state.selectedTheme === id ? ' active' : '');
+    card.dataset.themeId = id;
+
+    const topRow = document.createElement('div');
+    topRow.className = 'picker-item-top';
+
+    const vial = document.createElement('div');
+    vial.className = 'picker-vial-preview';
+    vial.setAttribute('aria-hidden', 'true');
+    const shapes = ['circle', 'square', 'circle'];
+    ['c1', 'c2', 'c3'].forEach((k, i) => {
+      const el = document.createElement('span');
+      el.className = `picker-vial-el ${shapes[i]}`;
+      el.style.background = colors[k];
+      vial.appendChild(el);
+    });
+
+    const info = document.createElement('div');
+    info.className = 'picker-item-info';
+    const labelEl = document.createElement('span');
+    labelEl.className = 'picker-item-label';
+    labelEl.textContent = t(labelKey);
+    info.appendChild(labelEl);
+
+    topRow.appendChild(vial);
+    topRow.appendChild(info);
+
+    const actionsRow = document.createElement('div');
+    actionsRow.className = 'picker-item-actions';
+    if (state.selectedTheme === id) {
+      const status = document.createElement('span');
+      status.className = 'picker-item-status';
+      status.textContent = t('themeActive');
+      actionsRow.appendChild(status);
+    } else {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-primary picker-item-btn';
+      btn.textContent = t('themeApply');
+      btn.onclick = () => selectTheme(id);
+      actionsRow.appendChild(btn);
+    }
+
+    card.appendChild(topRow);
+    card.appendChild(actionsRow);
+    return card;
+  }
+
+  function renderOformlenie() {
+    const listEl = document.getElementById('oformlenie-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    ownedThemeIds().forEach(id => {
+      const card = buildOformlenieCard(id);
+      if (card) listEl.appendChild(card);
+    });
+    const hintEl = document.getElementById('oformlenie-hint');
+    if (hintEl) hintEl.textContent = t(oformlenieHintKey());
+  }
+  /* OFORMLENIE-SCOPE-END */
 
   /* Dev-переключатель владения (ТЗ №3, задача C3, diag-сборка ТОЛЬКО —
      см. devThemeToggleEnabled выше). КРАСНАЯ ЛИНИЯ: правит ИСКЛЮЧИТЕЛЬНО
@@ -439,6 +601,7 @@
     }
     persist();
     renderShop();
+    renderOformlenie(); // ТЗ №17: dev-смена владения видна и на экране выбора
   }
 
   /* Карточка одной темы. Обработчики — через onclick (не addEventListener):
@@ -497,12 +660,12 @@
       if (state.selectedTheme === id) {
         const status = document.createElement('span');
         status.className = 'shop-item-status';
-        status.textContent = t('shopActive');
+        status.textContent = t('themeActive');
         actionsRow.appendChild(status);
       } else {
         const btn = document.createElement('button');
         btn.className = 'btn btn-primary shop-item-btn';
-        btn.textContent = t('shopApply');
+        btn.textContent = t('themeApply');
         btn.onclick = () => selectTheme(id);
         actionsRow.appendChild(btn);
       }
@@ -739,6 +902,7 @@
     updateShopButtonVisibility();
     await reconcileOwnership();
     renderShop();
+    renderOformlenie(); // ТЗ №17: сверка владения с площадкой меняет состав экрана выбора
   }
 
   /* Diag-only (ТЗ №6, задача F) — см. dev_purchase_diag.js. Единственный
@@ -759,6 +923,7 @@
     if (state.selectedTheme === id) { state.selectedTheme = 'default'; applyTheme('default'); }
     persist();
     renderShop();
+    renderOformlenie(); // ТЗ №17
   }
 
   /* Видимость самой вкладки «Магазин» — Platform.SHOP_SUPPORTED
@@ -792,6 +957,23 @@
     });
   }
 
+  /* ТЗ №17: навигация «Оформления». addEventListener здесь безопасен и
+     уместен — эти две кнопки статичны в разметке (создаются один раз,
+     экран их не перерисовывает); накопление обработчиков возможно только
+     на пересоздаваемых узлах, а те (карточки тем) сидят на onclick, см.
+     buildOformlenieCard. */
+  const btnOformlenie     = document.getElementById('btn-oformlenie');
+  const btnOformlenieBack = document.getElementById('btn-oformlenie-back');
+  if (btnOformlenie) {
+    btnOformlenie.addEventListener('click', () => {
+      show('oformlenie');
+      renderOformlenie();
+    });
+  }
+  if (btnOformlenieBack) {
+    btnOformlenieBack.addEventListener('click', goToMenu);
+  }
+
   /* ---------- Модуль удержания (ТЗ №14, этап 2) ----------
      retention.js сам ничего не знает про DOM/Platform/LEVELS (см.
      заголовок файла) — весь мост здесь, тот же приём, что main.js
@@ -802,13 +984,18 @@
   let _retentionState = null;
 
   const RETENTION_CONFIG = (typeof Retention !== 'undefined') ? Retention.mergeConfig({
-    // Числа раздатчика утверждены основателем 21.08 (ТЗ №14, п.2.3) —
-    // те же, что уже в бою на нонограммах (ТЗ №08 там): порция 6,
-    // такт 6ч (дефолт модуля, не переопределяем), потолок накопителя
-    // 24, стартовый запас (дефолт модуля, starterCount=11) +
-    // dripPerTick при новом игроке = 11+6=17. Свои числа не придумывать.
+    // ТЗ №15, этап 1: раздатчик УРОВНЕЙ (ТЗ №14) заменён режимом
+    // gateMode:'energy' — тот же модуль, та же обвязка (такт/потолок/
+    // пополнение рекламой/серия входов), но накопитель ничего не
+    // открывает: это отдельная тратимая валюта (см. заголовок
+    // retention.js и п.1.1/1.3 ТЗ №15). Числа —
+    // потолок 10, порция 6, такт 6ч (дефолт модуля, не переопределяем)
+    // — из ТЗ, свои не придумывались. starterCount модулю больше не
+    // нужен в этом режиме (initState его игнорирует при gateMode:
+    // 'energy') — не переопределяем, дефолт безвреден.
+    gateMode: 'energy',
     dripPerTick: 6,
-    accumulatorCap: 24,
+    accumulatorCap: 10,
     hintsRewardCount: 2, // перенесено с нонограмм вместе с остальным конфигом — свой не придумывался
     callbacks: {
       totalLevels:      function ()  { return LEVELS.length; },
@@ -843,6 +1030,11 @@
           state.giftedThemes.push(id);
           persist();
         }
+        // ТЗ №17: подарку наконец есть куда приземлиться — экран
+        // «Оформление» есть на ОБЕИХ площадках, поэтому компромисс,
+        // описанный абзацем выше («на ВК подарок останется невидим,
+        // пока витрина там не появится»), закрыт: тема видна сразу.
+        renderOformlenie();
         showRetentionToast(t('retentionRewardStyle'));
       },
     },
@@ -854,6 +1046,16 @@
     if (!el) return;
     el.textContent = text;
     el.hidden = false;
+    // ТЗ №15: игровой экран несёт двухрядную шапку (.game-header-stacked)
+    // — фиксированный top тоста перекрывал бы её (найдено кадром
+    // приёмки: тост «Энергия +6!» лёг поверх кнопок «назад»/звук).
+    // Отодвигаем тост НИЖЕ реальной высоты шапки (--header-h,
+    // syncHeaderSpace её держит в актуальном состоянии для ЭТОГО
+    // экрана — единственного места, где такой тост реально всплывает
+    // синхронно с высокой шапкой, см. retentionTick/onEnergyWallAdClick).
+    // На остальных экранах (меню без шапки, стена с обычной однорядной)
+    // — прежнее положение у верхнего края.
+    el.classList.toggle('below-header', screens.game.classList.contains('active'));
     requestAnimationFrame(() => el.classList.add('is-visible'));
     if (_retentionToastTimer) clearTimeout(_retentionToastTimer);
     _retentionToastTimer = setTimeout(() => {
@@ -862,57 +1064,46 @@
     }, 3200);
   }
 
-  // Продвигает раздатчик на текущий момент — дёшево вызывать часто
-  // (goToMenu/btnLevels), если тактов не набежало — no-op. Реальная
-  // выдача — сейв + тост сразу (п.2.4 контракта: тихих улучшений не
-  // бывает).
+  // Продвигает накопитель энергии на текущий момент — дёшево вызывать
+  // часто (goToMenu/btnLevels/перед стартом уровня), если тактов не
+  // набежало — no-op. Реальная выдача — сейв + тост сразу (п.2.4
+  // контракта модуля: тихих улучшений не бывает).
   function retentionTick() {
     if (typeof Retention === 'undefined' || !_retentionState) return;
     const before = _retentionState.dripOpened;
-    // Color Sort не несёт Platform.now() (в отличие от нонограмм) —
-    // адаптеры площадки его не экспортируют, используем Date.now()
-    // напрямую (то же самое, что делает todayKey() ниже по файлу).
-    _retentionState = Retention.applyDripTick(_retentionState, Date.now(), RETENTION_CONFIG);
+    // ТЗ №18: единая точка времени тракта энергии — Platform.now(), не
+    // Date.now() напрямую (иначе сценарии времени неподменяемы одной
+    // точкой). todayKey() ниже по файлу — про суточный лимит rewarded,
+    // не про энергию, её эта правка не касается.
+    _retentionState = Retention.applyDripTick(_retentionState, Platform.now(), RETENTION_CONFIG);
     if (_retentionState.dripOpened > before) {
       persist();
       const granted = _retentionState.dripOpened - before;
-      showRetentionToast(granted === 1 ? t('retentionRewardDrip') : `${t('retentionRewardDrip')} (${granted})`);
+      renderEnergyIndicator();
+      showRetentionToast(t('energyToastGain').replace('{n}', granted));
     }
   }
 
-  // RU-плюрализация (нонограммы несут I18N.pluralRu — здесь тот же
-  // приём локальной функцией, у Color Sort i18n.js его не было).
-  function pluralRu(n, forms) {
-    const n10 = n % 10, n100 = n % 100;
-    if (n10 === 1 && n100 !== 11) return forms[0];
-    if (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) return forms[1];
-    return forms[2];
-  }
   function formatClock(d) {
     return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   }
 
-  // Строка раздатчика (экран сетки уровней) — «сколько ждёт» + точное
-  // время следующего такта, БЕЗ общего числа уровней кампании (запрет
-  // контракта модуля).
-  function renderRetentionDripLine() {
-    const el = document.getElementById('retention-drip-line');
-    if (!el || !_retentionState) return;
-    const waiting = Retention.openUnfinishedCount(_retentionState, RETENTION_CONFIG);
-    const nextAt  = Retention.nextUnlockAtMs(_retentionState, RETENTION_CONFIG);
-    const portion = RETENTION_CONFIG.dripPerTick;
-    let text;
-    if (waiting > 0) {
-      const line1 = t('retentionWaitingLine').replace('{n}', waiting);
-      text = nextAt == null ? line1 : `${line1} · ${t('retentionNextAt').replace('{n}', portion).replace('{time}', formatClock(new Date(nextAt)))}`;
-    } else if (nextAt == null) {
-      text = t('retentionFull');
-    } else {
-      const word = pluralRu(portion, [t('levelWordOne'), t('levelWordFew'), t('levelWordMany')]);
-      const verb = pluralRu(portion, [t('levelArriveVerbOne'), t('levelArriveVerbMany'), t('levelArriveVerbMany')]);
-      text = t('retentionEmptyLine').replace('{n}', portion).replace('{word}', word).replace('{verb}', verb).replace('{time}', formatClock(new Date(nextAt)));
-    }
-    el.textContent = text;
+  /* Индикатор энергии (ТЗ №15, п.1.4) — ОДНА функция обновляет ВСЕ
+     инстансы разом (меню, игровой экран, стена энергии) через
+     querySelectorAll по общим классам разметки (см. index.html) —
+     не завязана на конкретный id, поэтому новый инстанс достаточно
+     просто добавить в разметку той же структурой, без правки JS. */
+  function renderEnergyIndicator() {
+    if (!_retentionState) return;
+    const current = Retention.dripBacklogCount(_retentionState, RETENTION_CONFIG);
+    const cap = RETENTION_CONFIG.accumulatorCap;
+    const nextAt = Retention.nextUnlockAtMs(_retentionState, RETENTION_CONFIG);
+    const pct = Math.max(0, Math.min(100, Math.round((current / cap) * 100)));
+    document.querySelectorAll('.energy-bar-fill').forEach(el => { el.style.width = pct + '%'; });
+    document.querySelectorAll('.energy-value-text').forEach(el => { el.textContent = `${current}/${cap}`; });
+    document.querySelectorAll('.energy-next-text').forEach(el => {
+      el.textContent = nextAt == null ? '' : t('energyNextAt').replace('{n}', RETENTION_CONFIG.dripPerTick).replace('{time}', formatClock(new Date(nextAt)));
+    });
   }
 
   // Строка серии входов (главное меню) — видна ПОСТОЯННО (не hidden).
@@ -939,59 +1130,94 @@
     }
   }
 
-  // Rewarded-кнопка «Открыть ещё +N» (экран сетки уровней) — ОТДЕЛЬНЫЙ
-  // кран от такта (Retention.grantDrip, не ограничен accumulatorCap),
-  // без кулдауна/суточного лимита (studio-стандарт: непрошеная реклама
-  // лимитируется, желанная — нет).
-  function renderRewardedButton() {
-    const btn = document.getElementById('retention-rewarded-btn');
-    if (!btn || !_retentionState) return;
-    const fullyOpen = Retention.isCampaignFullyUnlocked(_retentionState, RETENTION_CONFIG);
-    btn.hidden = fullyOpen;
-    if (fullyOpen) return;
-    btn.textContent = t('retentionRewardedBtn').replace('{n}', RETENTION_CONFIG.dripPerTick);
+  /* ---------- Стена энергии (ТЗ №15, п.1.1/1.4/1.6) ----------
+     Показывается ВМЕСТО старта нового (не пройденного) уровня, если
+     энергия на нуле. canStartLevel — единственное место, где решается
+     «можно ли начать» (уже пройденные уровни — бесплатный повтор,
+     п.1.2, энергию не проверяем вовсе). requestStartLevel — общая
+     точка входа для ВСЕХ мест, откуда уровень может начаться (кнопка
+     «Играть», тайл сетки, переход «Дальше»/конец главы) — если гейт не
+     пройден, запоминает намерение и после успешной рекламы на стене
+     автоматически продолжает туда же, куда шёл игрок (п.1.6: «реклама
+     пополняет, игра продолжается» — без лишнего клика). */
+  function canStartLevel(idx) {
+    if (typeof state.levelTimes[idx] === 'number') return true; // уже пройден — бесплатно (п.1.2)
+    if (typeof Retention === 'undefined' || !_retentionState) return true; // защита, модуль не инициализирован
+    return Retention.dripBacklogCount(_retentionState, RETENTION_CONFIG) > 0;
   }
 
-  function onRetentionRewardedClick() {
+  let _pendingProceedAfterEnergy = null;
+
+  function renderEnergyWall() {
+    if (!_retentionState) return;
+    renderEnergyIndicator();
+    const nextAt = Retention.nextUnlockAtMs(_retentionState, RETENTION_CONFIG);
+    const textEl = document.getElementById('energy-wall-text');
+    if (textEl) {
+      // nextAt===null на стене структурно не должен наступать (стена
+      // только при энергии 0 < потолка), но не молчим, если наступит —
+      // безопасный дефолт вместо пустой строки.
+      textEl.textContent = nextAt == null ? '' : t('energyWallText').replace('{n}', RETENTION_CONFIG.dripPerTick).replace('{time}', formatClock(new Date(nextAt)));
+    }
+    // Кнопка несёт data-i18n (applyStrings подставляет её ПРИ СМЕНЕ
+    // ЯЗЫКА и перезаписывает textContent сырой строкой с {n}) — подстановку
+    // числа делаем здесь, при каждом показе стены, ПОСЛЕ applyStrings.
+    const adBtn = document.getElementById('btn-energy-wall-ad');
+    if (adBtn) adBtn.textContent = t('energyWallAdBtn').replace('{n}', RETENTION_CONFIG.dripPerTick);
+  }
+
+  function requestStartLevel(idx, proceedFn) {
+    if (canStartLevel(idx)) { proceedFn(); return; }
+    _pendingProceedAfterEnergy = proceedFn;
+    renderEnergyWall();
+    show('energyWall');
+  }
+
+  function onEnergyWallAdClick() {
     Platform.showRewarded(
-      // ТЗ №14, этап 3 (добор): обновление UI — ЗДЕСЬ, внутри onRewarded,
-      // не в onResume (3-й аргумент) — platform.js/vk_platform.js зовут
-      // onResume ДО onRewarded (см. их комментарии «видимый эффект —
-      // строго после onResume»), поэтому рендер в onResume читал бы
-      // _retentionState ДО мутации grantDrip и не показал бы выданную
-      // награду (поймано живым Playwright-прогоном на сценарии
-      // «реклама недоступна» — строка раздатчика не менялась). Тот же
-      // порядок, что и у btnHint выше: результат — внутри onRewarded.
+      // Результат — внутри onRewarded, не в onResume (см. комментарий
+      // у onRetentionRewardedClick-эквивалента ТЗ №14 этап 3: адаптеры
+      // зовут onResume ДО onRewarded, рендер в onResume читал бы
+      // состояние до мутации).
       () => {
         const before = _retentionState.dripOpened;
         _retentionState = Retention.grantDrip(_retentionState, RETENTION_CONFIG, RETENTION_CONFIG.dripPerTick);
         const granted = _retentionState.dripOpened - before;
-        renderRetentionDripLine();
-        renderRewardedButton();
-        // Содержимое шапки могло поменять высоту (кнопка спряталась —
-        // кампания открылась целиком, либо текст строки перенёсся на
-        // другое число строк) — тот же порядок, что в btnLevels: текст
-        // ДО замера, замер ДО раскладки сетки.
-        syncHeaderSpace();
-        renderGrid();
-        if (granted > 0) {
-          persist();
-          showRetentionToast(granted === 1 ? t('retentionRewardDrip') : `${t('retentionRewardDrip')} (${granted})`);
-        }
+        renderEnergyIndicator();
+        renderEnergyWall();
+        if (granted > 0) persist();
+        // Автопродолжение — ДО тоста: тост определяет позицию (шапка
+        // экрана игры выше шапки стены — below-header) по ТЕКУЩЕМУ
+        // активному экрану в момент показа, поэтому обязан идти ПОСЛЕ
+        // переключения экрана, иначе берёт положение ещё под стену
+        // (поймано кадром приёмки — тост лёг на шапку игры, вычислив
+        // below-header, пока стена ещё была активна).
+        const proceed = _pendingProceedAfterEnergy;
+        _pendingProceedAfterEnergy = null;
+        if (proceed && _retentionState.dripOpened > 0) proceed();
+        if (granted > 0) showRetentionToast(t('energyToastGain').replace('{n}', granted));
       },
       pauseGame,
       resumeGame
     );
   }
-  const retentionRewardedBtnEl = document.getElementById('retention-rewarded-btn');
-  if (retentionRewardedBtnEl) retentionRewardedBtnEl.addEventListener('click', onRetentionRewardedClick);
+  const btnEnergyWallAd = document.getElementById('btn-energy-wall-ad');
+  if (btnEnergyWallAd) btnEnergyWallAd.addEventListener('click', onEnergyWallAdClick);
+  const btnEnergyWallBack = document.getElementById('btn-energy-wall-back');
+  if (btnEnergyWallBack) {
+    btnEnergyWallBack.addEventListener('click', () => {
+      _pendingProceedAfterEnergy = null; // ушли со стены сами — автопродолжение не должно сработать позже
+      goToMenu();
+    });
+  }
 
-  // Единая точка возврата в главное меню — обновляет строку серии и
-  // подбирает такты раздатчика, набежавшие, пока игрок был на другом
-  // экране (дёшево, retentionTick — no-op без набежавших тактов).
+  // Единая точка возврата в главное меню — обновляет строку серии,
+  // индикатор энергии и подбирает такты, набежавшие, пока игрок был на
+  // другом экране (дёшево, retentionTick — no-op без набежавших тактов).
   function goToMenu() {
     retentionTick();
     renderRetentionStreakLine();
+    renderEnergyIndicator();
     show('menu');
   }
 
@@ -1042,9 +1268,13 @@
       if (unlocked) {
         tile.textContent = String(i + 1);
         tile.addEventListener('click', () => {
-          show('game');
-          loadLevel(i);
-          persist();
+          // ТЗ №15, этап 1: гейт энергии — уже пройденный тайл (повтор)
+          // всегда бесплатен, см. canStartLevel.
+          requestStartLevel(i, () => {
+            show('game');
+            loadLevel(i);
+            persist();
+          });
         });
       } else {
         tile.disabled = true;
@@ -1132,17 +1362,9 @@
   }
 
   btnLevels.addEventListener('click', () => {
-    // ТЗ №14, этап 2/3: раздатчик + текст шапки (строка/кнопка) —
-    // ДО syncHeaderSpace(). .screen всегда display:flex (ТЗ №10,
-    // opacity/pointer-events для кроссфейда) — измерение работает и до
-    // show('grid'), а порядок здесь критичен: syncHeaderSpace меряет
-    // РЕАЛЬНЫЙ рендер шапки, и если строка ещё пустая/кнопка ещё
-    // скрыта, высота занижается — #grid-wrap (top:var(--header-h))
-    // наезжает на них, кнопка становится некликабельной (поймано живым
-    // Playwright-прогоном — клик перехватывал #level-grid поверх неё).
-    retentionTick();
-    renderRetentionDripLine();
-    renderRewardedButton();
+    // ТЗ №15, этап 1: сетка уровней вернулась к простой разметке —
+    // раздатчик здесь больше не живёт (см. index.html), лишние вызовы
+    // убраны вместе с ним.
     show('grid');
     syncHeaderSpace();
     renderGrid();
@@ -1169,15 +1391,19 @@
      Оба условия вместе, чтобы не докучать рекламой аудитории 35+.
      Каданс — платформенное решение (main.js площадку не знает, см.
      CLAUDE.md): читаем из Platform.AD_LEVELS_INTERVAL/AD_MIN_GAP_MS,
-     если адаптер их не экспортирует (Яндекс, platform.js) — дефолт
-     раз в 3 уровня / 90с, как и было. ВК-адаптер (vk_platform.js,
-     решение основателя 2026-07-26) переопределяет на раз в 4 уровня /
-     120с — реже, тише для той же аудитории.
+     если адаптер их не экспортирует — дефолт ниже. НИ platform.js, НИ
+     vk_platform.js сейчас этих полей не экспортируют (проверено при
+     правке ТЗ №15 — прежний комментарий здесь утверждал обратное, про
+     ВК-переопределение 4/120с, которого в коде физически нет; убрано
+     как устаревшее) — обе площадки идут по общему дефолту.
+     ТЗ №15, п.1.5: интервал 3 -> 5 (было «раз в 3 уровня», стало «раз
+     в 5») — приводит игру к уже действующему стандарту студии по ВК.
+     AD_MIN_GAP_MS (90с) НЕ трогаем — ТЗ прямым текстом.
      Частота НЕ меняется этой правкой (п.4.4 ТЗ fix/yandex-adv-p44) —
      только чистая синхронная проверка счётчиков, без единого await,
      чтобы её можно было безопасно вызывать первой инструкцией в
      обработчике клика (см. goToNextLevel). */
-  const AD_LEVELS_INTERVAL = Platform.AD_LEVELS_INTERVAL || 3;
+  const AD_LEVELS_INTERVAL = Platform.AD_LEVELS_INTERVAL || 5;
   const AD_MIN_GAP_MS = Platform.AD_MIN_GAP_MS || 90000;
   let levelsSinceAd = 0;
   let lastAdAt = 0;
@@ -1274,7 +1500,18 @@
     // момент победы — до этого таймер нигде не показывается игроку.
     const seconds = Stats.finishLevel();
     const finishedIdx = state.levelIndex; // 0-индексный, только что пройденный
+    // ТЗ №15, п.1.2: списание строго одно — новый, ЕЩЁ НЕ пройденный
+    // уровень завершён. Флаг снят ДО перезаписи levelTimes[finishedIdx]
+    // ниже — иначе к моменту проверки уровень уже выглядел бы «пройден»
+    // всегда (та же проверка, что canStartLevel/callbacks.isCompleted
+    // модуля). Рестарт/повтор уже пройденного уровня сюда не попадает
+    // вообще — energy не трогаем.
+    const isFirstCompletion = typeof state.levelTimes[finishedIdx] !== 'number';
     state.levelTimes[finishedIdx] = seconds;
+    if (isFirstCompletion && typeof Retention !== 'undefined' && _retentionState) {
+      _retentionState = Retention.spendEnergy(_retentionState, RETENTION_CONFIG);
+      renderEnergyIndicator(); // «расход виден... заметно, не молча» (п.1.4)
+    }
 
     const finishedLevelNumber = finishedIdx + 1;
     const nextIdx = finishedIdx + 1;
@@ -1448,6 +1685,14 @@
      игрок никогда не застревает (п.4.2.5 ТЗ). */
   function goToNextLevel(nextIdx) {
     function proceedToLevel() {
+      // ТЗ №15: раньше эта функция всегда запускалась, уже находясь на
+      // игровом экране (переход между уровнями мид-плей). Теперь
+      // requestStartLevel мог по дороге показать стену энергии
+      // (show('energyWall')) — без этой строки после рекламы игрок
+      // остался бы визуально на стене, хотя loadLevel() уже отработал
+      // в фоне (найдено кадром приёмки). show() идемпотентен — если
+      // экран и так игровой, вызов безвреден.
+      show('game');
       hideWinOverlay();
       hideChapterOverlay();
       boardWrap.classList.add('board-fade');
@@ -1461,15 +1706,24 @@
         requestAnimationFrame(() => boardWrap.classList.remove('board-fade'));
       }, prefersReducedMotion() ? 0 : BOARD_FADE_MS); // ТЗ №10, задача E
     }
-    if (shouldShowInterstitialNow()) {
-      Platform.showInterstitial(
-        () => { advDiagMarkAdOpen(); pauseGame(); }, // onOpen: сюда SDK приходит первым — момент фактического открытия рекламы
-        () => { resumeGame(); proceedToLevel(); },   // onClose/onError (см. platform.js) — единая точка продолжения
-        advDiagMarkCall                              // ТЗ №1 задача C: наша часть задержки, измеримо и без SDK
-      );
-    } else {
-      proceedToLevel();
+    function proceedWithAdCheck() {
+      if (shouldShowInterstitialNow()) {
+        Platform.showInterstitial(
+          () => { advDiagMarkAdOpen(); pauseGame(); }, // onOpen: сюда SDK приходит первым — момент фактического открытия рекламы
+          () => { resumeGame(); proceedToLevel(); },   // onClose/onError (см. platform.js) — единая точка продолжения
+          advDiagMarkCall                              // ТЗ №1 задача C: наша часть задержки, измеримо и без SDK
+        );
+      } else {
+        proceedToLevel();
+      }
     }
+    // ТЗ №15, этап 1: гейт энергии — ДО проверки интерстишла (нечего
+    // показывать рекламу между уровнями, если следующий уровень вообще
+    // не может начаться). canStartLevel — синхронная дешёвая проверка,
+    // не нарушает п.4.3/4.4 (задержка показа интерстишла ≤330мс —
+    // requestStartLevel не вводит await/setTimeout/анимацию перед ним
+    // в основном пути, где энергия есть).
+    requestStartLevel(nextIdx, proceedWithAdCheck);
   }
 
   // Замер задержки показа рекламы (dev-режим, п.4.3 ТЗ): pointerdown
@@ -1509,8 +1763,13 @@
      стирающий прогресс без подтверждения, из UI убран целиком —
      отдельной кнопки «Продолжить»/сброса больше нет. */
   function playGame() {
-    show('game');
-    loadLevel(state.levelIndex);
+    // ТЗ №15, этап 1: гейт энергии — state.levelIndex может указывать
+    // на уже пройденный уровень (игрок заходил через сетку на старый
+    // тайл) — canStartLevel это учитывает, повтор бесплатен.
+    requestStartLevel(state.levelIndex, () => {
+      show('game');
+      loadLevel(state.levelIndex);
+    });
   }
   btnPlay.addEventListener('click', playGame);
   btnBack.addEventListener('click', () => {
@@ -1605,20 +1864,44 @@
     checkRewardedDailyReset();
   }
 
-  /* ТЗ №14, этап 2: инициализация/восстановление retention.js — ОБЩАЯ
-     между обычным стартом (boot()) и успехом фонового ретрая (см.
+  /* Инициализация/восстановление retention.js — ОБЩАЯ между обычным
+     стартом (boot()) и успехом фонового ретрая (см.
      retryLoadInBackground) — не дублируем правила. isBrandNew — ТОЛЬКО
      если сейва не было вовсе (loadResult.data пуст) — Color Sort
      дефолтит maxUnlocked=0 даже для настоящего новичка, поэтому
      «maxUnlocked<0» (как у нонограмм) здесь не сработал бы отличить
-     новичка от игрока, легитимно застрявшего на уровне 0. */
+     новичка от игрока, легитимно застрявшего на уровне 0.
+     ТЗ №15: с gateMode:'energy' initState() параметр maxReachedIndex
+     (и, значит, isBrandNew) больше НЕ ВЛИЯЕТ на итог — энергия всегда
+     стартует полной, независимо от прогресса (щедрость, п.1.1). Вызов
+     оставлен как есть (передаём честное значение) — модуль сам решает,
+     что с ним делать по режиму, main.js в это не лезет. */
   function bootRetention(isBrandNew) {
     if (typeof Retention === 'undefined') return;
-    const nowMs = Date.now();
+    // ТЗ №18: та же единая точка, что в retentionTick() — Platform.now(),
+    // не Date.now(). dayKeyFromDate(new Date()) ниже — СЕРИЯ ВХОДОВ
+    // (календарный день по местному времени устройства), намеренно
+    // отдельный источник времени: этот ТЗ серию не правит, только
+    // докладывает о её поведении в сценариях перевода часов (см. отчёт).
+    const nowMs = Platform.now();
     _retentionState = Retention.isValidEncoded(state.retention)
       ? Retention.decodeState(state.retention)
       : Retention.initState(isBrandNew ? -1 : state.maxUnlocked, nowMs, RETENTION_CONFIG);
+    // ТЗ №18 (сценарий A, найдено при проверке — не новая механика):
+    // тик, применённый ЗДЕСЬ (энергия, набежавшая, пока игра была
+    // закрыта), раньше нигде не сохранялся сам по себе — задержка
+    // расчёта висела ТОЛЬКО в памяти сессии до следующего persist()
+    // (по любому другому событию). Разница на экране не видна (рендер
+    // идёт из живого _retentionState), но реальный сейв на площадке
+    // оставался со СТАРЫМ штампом — если игрок закрывал игру сразу
+    // после открытия, ничего не потеряно (тик у него честно
+    // пересчитается заново на следующем старте от того же старого
+    // штампа), но и ничего не выигрывалось: третий пример студийного
+    // принципа «тихих улучшений не бывает» (см. retentionTick) — запись
+    // обязана сопровождать реальную выдачу, а не просто рендер.
+    const beforeTick = _retentionState.dripOpened;
     _retentionState = Retention.applyDripTick(_retentionState, nowMs, RETENTION_CONFIG);
+    if (_retentionState.dripOpened > beforeTick) persist();
     // День засчитывается фактом входа (не прохождением уровня) — один
     // раз на старте сессии.
     const entryResult = Retention.onEnter(_retentionState, Retention.dayKeyFromDate(new Date()), RETENTION_CONFIG);
@@ -1653,8 +1936,9 @@
       if (result.data && typeof result.data.levelIndex === 'number') {
         Object.assign(state, result.data);
         normalizeState();
-        if (Platform.SHOP_SUPPORTED) applyTheme(state.selectedTheme);
+        if (themeAvailableHere(state.selectedTheme)) applyTheme(state.selectedTheme); // ТЗ №17, см. гейт в boot()
         renderShop();
+        renderOformlenie(); // ТЗ №17: поздно приехавший сейв меняет состав владения
       }
       // Гейт — ДО bootRetention(): grantHints/grantStyle внутри неё сами
       // зовут persist() (ТЗ №14, этап 3, добор), с закрытым гейтом эта
@@ -1666,6 +1950,7 @@
       // сразу, а не ошибку сети — этот путь для игроков с реальным
       // прогрессом, которым не повезло с сетью на старте.
       bootRetention(false);
+      renderEnergyIndicator(); // игрок мог уже сидеть на меню/игре, пока шёл ретрай — освежаем сразу
       console.log('[save] повторная загрузка успешна — запись сейва разрешена');
     }, delaysMs[attempt - 1]);
   }
@@ -1720,10 +2005,17 @@
     // ТЗ №14, этап 3 (добор): карве-аут giftedThemes из этапа 2 УБРАН —
     // grantStyle больше не переключает тему автоматически (см. комментарий
     // там), правило снова без исключений на обеих площадках.
-    if (Platform.SHOP_SUPPORTED) {
-      applyTheme(state.selectedTheme); // переживает перезагрузку — реальная покупка/выбор, не превью
+    // ТЗ №17: гейт был `Platform.SHOP_SUPPORTED` — на ВК не применялась
+    // НИКАКАЯ тема, потому что до появления «Оформления» игрок там не мог
+    // выбрать её законно. Теперь может (подарок за серию входов), и выбор
+    // ОБЯЗАН переживать перезагрузку. Гейт сузился до themeAvailableHere:
+    // подаренная тема применяется на обеих площадках, платная — только
+    // там, где её реально можно купить. Сейв по-прежнему не трогаем.
+    if (themeAvailableHere(state.selectedTheme)) {
+      applyTheme(state.selectedTheme); // переживает перезагрузку — реальная покупка/подарок/выбор, не превью
     }
     updateShopButtonVisibility();
+    renderOformlenie(); // ТЗ №17: состав экрана известен уже на старте
 
     goToMenu();
 

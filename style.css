@@ -334,22 +334,25 @@ body {
   z-index: 9999;
 }
 
-/* ---------- Модуль удержания (ТЗ №14, этап 2, retention.js) ----------
-   .retention-line — общий стиль для строки серии (меню, ВСЕГДА видна) и
-   строки раздатчика (сетка уровней) — обычный второстепенный текст,
-   тот же токен --ink-soft, что у .stat-label/.hint-ad-label.
-   .game-header-grid — ТОЛЬКО у шапки экрана сетки: строка кнопок/
-   заголовка (.game-header-row) остаётся горизонтальной, ниже — drip-
-   строка + rewarded-кнопка отдельными рядами. Высота растёт сама,
-   syncHeaderSpace() (main.js) меряет реальный рендер и прокидывает в
-   --header-h — grid-wrap подстраивается без отдельной правки. */
+/* ---------- Модуль удержания (ТЗ №14/№15, retention.js) ----------
+   .retention-line — стиль строки серии входов (меню, ВСЕГДА видна) —
+   обычный второстепенный текст, тот же токен --ink-soft, что у
+   .stat-label/.hint-ad-label.
+   .game-header-stacked — шапка в два ряда: строка кнопок/заголовка
+   (.game-header-row) горизонтальна, ниже — доп. контент отдельным
+   рядом (ТЗ №15: индикатор энергии на игровом экране; было у сетки
+   уровней в ТЗ №14 этап 3 под раздатчик — тот убран этапом 1 ТЗ №15,
+   класс переименован из .game-header-grid, механика та же). Высота
+   растёт сама, syncHeaderSpace() (main.js) меряет реальный рендер и
+   прокидывает в --header-h — board-wrap/grid-wrap подстраиваются без
+   отдельной правки. */
 .retention-line {
   font-size: 0.8rem;
   color: var(--ink-soft);
   text-align: center;
   margin: 0;
 }
-.game-header-grid {
+.game-header-stacked {
   flex-direction: column;
   align-items: stretch;
   gap: 4px;
@@ -359,12 +362,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-.retention-rewarded-btn {
-  align-self: center;
-  min-width: 0;
-  padding: 6px 16px;
-  font-size: 0.85rem;
 }
 
 /* Тост отклика (п.2.4 контракта модуля — «тихих улучшений не бывает»):
@@ -395,6 +392,92 @@ body {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+/* ТЗ №15: игровой экран несёт двухрядную шапку (.game-header-stacked,
+   энергия вторым рядом) — фиксированный верхний край перекрывал бы её
+   (см. main.js showRetentionToast). --header-h уже держит реальную
+   высоту (syncHeaderSpace). */
+.retention-toast.below-header {
+  top: calc(var(--header-h, 72px) + 10px);
+}
+
+/* ---------- Энергия (ТЗ №15, этап 1) ----------
+   Одна разметка, три места (меню/игра/стена) — main.js рендерит ВСЕ
+   инстансы разом через querySelectorAll по этим классам (см.
+   renderEnergyIndicator), не завязано на конкретный id. Полоса — не
+   только цифра (п.1.4: «заполнение читается глазом»), разборчива на
+   320px (min-width полосы 90px даже в компактном варианте — деления по
+   1 энергии на 90px это ~9px/деление, ещё различимо). */
+.energy-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+.energy-label {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.energy-bar {
+  width: 120px;
+  height: 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 5px;
+  background: var(--card);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.energy-bar-fill {
+  height: 100%;
+  /* Тот же акцентный токен темы, что у .btn-primary — энергия читается
+     как «ресурс/валюта», не игровой элемент поля (карточка приёмки: не
+     должна путаться с цветами колб на игровом экране). */
+  background: var(--accent);
+  /* Заметное, не мгновенное изменение при трате/пополнении (ТЗ №15,
+     п.1.4: «расход виден... заметно, не молча») — общий токен
+     длительности игры, тот же, что у остальных переходов. */
+  transition: width var(--transition-ms) ease;
+}
+.energy-value-text {
+  font-size: 0.85rem;
+  font-weight: bold;
+  white-space: nowrap;
+  min-width: 2.6em;
+}
+.energy-next-text {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.energy-indicator-compact .energy-bar { width: 84px; }
+.energy-indicator-compact .energy-label { display: none; }
+.energy-indicator-compact .energy-next-text { display: none; } /* время — только в меню/на стене, в игре мешало бы шапке на 320px */
+
+/* ---------- Стена энергии (ТЗ №15, п.1.1/1.4/1.6) ----------
+   Отдельный .screen (тот же приём кроссфейда, что у остальных экранов,
+   см. .screen/.screen.active) — не оверлей поверх игры: уровень при
+   энергии 0 вообще не должен начинать грузиться/рисоваться. */
+.energy-wall-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px 28px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--shadow);
+  max-width: 320px;
+  text-align: center;
+}
+.energy-wall-icon {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+.energy-wall-text {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
 
 /* ---------- Магазин (ТЗ №2 — вкладка вместо карточки в меню) ----------
    Тот же приём анти-скролла и резерва под шапку, что у .grid-wrap
@@ -402,7 +485,8 @@ body {
    журнал). Список карточек — вертикальный flex, рассчитан на рост
    ассортимента (main.js рендерит из SHOP_THEMES, не хардкод одной
    темы), при переполнении скроллится ВНУТРИ контейнера. */
-.shop-wrap {
+.shop-wrap,
+.picker-wrap {
   position: absolute;
   top: var(--header-h);
   left: 0;
@@ -418,14 +502,16 @@ body {
   touch-action: pan-y;
   -webkit-overflow-scrolling: touch;
 }
-.shop-list {
+.shop-list,
+.picker-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
   max-width: 340px;
 }
-.shop-item {
+.shop-item,
+.picker-item {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -437,13 +523,16 @@ body {
 }
 /* Активная (сейчас применённая) тема — акцентная рамка, без лишней
    разметки: одна и та же карточка, другой бордер. */
-.shop-item.active { border-color: var(--accent); }
-.shop-item-top { display: flex; align-items: center; gap: 14px; }
+.shop-item.active,
+.picker-item.active { border-color: var(--accent); }
+.shop-item-top,
+.picker-item-top { display: flex; align-items: center; gap: 14px; }
 /* Мини-макет колбы — тот же силуэт, что рисует board.js (открытый
    верх, скруглённое дно), с фигурами круг/квадрат/круг в цветах темы.
    column-reverse укладывает первый добавленный элемент (c1) в НИЗ
    макета — как элементы реально лежат в колбе снизу вверх. */
-.shop-vial-preview {
+.shop-vial-preview,
+.picker-vial-preview {
   width: 44px;
   height: 76px;
   flex-shrink: 0;
@@ -458,22 +547,30 @@ body {
   gap: 4px;
   padding: 5px 0;
 }
-.shop-vial-el { width: 24px; height: 24px; border: 1.5px solid var(--ink); flex-shrink: 0; }
-.shop-vial-el.circle { border-radius: 50%; }
-.shop-vial-el.square { border-radius: 4px; }
-.shop-item-info {
+.shop-vial-el,
+.picker-vial-el { width: 24px; height: 24px; border: 1.5px solid var(--ink); flex-shrink: 0; }
+.shop-vial-el.circle,
+.picker-vial-el.circle { border-radius: 50%; }
+.shop-vial-el.square,
+.picker-vial-el.square { border-radius: 4px; }
+.shop-item-info,
+.picker-item-info {
   display: flex;
   flex-direction: column;
   gap: 3px;
   flex: 1;
   min-width: 0;
 }
-.shop-item-label { font-weight: 700; font-size: 0.9rem; }
+.shop-item-label,
+.picker-item-label { font-weight: 700; font-size: 0.9rem; }
 /* Нижний ряд — кнопка («Купить»-с-ценой/«Применить») ИЛИ один из
    статусных лейблов (активна/недоступно), одна ширина на всю карточку. */
-.shop-item-actions { display: flex; align-items: center; gap: 10px; }
-.shop-item-btn { flex: 1; min-width: 0; padding: 10px 8px; font-size: 0.92rem; }
-.shop-item-status { font-size: 0.95rem; color: var(--ink); }
+.shop-item-actions,
+.picker-item-actions { display: flex; align-items: center; gap: 10px; }
+.shop-item-btn,
+.picker-item-btn { flex: 1; min-width: 0; padding: 10px 8px; font-size: 0.92rem; }
+.shop-item-status,
+.picker-item-status { font-size: 0.95rem; color: var(--ink); }
 /* Иконка валюты (getPriceCurrencyImage, п.1.13.2) — вплотную к цене
    внутри кнопки «Купить». ТЗ №8, задача A: элемент попадает в DOM
    (main.js) только ПОСЛЕ подтверждённой загрузки, поэтому здесь
@@ -484,6 +581,21 @@ body {
    полноэкранный блок (п.1.16). Приглушённый цвет: сообщение нейтральное,
    не пугающее — уместно и при отмене, и при техническом сбое. */
 .shop-item-message { font-size: 0.85rem; color: var(--ink-soft); }
+
+/* Подсказка экрана «Оформление» (ТЗ №17) — объясняет, откуда берутся
+   новые оформления, чтобы экран с одной карточкой не читался как
+   поломка. Приглушённая и НИЖЕ карточек: это пояснение, а не заголовок
+   и не призыв. Ширина совпадает с .shop-list, чтобы строка переносилась
+   по той же сетке, что и карточки. */
+.picker-hint {
+  width: 100%;
+  max-width: 340px;
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  text-align: center;
+}
 
 /* Перечёркнутая нота — CSS-чертой, не символом (стандарт студии) */
 .btn-icon.muted::after {

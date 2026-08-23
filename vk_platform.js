@@ -118,6 +118,38 @@ const Platform = (() => {
      перед КАЖДОЙ записью (persist()), не полагается на расчёт «влезет». */
   const SAVE_SIZE_GUARD_BYTES = 3500;
 
+  /* ---------- Плашка номера билда (ТЗ №14, добор — починка 22.08.2026)
+     ----------
+     Плейсхолдер на диске — build.py подставляет реальное значение
+     ('vk-b<счётчик>-<git-хэш>-<дата>') ТОЛЬКО в копию, летящую в
+     dist/colorsort_vk/ (тот же приём точечной замены байт, что у
+     __YANDEX_BUILD__ в platform.js — исходник на диске не трогается).
+     Локальный запуск без сборки покажет плейсхолдер как есть — это
+     нормально, значит билд не собирался через build.py. main.js
+     (updateBuildBadge) уже читает Platform.BUILD через typeof-гейт —
+     раньше на ВК этого поля не было вовсе (undefined, не строка),
+     плашка молчала всегда независимо от сборки; main.js трогать не
+     нужно, правка живёт ТОЛЬКО здесь и в build.py. */
+  const BUILD = 'vk-b35-1247088-20260822';
+
+  /* ---------- Единая точка времени (ТЗ №18) ----------
+     Симметрично platform.js (Яндекс) — см. комментарий там же. Оба
+     адаптера несут ОДИНАКОВЫЙ now(), тракт энергии (main.js/
+     retention.js) вызывает Platform.now() платформо-агностично, не
+     зная, какой адаптер подключён. */
+  let _devTimeWarned = false;
+  function now() {
+    if (typeof window !== 'undefined' && window.DEV_TIME_OVERRIDE_ENABLED === true
+        && typeof window.__devNowMs === 'number') {
+      if (!_devTimeWarned) {
+        console.warn('[vk_platform] Platform.now() подменено dev_time_override.js:', new Date(window.__devNowMs).toISOString());
+        _devTimeWarned = true;
+      }
+      return window.__devNowMs;
+    }
+    return Date.now();
+  }
+
   let ready = false; // true только после успешного VKWebAppInit
 
   function withTimeout(promise, ms) {
@@ -332,5 +364,5 @@ const Platform = (() => {
       });
   }
 
-  return { init, gameReady, getLang, save, load, showInterstitial, showRewarded, SHOP_SUPPORTED, SAVE_SIZE_GUARD_BYTES };
+  return { init, gameReady, getLang, save, load, showInterstitial, showRewarded, SHOP_SUPPORTED, SAVE_SIZE_GUARD_BYTES, BUILD, now };
 })();

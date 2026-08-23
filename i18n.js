@@ -29,32 +29,47 @@ const I18N = {
     themeSeaLabel: 'Морская тема',
     themeForestLabel: 'Лесная тема',
     themeBerryLabel: 'Ягодная тема',
-    shopApply: 'Применить',
-    shopActive: 'Активна ✓',
+    themeApply: 'Применить',
+    themeActive: 'Активна ✓',
     cosmeticBuy: 'Купить',
     shopPurchaseNotCompleted: 'Покупка не завершена',
+    // ТЗ №17 «Оформление»: экран ВЫБОРА уже принадлежащих оформлений
+    // (не магазин — покупка живёт отдельным экраном и только на Яндексе).
+    // Подсказка выбирается по СОСТОЯНИЮ владения (см. oformlenieHintKey
+    // в main.js) — из трёх вариантов копирайта, показанных отчётом ТЗ №17,
+    // основатель выбрал V1 (22.08); V2/V3 удалены отсюда как решённые.
+    // Чисел/знаменателей в строках нет (запрет ТЗ) — ни «2 из 4», ни
+    // точек-индикаторов.
+    oformlenie: 'Оформление',
+    // Состояние 1 — во владении только стандартная тема. Экран с одной
+    // карточкой не должен читаться как поломка: строка объясняет, откуда
+    // берутся новые. Общая (ВК-безопасная) редакция — про серию входов,
+    // без единого упоминания покупки/магазина/цены.
+    oformlenieHintNone: 'Новые оформления открываются за серию входов',
+    // Состояние 2 — во владении несколько, но не все.
+    oformlenieHintSome: 'Выберите оформление — менять можно когда угодно',
+    // Состояние 3 — во владении все доступные на этой площадке.
+    oformlenieHintAll: 'Открыты все оформления — выбирайте любое',
     // ТЗ №14, этап 2: модуль удержания (retention.js), перенесён с
-    // нонограмм. «Пазл» -> «уровень» (в Color Sort нет пазлов).
-    retentionWaitingLine: 'Уровни ждут: {n}',
-    retentionNextAt:      'ещё +{n} в {time}',
-    retentionEmptyLine:   '+{n} {word} {verb} в {time}',
-    retentionFull:        'Уровни ждут — играйте!',
-    // ТЗ №14, этап 3 (добор): подпись обязана однозначно называть И
-    // рекламу, И награду (п.4.5.1 требований Яндекса) — прежний текст
-    // называл только результат (тот же приём, что renderRewardedButton
-    // нонограмм, но там не было этого требования площадки).
-    retentionRewardedBtn: 'Открыть ещё +{n} за рекламу',
-    levelWordOne:  'уровень',
-    levelWordFew:  'уровня',
-    levelWordMany: 'уровней',
-    levelArriveVerbOne:  'откроется',
-    levelArriveVerbMany: 'откроются',
+    // нонограмм. Серия входов — общая механика, не тронута этапом 1
+    // ТЗ №15.
     retentionStreakLine:  'Серия входов: {n} из {m}',
     retentionRewardHints: '+{n} подсказки бесплатно — серия входов!',
     // Награда 3-го дня — конкретная тема (решение основателя 22.08):
     // ягодная тема дарится бесплатно, минуя магазин/IAP.
     retentionRewardStyle: 'Ягодная тема открыта — серия входов!',
-    retentionRewardDrip:  'Открыт новый уровень!'
+    // ТЗ №15, этап 1: энергия — отдельная валюта (не открывает уровни,
+    // см. п.1.1 ТЗ). Раздатчик уровней (ТЗ №14) и его строки/подпись
+    // удалены вместе с механикой — заменены этим блоком.
+    energyLabel:     'Энергия',
+    energyNextAt:    'ещё +{n} в {time}',
+    energyToastGain: 'Энергия +{n}!',
+    energyWallTitle: 'Нет энергии',
+    energyWallText:  'Следующая порция (+{n}) — в {time}',
+    // п.4.5.1 требований Яндекса (тот же принцип, что у прежней
+    // retentionRewardedBtn ТЗ №14 этап 3): подпись обязана однозначно
+    // называть И рекламу, И награду.
+    energyWallAdBtn: 'Смотреть рекламу за +{n} энергии'
   },
   en: {
     title: 'Sort: Color & Shape', // карточное имя (п.5.1.3, решение основателя 2026-07-17)
@@ -81,24 +96,24 @@ const I18N = {
     themeSeaLabel: 'Sea theme',
     themeForestLabel: 'Forest theme',
     themeBerryLabel: 'Berry theme',
-    shopApply: 'Apply',
-    shopActive: 'Active ✓',
+    themeApply: 'Apply',
+    themeActive: 'Active ✓',
     cosmeticBuy: 'Buy',
     shopPurchaseNotCompleted: 'Purchase not completed',
-    retentionWaitingLine: 'Levels waiting: {n}',
-    retentionNextAt:      'plus {n} more at {time}',
-    retentionEmptyLine:   '+{n} {word} {verb} at {time}',
-    retentionFull:        'Levels are waiting — go play!',
-    retentionRewardedBtn: 'Watch an ad for +{n} more levels',
-    levelWordOne:  'level',
-    levelWordFew:  'levels',
-    levelWordMany: 'levels',
-    levelArriveVerbOne:  'unlocks',
-    levelArriveVerbMany: 'unlock',
+    // ТЗ №17 — см. комментарий у русского блока.
+    oformlenie: 'Appearance',
+    oformlenieHintNone: 'New looks unlock through a login streak',
+    oformlenieHintSome: 'Pick a look — you can change it anytime',
+    oformlenieHintAll: 'Every look is unlocked — take your pick',
     retentionStreakLine:  'Login streak: {n} of {m}',
     retentionRewardHints: '+{n} free hints — login streak!',
     retentionRewardStyle: 'Berry theme unlocked — login streak!',
-    retentionRewardDrip:  'A new level unlocked!'
+    energyLabel:     'Energy',
+    energyNextAt:    'plus {n} more at {time}',
+    energyToastGain: '+{n} energy!',
+    energyWallTitle: 'Out of energy',
+    energyWallText:  'Next refill (+{n}) at {time}',
+    energyWallAdBtn: 'Watch an ad for +{n} energy'
   }
 };
 
