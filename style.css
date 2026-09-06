@@ -210,15 +210,44 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* Было justify-content:center — центрирование самого flex-контейнера
+     конфликтует с overflow (flexbugs #10): когда контент-коробка
+     (.menu-box и т.п.) выше вьюпорта, центрирование обрезает её
+     СИММЕТРИЧНО сверху и снизу, и обрезанная часть НЕ доскроллиевается
+     (застревает в отрицательном/недостижимом scroll-диапазоне) — живой
+     прогон и видео Яндекса (отказ, landscape, п.1.10.1): в телефоне
+     боком карточка меню выше короткого вьюпорта, верх режет тулбар
+     браузера, низ (кнопка звука) обрезан краем экрана, докрутить нельзя.
+     Центрирование теперь на самих коробках (margin:auto 0 у .menu-box/
+     .loading-box/.energy-wall-box/.win-box) — при нехватке высоты auto-
+     margin схлопывается в 0, и коробка просто прижимается к верху
+     скролл-области, откуда достижима докруткой, вместо неразрешимого
+     обрезания. Экраны без такой коробки (grid/shop/oformlenie/game) не
+     зависят от justify-content — их контент уже позиционируется
+     собственным position:absolute-слоем (#grid-wrap/.shop-wrap/
+     .picker-wrap) или flex:1 (#board-wrap), которым direction контейнера
+     не указывает, где встать. */
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transition-ms) ease;
+  /* Тот же приём, что у #grid-wrap/.shop-wrap ниже: внутренний скролл
+     .screen (изолированный слой внутри html/body c overflow:hidden) не
+     нарушает анти-скролл страницы. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 .screen.active { opacity: 1; pointer-events: auto; }
 
 /* ---------- Загрузка ---------- */
-.loading-box { text-align: center; }
+/* margin:auto 0 вместо опоры на .screen{justify-content:center}: если
+   контент выше вьюпорта (лэндскейп-фикс выше — .screen{overflow-y:auto}),
+   auto-margin в колоночном flex-контейнере схлопывается до 0 и коробка
+   просто прижимается к верху скролл-области — доступна докруткой,
+   вместо неразрешимого симметричного обрезания сверху/снизу
+   (flexbugs #10: justify-content:center конфликтует с overflow). */
+.loading-box { text-align: center; margin: auto 0; }
 .loading-title { font-size: 2rem; font-weight: bold; margin-bottom: 18px; }
 .loading-dots span {
   display: inline-block;
@@ -247,6 +276,10 @@ body {
   border-radius: 14px;
   box-shadow: 4px 4px 0 var(--shadow);
   min-width: 260px;
+  /* см. .loading-box — тот же приём против симметричного обрезания в
+     лэндскейпе, где карточка меню (заголовок+серия входов+энергия+4
+     кнопки) выше короткого широкого вьюпорта (отказ Яндекса, п.1.10.1). */
+  margin: auto 0;
 }
 .game-title { font-size: 2.2rem; margin-bottom: 6px; text-align: center; }
 
@@ -352,7 +385,17 @@ body {
   text-align: center;
   margin: 0;
 }
-.game-header-stacked {
+/* Отказ Яндекса (landscape, п.1.10.1): селектор ЗДЕСЬ (.game-header-stacked)
+   и .game-header (ниже, "Игровой экран") имеют равную специфичность —
+   align-items:center у .game-header, идущего ПОЗЖЕ в файле, побеждал
+   align-items:stretch по порядку источника. Без stretch .game-header-row
+   не растягивался на всю ширину шапки, а сжимался под контент и
+   центрировался — в портрете разница почти не видна (строка и так
+   занимает почти всю ширину), в лэндскейпе (широкий короткий вьюпорт)
+   кнопки «назад»/звук вместо краёв шапки сбивались в кучку у центра и
+   наезжали на текст уровня. Комбинированный селектор — специфичность
+   выше .game-header НАВСЕГДА, а не только по случайному порядку файла. */
+.game-header.game-header-stacked {
   flex-direction: column;
   align-items: stretch;
   gap: 4px;
@@ -469,6 +512,8 @@ body {
   box-shadow: 4px 4px 0 var(--shadow);
   max-width: 320px;
   text-align: center;
+  /* см. .menu-box/.loading-box — тот же приём против обрезания в лэндскейпе. */
+  margin: auto 0;
 }
 .energy-wall-icon {
   font-size: 2.4rem;
@@ -848,8 +893,18 @@ body {
   position: absolute;
   inset: 0;
   display: flex;
+  /* flex-direction:column ОБЯЗАТЕЛЕН — без него это была реальная
+     регрессия (баг основателя, скрин 2026-09, портрет): по умолчанию
+     flex — row, тогда align-items:center центрирует .win-box только по
+     кросс-оси (вертикали), а justify-content по главной оси (горизонт.)
+     молча остаётся flex-start — карточка прижималась к левому краю
+     экрана вместо центра. .screen (откуда скопирован приём) эту строку
+     несёт, здесь её потеряли при копировании. */
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* Было justify-content:center — см. развёрнутый комментарий у .screen:
+     тот же конфликт center+overflow (flexbugs #10). Центрирование теперь
+     на .win-box (margin: auto 0). */
   /* ТЗ №10, задача B: --scrim-rgb, не --ink-rgb — см. комментарий у
      токена в :root (--ink светлый на тёмных темах, скрим на нём терял
      оттенок темы, читался плоско-серым). */
@@ -857,6 +912,15 @@ body {
   /* Вспышка света при появлении — момент читается как награда,
      не просто смена экрана. Перезапускается сама (.hidden = display:none). */
   animation: winFlash 0.5s ease-out;
+  /* Отказ Яндекса (landscape, п.1.10.1): та же коробка-выше-вьюпорта
+     логика, что у .screen/.menu-box (см. комментарии там) — этот
+     оверлей несёт также .campaign-box (4 плашки статистики + кнопка),
+     самую высокую карточку игры, реальный кандидат на обрезание в
+     лэндскейпе, хоть в присланных скриншотах и не пойман. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 .win-box {
   position: relative; /* конфетти-канвас поверх, координаты — от оверлея */
@@ -874,6 +938,8 @@ body {
   /* Лёгкая полировка: мягкое появление с небольшим перехлёстом
      («поп») — антистресс-темп, но ощущается как награда. */
   animation: winPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* см. .menu-box — та же защита от симметричного обрезания. */
+  margin: auto 0;
 }
 .win-title { font-size: 1.6rem; text-align: center; }
 
