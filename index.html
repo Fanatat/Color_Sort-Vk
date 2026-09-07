@@ -29,9 +29,9 @@
        ПАДАЕТ, если цель не найдена ровно один раз (_stamp_cache_bust,
        build.py) — тихая неподстановка была ровно тем дефектом, который
        просуществовал месяц. -->
-  <link rel="stylesheet" href="style.css?v=38">
+  <link rel="stylesheet" href="style.css?v=40">
   <!-- SDK Яндекс Игр: подключается ДО инициализации (п. журнала 2026-06-21) -->
-  <script src="vk-bridge.min.js?v=38"></script>
+  <script src="vk-bridge.min.js?v=40"></script>
 </head>
 <body>
 
@@ -175,6 +175,18 @@
       <div class="hint-ad-label" data-i18n="hintAd">Подсказка за рекламу</div>
     </div>
     <div id="hint-toast" class="hint-toast hidden" data-i18n="noMoves">Нет доступных ходов</div>
+    <!-- Индикатор ожидания rewarded-показа (баг основателя 2026-09-06,
+         мобильный ВК): showRewarded() может молчать до REWARD_AD_TIMEOUT_MS
+         (адаптер, до 40с) прежде чем выдать награду бесплатным путём —
+         без этого индикатора нажатие выглядело «мёртвой кнопкой», игрок
+         не понимал, идёт показ или клик не сработал. main.js показывает
+         ПЕРЕД Platform.showRewarded() (только на самом rewarded-пути, не
+         на бесплатных ветках — бонус/дневной лимит), прячет ВНУТРИ
+         обёртки над onResume (единственная точка, куда доходят ВСЕ
+         исходы обоих адаптеров — реальный показ, таймаут-фолбэк И
+         «закрыл рекламу без просмотра» на Яндексе, см.
+         vk_platform.js/platform.js). -->
+    <div id="hint-loading-toast" class="hint-toast hidden" data-i18n="hintAdLoading">Загрузка рекламы…</div>
 
     <!-- Оверлей победы (за уровень). Полоса прогресса главы (п.1 фазы 3
          «хук экрана победы») и увеличенная кнопка «Дальше» (п.2) —
@@ -294,19 +306,19 @@
        (position:fixed, не привязан к конкретному .screen). -->
   <div id="retention-reward-toast" class="retention-toast" hidden></div>
 
-  <script src="i18n.js?v=38"></script>
-  <script src="vk_platform.js?v=38"></script>
-  <script src="levels.js?v=38"></script>
-  <script src="board.js?v=38"></script>
-  <script src="sound.js?v=38"></script>
-  <script src="confetti.js?v=38"></script>
-  <script src="stats.js?v=38"></script>
-  <script src="game.js?v=38"></script>
+  <script src="i18n.js?v=40"></script>
+  <script src="vk_platform.js?v=40"></script>
+  <script src="levels.js?v=40"></script>
+  <script src="board.js?v=40"></script>
+  <script src="sound.js?v=40"></script>
+  <script src="confetti.js?v=40"></script>
+  <script src="stats.js?v=40"></script>
+  <script src="game.js?v=40"></script>
   <!-- Модуль удержания (ТЗ №14 этап 2, перенесён с нонограмм) — грузится
        СТРОГО перед main.js: main.js читает глобал Retention при
        разборе (RETENTION_CONFIG). Обе площадки (в отличие от нонограмм,
        где модуль был только на ВК) — общий index.html/белый список. -->
-  <script src="retention.js?v=38"></script>
-  <script src="main.js?v=38"></script>
+  <script src="retention.js?v=40"></script>
+  <script src="main.js?v=40"></script>
 </body>
 </html>

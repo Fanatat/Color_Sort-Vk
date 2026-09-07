@@ -130,7 +130,7 @@ const Platform = (() => {
      раньше на ВК этого поля не было вовсе (undefined, не строка),
      плашка молчала всегда независимо от сборки; main.js трогать не
      нужно, правка живёт ТОЛЬКО здесь и в build.py. */
-  const BUILD = 'b38-26b4214-20260906';
+  const BUILD = 'b40-c2c15da-20260907';
 
   /* ---------- Единая точка времени (ТЗ №18) ----------
      Симметрично platform.js (Яндекс) — см. комментарий там же. Оба
@@ -322,8 +322,14 @@ const Platform = (() => {
      settled защищает от двойного вызова (штатный ответ ПОСЛЕ того,
      как уже сработал таймаут-предохранитель). */
   function showRewarded(onRewarded, onPause, onResume) {
+    // Debug-оверлей (?debug=1, main.js) — см. журнал наверху, п. основателя
+    // 2026-09-06. typeof-гейт: main.js объявляет window.__debugLog ТОЛЬКО
+    // при активном флаге, адаптер не должен падать в обычной сборке.
+    const dbg = (typeof window !== 'undefined' && window.__debugLog) || null;
+    if (dbg) dbg('[rewarded] клик получен, ready=' + ready);
     if (!ready) {
       console.warn('[vk_platform] dev: rewarded → награда выдана');
+      if (dbg) dbg('[rewarded] ready=false (dev-режим/нет моста) — награда сразу');
       if (onRewarded) onRewarded();
       if (onResume) onResume();
       return;
@@ -336,6 +342,7 @@ const Platform = (() => {
       // Видимый эффект — строго после onResume(), как в platform.js.
       if (onResume) onResume();
       console.log('[vk_platform] rewarded завершён:', reason, '| награда:', grantReward);
+      if (dbg) dbg('[rewarded] finish: ' + reason + ' | награда=' + grantReward);
       if (grantReward && onRewarded) {
         // На мобильном ВК onRewarded() (внутри — Board.showHint(), общий
         // код) не должен стартовать, пока экран ещё реально перекрыт
@@ -353,14 +360,37 @@ const Platform = (() => {
         });
       }
     };
+    if (dbg) dbg('[rewarded] отправляю VKWebAppShowNativeAds(ad_format=reward, useWaterfall=true) в мост');
     withTimeout(
-      vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' }),
+      // useWaterfall (баг основателя 2026-09-06, п.2: rewarded молчит на
+      // мобильном ВК, PC/Яндекс ок): официальный параметр контракта —
+      // разрешает площадке подставить interstitial-инвентарь, когда
+      // настоящего rewarded-ролика нет в наличии, вместо немедленного
+      // отказа/тишины (у ВК исторически заметно уже rewarded-инвентарь,
+      // чем interstitial/баннерного — VKCOM/vk-bridge#243, тот же класс
+      // жалобы). МИТИГАЦИЯ СИМПТОМА, не подтверждённая причина: живого
+      // показа на реальном мобильном ВК-клиенте это НЕ доказывает — от
+      // пустого мостового Promise (см. журнал наверху) страхует
+      // ТОЛЬКО таймаут-предохранитель ниже.
+      vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward', useWaterfall: true }),
       REWARD_AD_TIMEOUT_MS
     )
       .then(() => finish(true, 'ролик закрыт (resolve)'))
       .catch((e) => {
+        // Различаем «площадка не ответила за N секунд» (НАШ withTimeout —
+        // единственный источник Error с message 'timeout' в этой цепочке)
+        // от «мост явно отказал» (родной reject vk-bridge — обычный
+        // объект вида {error_type, error_data}, без .message) — вопрос,
+        // который с телефона раньше нечем было различить (нет
+        // chrome://inspect), теперь виден прямо на экране через ?debug=1.
+        const isOwnTimeout = e && e.message === 'timeout';
+        if (dbg) {
+          dbg(isOwnTimeout
+            ? `[rewarded] мост НЕ ОТВЕТИЛ за ${REWARD_AD_TIMEOUT_MS}мс — сработал таймаут-предохранитель`
+            : '[rewarded] мост явно отказал: ' + JSON.stringify(e));
+        }
         console.warn('[vk_platform] rewarded недоступна/зависла — выдаём подсказку бесплатно:', e);
-        finish(true, 'ошибка/таймаут — выдано бесплатно');
+        finish(true, isOwnTimeout ? 'таймаут — выдано бесплатно' : 'явный отказ моста — выдано бесплатно');
       });
   }
 

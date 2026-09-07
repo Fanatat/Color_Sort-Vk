@@ -9,6 +9,87 @@
    правка по решению основателя.
    ============================================================ */
 (() => {
+  /* ---------- Debug-оверлей rewarded-пути (?debug=1 ИЛИ тайный жест) ----------
+     Баг основателя 2026-09-06: rewarded-реклама на мобильном ВК ведёт
+     себя непрозрачно (молчит/зависает), а с телефона нет chrome://inspect,
+     чтобы прочитать console.log вживую. Оверлей печатает ключевые
+     события ПРЯМО НА ЭКРАНЕ. НЕ заменяет console.log — vk_platform.js/
+     platform.js зовут ОБА: debugLog даёт основателю самому снять
+     доказательство на СВОЁМ устройстве и прислать скриншот, без
+     необходимости в USB-отладке.
+
+     ПРАВКА 2026-09-07 (живой тест основателя): ?debug=1 в URL
+     НЕДОСТИЖИМ внутри мобильного приложения ВК — игра открывается
+     внутри самого приложения, адресной строки нет физически, дописать
+     параметр некуда. Добавлен ВТОРОЙ путь включения — тайный жест:
+     5 быстрых тапов по заголовку игры на главном экране (см. ниже).
+     Обычный игрок не тапает заголовок 5 раз подряд за 2с — риск
+     случайной активации пренебрежимо мал, а сам заголовок ни на что
+     больше не реагирует (не кнопка), так что жест никого не запутает.
+     Оба пути ведут к ОДНОЙ И ТОЙ ЖЕ функции (setDebugOverlayEnabled) —
+     ?debug=1 остаётся для быстрой проверки с ПК/десктоп-ВК, жест — для
+     мобильного приложения, где URL недоступен.
+
+     window.__debugLog — типизированный экспорт для адаптеров платформы
+     (typeof-гейт на вызывающей стороне, тот же приём, что devUnlockAll
+     ниже) — адаптеры не должны падать, если оверлей выключен. */
+  let DEBUG_OVERLAY_ENABLED = (() => {
+    try { return new URLSearchParams(location.search).get('debug') === '1'; }
+    catch (e) { return false; }
+  })();
+  let debugOverlayEl = null;
+  function debugLog(msg) {
+    if (!DEBUG_OVERLAY_ENABLED) return;
+    console.log('[debug-overlay]', msg);
+    if (!debugOverlayEl) {
+      debugOverlayEl = document.createElement('div');
+      debugOverlayEl.id = 'debug-overlay';
+      Object.assign(debugOverlayEl.style, {
+        position: 'fixed', left: '0', right: '0', bottom: '0', maxHeight: '42vh',
+        overflowY: 'auto', background: 'rgba(0,0,0,0.86)', color: '#5fdc6a',
+        font: '10px/1.35 monospace', padding: '4px 6px', zIndex: '99999',
+        whiteSpace: 'pre-wrap', pointerEvents: 'none'
+      });
+      document.body.appendChild(debugOverlayEl);
+    }
+    const line = document.createElement('div');
+    line.textContent = `[${(performance.now() / 1000).toFixed(2)}s] ${msg}`;
+    debugOverlayEl.appendChild(line);
+    debugOverlayEl.scrollTop = debugOverlayEl.scrollHeight;
+  }
+  function setDebugOverlayEnabled(enabled) {
+    DEBUG_OVERLAY_ENABLED = enabled;
+    if (enabled) {
+      window.__debugLog = debugLog;
+      debugLog('[debug] оверлей включён');
+    } else {
+      window.__debugLog = undefined;
+      if (debugOverlayEl) { debugOverlayEl.remove(); debugOverlayEl = null; }
+    }
+  }
+  if (DEBUG_OVERLAY_ENABLED) window.__debugLog = debugLog;
+
+  /* Тайный жест включения — см. комментарий выше. Живёт на заголовке
+     главного экрана (единственный .game-title в разметке, index.html) —
+     работает ДО входа в игру, оверлей остаётся включённым при переходе
+     на игровой экран (глобальный fixed-элемент, не привязан к экрану). */
+  (() => {
+    const titleEl = document.querySelector('.game-title');
+    if (!titleEl) return;
+    let tapCount = 0;
+    let tapResetTimer = null;
+    titleEl.addEventListener('click', () => {
+      tapCount++;
+      clearTimeout(tapResetTimer);
+      tapResetTimer = setTimeout(() => { tapCount = 0; }, 2000);
+      if (tapCount >= 5) {
+        tapCount = 0;
+        clearTimeout(tapResetTimer);
+        setDebugOverlayEnabled(!DEBUG_OVERLAY_ENABLED);
+      }
+    });
+  })();
+
   const screens = {
     loading: document.getElementById('screen-loading'),
     menu:    document.getElementById('screen-menu'),
@@ -64,6 +145,7 @@
   const winProgressLabel = document.getElementById('win-progress-label');
   const levelIndicator = document.getElementById('level-indicator');
   const hintToast   = document.getElementById('hint-toast');
+  const hintLoadingToast = document.getElementById('hint-loading-toast');
   const confettiCanvas = document.getElementById('confetti-canvas');
 
   /* Экран завершения кампании (после последнего уровня) */
@@ -1426,6 +1508,24 @@
     showHintToast._t = setTimeout(() => hintToast.classList.add('hidden'), 1800);
   }
 
+  /* Индикатор ожидания rewarded-показа (баг основателя 2026-09-06,
+     мобильный ВК): showRewarded() на ВК может не дать НИКАКОГО видимого
+     сигнала до REWARD_AD_TIMEOUT_MS (адаптер, до 40с) — известная
+     нестабильность моста на части мобильных клиентов (см. журнал
+     vk_platform.js). Без индикатора тап по кнопке в этом окне выглядел
+     «мёртвым» — игрок не понимал, идёт показ или клик не сработал.
+     НЕ автоскрывается по таймеру (в отличие от showHintToast выше) —
+     длительность неизвестна заранее, прячется явно из onResume
+     (см. вызов ниже) — единственной точки, в которую доходят ВСЕ
+     исходы обоих адаптеров, включая «закрыл рекламу без просмотра»
+     на Яндексе, где onRewarded вообще не вызывается. */
+  function showHintLoadingToast() {
+    hintLoadingToast.classList.remove('hidden');
+  }
+  function hideHintLoadingToast() {
+    hintLoadingToast.classList.add('hidden');
+  }
+
   /* ---------- Суточный лимит rewarded (задача 11) ----------
      30 показов/сутки — рекомендация доки ВК, защита от накрутки.
      Сутки — КАЛЕНДАРНЫЕ по локальному времени устройства (не UTC и не
@@ -1444,8 +1544,10 @@
   }
 
   btnHint.addEventListener('click', () => {
+    debugLog('[hint] клик по кнопке подсказки');
     const hint = Game.findHint();
     if (!hint) {
+      debugLog('[hint] findHint() вернул null — нет доступных ходов, реклама не запрашивается');
       showHintToast(); // мягкое сообщение — ролик не показываем зря
       return;
     }
@@ -1455,6 +1557,7 @@
     // не пуст. Бейдж остатка (renderHintBonusBadge, п.3.2) виден
     // ДО клика (боевое состояние) и уменьшается видимо сразу после траты.
     if (state.bonusHints > 0) {
+      debugLog('[hint] бесплатный бонус-баланс (' + state.bonusHints + ' шт.) — реклама не запрашивается');
       state.bonusHints--;
       persist();
       renderHintBonusBadge();
@@ -1472,15 +1575,23 @@
       // до вызова Platform.showRewarded — адаптер про лимит не знает,
       // поэтому лог тут же, а не в vk_platform.js.
       console.log(`[rewarded] запрос — исчерпан суточный лимит ${state.rewardedCount}/${REWARDED_DAILY_LIMIT}, подсказка выдана бесплатно`);
+      debugLog(`[hint] суточный лимит исчерпан (${state.rewardedCount}/${REWARDED_DAILY_LIMIT}) — реклама не запрашивается`);
       Board.showHint(hint.from, hint.to);
       return;
     }
     state.rewardedCount++;
     persist(); // считаем показ сразу, не дожидаясь колбэка рекламы
+    debugLog('[hint] иду в Platform.showRewarded()');
+    showHintLoadingToast();
     Platform.showRewarded(
-      () => Board.showHint(hint.from, hint.to), // награда получена — подсвечиваем ход
+      () => { debugLog('[hint] onRewarded вызван — подсвечиваю ход'); Board.showHint(hint.from, hint.to); }, // награда получена — подсвечиваем ход
       pauseGame,
-      resumeGame
+      // onResume — единственная точка, куда доходят ВСЕ исходы обоих
+      // адаптеров (реальный показ, таймаут-фолбэк, И «закрыл без
+      // просмотра» на Яндексе, где onRewarded вообще не вызывается) —
+      // hideHintLoadingToast ЗДЕСЬ, не в onRewarded, иначе честный отказ
+      // от просмотра на Яндексе оставлял бы индикатор висеть навсегда.
+      () => { hideHintLoadingToast(); resumeGame(); }
     );
   });
 
