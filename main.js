@@ -1543,8 +1543,27 @@
     }
   }
 
+  /* Баг основателя 2026-09-07 (виден прямо в реальном debug-логе с
+     Android): пока первый VKWebAppShowNativeAds(reward) ещё «в полёте»
+     (мост может молчать до 40с — REWARD_AD_TIMEOUT_MS), игрок в жизни
+     жмёт подсказку ПОВТОРНО («ничего же не происходит») — уходит ВТОРОЙ
+     одновременный запрос того же формата. Мост маршрутизирует ответы по
+     request_id, но два параллельных запроса — минимум неопределённое
+     поведение, а возможно и причина того, что не резолвится НИ ОДИН.
+     rewardedInFlight — простой флаг реентерабельности: пока показ уже
+     идёт, повторный клик по подсказке молча игнорируется (лог для
+     диагностики есть, полноценного UI-сообщения не нужно — индикатор
+     «Загрузка рекламы…» и так уже виден). Сбрасывается в onResume —
+     той же единственной точке, куда доходят ВСЕ исходы обоих
+     адаптеров (см. комментарий у showHintLoadingToast). */
+  let rewardedInFlight = false;
+
   btnHint.addEventListener('click', () => {
     debugLog('[hint] клик по кнопке подсказки');
+    if (rewardedInFlight) {
+      debugLog('[hint] запрос уже в полёте — игнорирую повторный клик');
+      return;
+    }
     const hint = Game.findHint();
     if (!hint) {
       debugLog('[hint] findHint() вернул null — нет доступных ходов, реклама не запрашивается');
@@ -1582,6 +1601,7 @@
     state.rewardedCount++;
     persist(); // считаем показ сразу, не дожидаясь колбэка рекламы
     debugLog('[hint] иду в Platform.showRewarded()');
+    rewardedInFlight = true;
     showHintLoadingToast();
     Platform.showRewarded(
       () => { debugLog('[hint] onRewarded вызван — подсвечиваю ход'); Board.showHint(hint.from, hint.to); }, // награда получена — подсвечиваем ход
@@ -1589,9 +1609,9 @@
       // onResume — единственная точка, куда доходят ВСЕ исходы обоих
       // адаптеров (реальный показ, таймаут-фолбэк, И «закрыл без
       // просмотра» на Яндексе, где onRewarded вообще не вызывается) —
-      // hideHintLoadingToast ЗДЕСЬ, не в onRewarded, иначе честный отказ
-      // от просмотра на Яндексе оставлял бы индикатор висеть навсегда.
-      () => { hideHintLoadingToast(); resumeGame(); }
+      // rewardedInFlight сбрасывается ЗДЕСЬ ЖЕ (не в onRewarded), той
+      // же логикой, что и hideHintLoadingToast чуть выше по коду.
+      () => { rewardedInFlight = false; hideHintLoadingToast(); resumeGame(); }
     );
   });
 

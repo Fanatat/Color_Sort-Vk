@@ -130,7 +130,7 @@ const Platform = (() => {
      раньше на ВК этого поля не было вовсе (undefined, не строка),
      плашка молчала всегда независимо от сборки; main.js трогать не
      нужно, правка живёт ТОЛЬКО здесь и в build.py. */
-  const BUILD = 'b40-c2c15da-20260907';
+  const BUILD = 'b41-d6bd3c1-20260907';
 
   /* ---------- Единая точка времени (ТЗ №18) ----------
      Симметрично platform.js (Яндекс) — см. комментарий там же. Оба
@@ -336,9 +336,21 @@ const Platform = (() => {
     }
     if (onPause) onPause();
     let settled = false;
+    const sendStartedAt = performance.now();
+    // Строка раз в 10с, пока ждём мост (баг основателя 2026-09-07: живой
+    // лог с Android показал тишину >10с и, самое важное, что основатель
+    // ЗАКРЫЛ игру раньше срабатывания 40-секундного предохранителя —
+    // без промежуточных отметок непонятно, сколько ещё ждать, человек
+    // решает, что игра зависла, и уходит ДО того, как код успевает
+    // самостоятельно восстановиться). Формат согласован с сессией
+    // Нонограмм — тот же класс бага, общий вид строки для основателя.
+    const waitProgressTimer = dbg ? setInterval(() => {
+      dbg(`[rewarded] жду ответа моста: ${Math.round((performance.now() - sendStartedAt) / 1000)}с/${REWARD_AD_TIMEOUT_MS / 1000}с`);
+    }, 10000) : null;
     const finish = (grantReward, reason) => {
       if (settled) return;
       settled = true;
+      if (waitProgressTimer) clearInterval(waitProgressTimer);
       // Видимый эффект — строго после onResume(), как в platform.js.
       if (onResume) onResume();
       console.log('[vk_platform] rewarded завершён:', reason, '| награда:', grantReward);
