@@ -100,6 +100,30 @@ const Platform = (() => {
      причине не придёт (не все нативные оверлеи гарантированно её
      шлют) — тогда просто продолжаем, не блокируя награду вечно. */
   const VISIBILITY_WAIT_TIMEOUT_MS = 3000;
+  /* Предохранитель VKWebAppStorageGet/Set — баг основателя 2026-09-07:
+     живой лог с реального Android подтвердил, что мост может молчать
+     МИНУТАМИ на VKWebAppShowNativeAds (см. журнал у showRewarded) без
+     единого события — ни успеха, ни ошибки. load()/save() звали мост
+     БЕЗ withTimeout вовсе (в отличие от init()/showRewarded(), у
+     которых предохранитель уже был) — тот же класс молчания на
+     VKWebAppStorageGet в момент boot() (main.js) вешает игру на экране
+     загрузки НАВСЕГДА, без кнопки «Повторить» — «бесконечная загрузка»,
+     дважды пойманная основателем живьём (Color Sort b41 и, судя по
+     тому же классу отчёта, Нонограммы v45 — то же самое отсутствие
+     предохранителя, adapters/vk_bridge.js этой студии). 5с — щедрый
+     запас над типичным откликом хранилища ВК (обычно <500мс), но
+     конечный, в отличие от «навсегда». */
+  const STORAGE_TIMEOUT_MS = 5000;
+  /* Предохранитель showInterstitial — тот же класс дыры, что был у
+     load()/save() выше, найден по аналогии сессией Нонограмм в СВОЁМ
+     коде (adapters/vk_bridge.js, тот же немой мост) и проверен здесь
+     же: showInterstitial() звал VKWebAppShowNativeAds БЕЗ withTimeout
+     вовсе. Не на пути загрузки (боевого зависания живьём не поймано),
+     но при том же молчании моста подвесил бы переход между уровнями
+     навсегда — onResume() не пришёл бы, экран остался бы затемнён
+     паузой. Интерстишлы короче rewarded (обычно 5-15с, не 15-30с) —
+     20с даёт запас над этим, оставаясь конечным. */
+  const INTERSTITIAL_TIMEOUT_MS = 20000;
 
   /* ---------- SHOP_SUPPORTED (ТЗ VK_remove_shop, задача A) ----------
      ЕДИНСТВЕННЫЙ флаг, которым main.js решает, показывать ли витрину/
@@ -130,7 +154,7 @@ const Platform = (() => {
      раньше на ВК этого поля не было вовсе (undefined, не строка),
      плашка молчала всегда независимо от сборки; main.js трогать не
      нужно, правка живёт ТОЛЬКО здесь и в build.py. */
-  const BUILD = 'b41-d6bd3c1-20260907';
+  const BUILD = 'b43-b7c36df-20260907';
 
   /* ---------- Единая точка времени (ТЗ №18) ----------
      Симметрично platform.js (Яндекс) — см. комментарий там же. Оба
@@ -212,6 +236,14 @@ const Platform = (() => {
     // Кнопка подсказки НЕ прячется здесь: VKWebAppCheckNativeAds
     // ненадёжен для превентивной проверки (см. журнал наверху, п.1) —
     // доступность рекламы обрабатывается реактивно, в showRewarded().
+    // Баннер (гипотеза основателя 2026-09-07: занятый баннером рекламный
+    // слот блокирует rewarded) — Color Sort НЕ вызывает VKWebAppShowBannerAd
+    // ни разу во всём коде (сверено grep'ом по репозиторию), баннера
+    // здесь физически нет. Строка в лог — чтобы диагностика с реального
+    // устройства не гадала, а видела этот факт явно.
+    if (typeof window !== 'undefined' && window.__debugLog) {
+      window.__debugLog('[init] баннер: Color Sort его не показывает (в коде отсутствует)');
+    }
     return true;
   }
 
@@ -252,10 +284,10 @@ const Platform = (() => {
       return { ok: true, error: null };
     }
     try {
-      await vkBridge.send('VKWebAppStorageSet', {
+      await withTimeout(vkBridge.send('VKWebAppStorageSet', {
         key: SAVE_KEY,
         value: JSON.stringify(fullState)
-      });
+      }), STORAGE_TIMEOUT_MS);
       return { ok: true, error: null };
     } catch (e) {
       console.error('[vk_platform] VKWebAppStorageSet ошибка:', e);
@@ -265,14 +297,18 @@ const Platform = (() => {
 
   async function load() {
     if (!ready) return { ok: true, data: null, error: null };
+    const dbg = (typeof window !== 'undefined' && window.__debugLog) || null;
+    if (dbg) dbg('[load] отправляю VKWebAppStorageGet в мост');
     try {
-      const res = await vkBridge.send('VKWebAppStorageGet', { keys: [SAVE_KEY] });
+      const res = await withTimeout(vkBridge.send('VKWebAppStorageGet', { keys: [SAVE_KEY] }), STORAGE_TIMEOUT_MS);
+      if (dbg) dbg('[load] мост ответил');
       const entry = res.keys.find((k) => k.key === SAVE_KEY);
       // Пустая строка — штатный ответ ВК для отсутствующего ключа
       // (первый запуск, не битый сейв) — не пытаемся её парсить.
       if (!entry || !entry.value) return { ok: true, data: null, error: null };
       return { ok: true, data: JSON.parse(entry.value), error: null };
     } catch (e) {
+      if (dbg) dbg('[load] ' + (e && e.message === 'timeout' ? `мост НЕ ОТВЕТИЛ за ${STORAGE_TIMEOUT_MS}мс` : 'ошибка: ' + JSON.stringify(e)));
       console.error('[vk_platform] VKWebAppStorageGet/парсинг ошибка:', e);
       return { ok: false, data: null, error: e };
     }
@@ -305,7 +341,10 @@ const Platform = (() => {
       return;
     }
     if (onPause) onPause();
-    vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'interstitial' })
+    withTimeout(
+      vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'interstitial' }),
+      INTERSTITIAL_TIMEOUT_MS
+    )
       .then(() => { if (onResume) onResume(true); })
       .catch((e) => {
         console.error('[vk_platform] interstitial:', e);

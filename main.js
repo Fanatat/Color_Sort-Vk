@@ -69,16 +69,24 @@
   }
   if (DEBUG_OVERLAY_ENABLED) window.__debugLog = debugLog;
 
-  /* Тайный жест включения — см. комментарий выше. Живёт на заголовке
-     главного экрана (единственный .game-title в разметке, index.html) —
-     работает ДО входа в игру, оверлей остаётся включённым при переходе
-     на игровой экран (глобальный fixed-элемент, не привязан к экрану). */
+  /* Тайный жест включения — см. комментарий выше. Правка 2026-09-07,
+     часть 2: раньше слушатель стоял ТОЛЬКО на .game-title (заголовок
+     меню) — бесполезно ровно для диагностики «бесконечной загрузки»
+     (баг основателя, п.5), потому что goToMenu() вызывается ПОСЛЕ
+     Platform.load(): если load() виснет, меню (и .game-title) не
+     появляется вообще, жест некуда применить именно тогда, когда он
+     нужнее всего. Экран загрузки несёт СВОЙ, отдельный узел с тем же
+     текстом (.loading-title, data-i18n="title") — уже в DOM на момент
+     выполнения этого кода (main.js — синхронная часть, до async boot()/
+     Platform.init()), поэтому вешаем жест на ВСЕ узлы с data-i18n="title"
+     разом (сейчас их два: загрузка + меню) — работает даже если игра
+     зависла на самом первом экране. */
   (() => {
-    const titleEl = document.querySelector('.game-title');
-    if (!titleEl) return;
+    const titleEls = document.querySelectorAll('[data-i18n="title"]');
+    if (!titleEls.length) return;
     let tapCount = 0;
     let tapResetTimer = null;
-    titleEl.addEventListener('click', () => {
+    const onTap = () => {
       tapCount++;
       clearTimeout(tapResetTimer);
       tapResetTimer = setTimeout(() => { tapCount = 0; }, 2000);
@@ -87,7 +95,8 @@
         clearTimeout(tapResetTimer);
         setDebugOverlayEnabled(!DEBUG_OVERLAY_ENABLED);
       }
-    });
+    };
+    titleEls.forEach((el) => el.addEventListener('click', onTap));
   })();
 
   const screens = {
