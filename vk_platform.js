@@ -154,7 +154,7 @@ const Platform = (() => {
      раньше на ВК этого поля не было вовсе (undefined, не строка),
      плашка молчала всегда независимо от сборки; main.js трогать не
      нужно, правка живёт ТОЛЬКО здесь и в build.py. */
-  const BUILD = 'b43-b7c36df-20260907';
+  const BUILD = 'b47-1005832-20260924';
 
   /* ---------- Единая точка времени (ТЗ №18) ----------
      Симметрично platform.js (Яндекс) — см. комментарий там же. Оба
@@ -175,6 +175,29 @@ const Platform = (() => {
   }
 
   let ready = false; // true только после успешного VKWebAppInit
+
+  /* ---------- Виброотклик (ТЗ №22, B4) ----------
+     Методы — «Документация к играм на VK.txt», раздел «Виброотклик»:
+     VKWebAppTapticImpactOccurred / NotificationOccurred /
+     SelectionChanged. Огонь-и-забыть: на вебе и старых клиентах мост
+     отвечает ошибкой — глотаем её молча, игра от вибрации не зависит.
+     kind — общий словарь обоих адаптеров: select/pour/lock/invalid/win. */
+  const HAPTIC_VK = {
+    select:  ['VKWebAppTapticSelectionChanged', {}],
+    pour:    ['VKWebAppTapticImpactOccurred', { style: 'light' }],
+    lock:    ['VKWebAppTapticImpactOccurred', { style: 'medium' }],
+    invalid: ['VKWebAppTapticNotificationOccurred', { type: 'warning' }],
+    win:     ['VKWebAppTapticNotificationOccurred', { type: 'success' }],
+  };
+  function haptic(kind) {
+    if (!ready || typeof vkBridge === 'undefined') return;
+    const call = HAPTIC_VK[kind];
+    if (!call) return;
+    try {
+      const p = vkBridge.send(call[0], call[1]);
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    } catch (e) { /* клиент без поддержки — молчим */ }
+  }
 
   function withTimeout(promise, ms) {
     return new Promise((resolve, reject) => {
@@ -236,14 +259,6 @@ const Platform = (() => {
     // Кнопка подсказки НЕ прячется здесь: VKWebAppCheckNativeAds
     // ненадёжен для превентивной проверки (см. журнал наверху, п.1) —
     // доступность рекламы обрабатывается реактивно, в showRewarded().
-    // Баннер (гипотеза основателя 2026-09-07: занятый баннером рекламный
-    // слот блокирует rewarded) — Color Sort НЕ вызывает VKWebAppShowBannerAd
-    // ни разу во всём коде (сверено grep'ом по репозиторию), баннера
-    // здесь физически нет. Строка в лог — чтобы диагностика с реального
-    // устройства не гадала, а видела этот факт явно.
-    if (typeof window !== 'undefined' && window.__debugLog) {
-      window.__debugLog('[init] баннер: Color Sort его не показывает (в коде отсутствует)');
-    }
     return true;
   }
 
@@ -445,5 +460,5 @@ const Platform = (() => {
       });
   }
 
-  return { init, gameReady, getLang, save, load, showInterstitial, showRewarded, SHOP_SUPPORTED, SAVE_SIZE_GUARD_BYTES, BUILD, now };
+  return { init, gameReady, getLang, save, load, showInterstitial, showRewarded, SHOP_SUPPORTED, SAVE_SIZE_GUARD_BYTES, BUILD, now, haptic };
 })();

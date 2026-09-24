@@ -4,19 +4,32 @@
    уровня; Board отвечает только за пиксели/анимацию. Переход между
    уровнями (какой уровень следующий, экран меню) — забота main.js;
    game.js лишь сообщает о победе через колбэк.
+
+   ТЗ №22: события хода (выбор, перелив, сборка колбы, отказ, тупик)
+   уходят наружу через hooks — эффекты/вибрация/обучение живут в
+   main.js, правила остаются здесь.
    ============================================================ */
 const Game = (() => {
-  let canvas, undoBtn, onWinCallback;
+  let canvas, undoBtn, restartBtn, onWinCallback;
+  let hooks = {};
   let level = null;
   let selectedIndex = -1;
   let busy = false;        // идёт анимация — новые тапы игнорируем
-  let lastMove = null;     // { from, to, elements } — только последний ход
+  // ТЗ №22, A4: стек ходов уровня (было — только последний ход).
+  // Каждый элемент — { from, to, elements }.
+  let moveStack = [];
   let solved = false;      // уровень пройден — вход заблокирован до следующего уровня
 
-  function init(canvasEl, onWin) {
+  function emit(name, payload) {
+    if (typeof hooks[name] === 'function') hooks[name](payload);
+  }
+
+  function init(canvasEl, onWin, eventHooks) {
     canvas = canvasEl;
     onWinCallback = onWin;
+    hooks = eventHooks || {};
     undoBtn = document.getElementById('btn-undo');
+    restartBtn = document.getElementById('btn-restart');
 
     let downX = 0, downY = 0;
     canvas.addEventListener('pointerdown', (e) => {
@@ -37,10 +50,22 @@ const Game = (() => {
     level = lvl;
     selectedIndex = -1;
     busy = false;
-    lastMove = null;
+    moveStack = [];
     solved = false;
     Board.setSelected(-1);
     updateUndoButton();
+  }
+
+  // Число собранных колб — для «звука прогресса» (ТЗ №22, B3).
+  function collectedCount(vials) {
+    return vials.filter(isCollected).length;
+  }
+
+  // Тупик в строгом смысле: ни одного легального хода (см. C3 ТЗ №22).
+  // Дёшево (O(n²)), в отличие от BFS findHint — можно звать после
+  // каждого хода. Циклы без выхода ловит уже findHint по кнопке ?.
+  function hasNoMoves(vials) {
+    return !isLevelSolved(vials) && hintLegalMoves(vials).length === 0;
   }
 
   /* Победа: КАЖДАЯ колба либо пуста, либо однородна по цвету И форме
@@ -92,12 +117,14 @@ const Game = (() => {
       if (isCollected(level.vials[idx])) return; // залочена — уже собрана, из неё не льём
       selectedIndex = idx;
       Board.setSelected(idx);
+      emit('onSelect', { index: idx });
       return;
     }
 
     if (idx === selectedIndex) {
       selectedIndex = -1;
       Board.setSelected(-1);
+      emit('onDeselect', { index: idx });
       return;
     }
 
@@ -108,6 +135,7 @@ const Game = (() => {
     if (count === 0) {
       Sound.playInvalid();
       Board.shake(idx); // лёгкий отказ, без наказания; выбор источника остаётся
+      emit('onInvalid', { index: idx });
       return;
     }
 
@@ -126,39 +154,47 @@ const Game = (() => {
       onDone: () => {
         const moved = sourceVial.splice(sourceVial.length - count, count);
         targetVial.push(...moved);
-        lastMove = { from: fromIdx, to: toIdx, elements: moved.slice() };
+        moveStack.push({ from: fromIdx, to: toIdx, elements: moved.slice() });
         busy = false;
         updateUndoButton();
         // Задача 9: колба-цель только что стала полностью собрана —
         // отдельный «щелчок-замок» ВМЕСТО обычного «оседания».
-        if (isCollected(targetVial)) {
-          Sound.playLock();
+        // ТЗ №22, B3: высота «щелчка» растёт с числом собранных колб.
+        const collected = isCollected(targetVial);
+        const collectedNow = collectedCount(level.vials);
+        if (collected) {
+          Sound.playLock(collectedNow - 1);
         } else {
           Sound.playSettle();
         }
+        const won = isLevelSolved(level.vials);
+        emit('onPour', { fromIdx, toIdx, count, targetLen: targetVial.length, element: moved[0], collected, collectedNow, won });
 
-        if (isLevelSolved(level.vials)) {
+        if (won) {
           solved = true;
           updateUndoButton(); // прятать её теперь безусловно (см. toggle ниже)
           Sound.playWin();
           if (onWinCallback) onWinCallback();
+        } else if (hasNoMoves(level.vials)) {
+          emit('onDeadEnd', {});
         }
       }
     });
   }
 
   function undo() {
-    if (!lastMove || busy || solved || !level) return;
-    const { from, to, elements } = lastMove;
+    if (!moveStack.length || busy || solved || !level) return;
+    const { from, to, elements } = moveStack.pop();
     const count = elements.length;
     const sourceVial = level.vials[to];   // сейчас элементы здесь
     const targetVial = level.vials[from]; // возвращаем сюда
 
     selectedIndex = -1;
     Board.setSelected(-1);
-    lastMove = null;
+    Board.clearHint();
     busy = true;
     updateUndoButton();
+    emit('onUndo', {});
 
     Board.animatePour({
       fromIdx: to, toIdx: from, count,
@@ -172,9 +208,18 @@ const Game = (() => {
   }
 
   function updateUndoButton() {
-    if (!undoBtn) return;
-    undoBtn.classList.toggle('hidden', !lastMove || solved);
+    const nothingToUndo = !moveStack.length || solved;
+    if (undoBtn) undoBtn.classList.toggle('hidden', nothingToUndo);
+    // ТЗ №22, A3: рестарт виден по тому же условию — на нетронутом поле
+    // он ничего не делает и только отвлекает новичка на уровне 1.
+    if (restartBtn) restartBtn.classList.toggle('hidden', nothingToUndo);
   }
+
+  // ТЗ №22: main.js решает, можно ли сейчас перезапустить уровень
+  // (идёт анимация перелива — нельзя, модель ещё не обновлена).
+  function isBusy() { return busy; }
+  function hasMoves() { return moveStack.length > 0; }
+  function isSolved() { return solved; }
 
   /* ---------- Подсказка: первый ход НАСТОЯЩЕГО кратчайшего BFS-решения ----------
      Решение основателя 2026-07-17 (починка дефекта): раньше отдавали
@@ -248,5 +293,5 @@ const Game = (() => {
     return null; // решения от текущей позиции не нашли — тупик
   }
 
-  return { init, setLevel, findHint };
+  return { init, setLevel, findHint, isBusy, hasMoves, isSolved };
 })();

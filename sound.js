@@ -89,9 +89,15 @@ const Sound = (() => {
      + отдельная более высокая sine-нота следом — звучит как «защёлкнулось»,
      не спутать с обычным приземлением. Вызывается ВМЕСТО playSettle для
      этого хода (game.js), не вместе с ним. */
-  function playLock() {
-    tone({ freq: 900, duration: 0.035, type: 'square', gain: 0.09 });
-    tone({ freq: 880, duration: 0.12, type: 'sine', gain: 0.12, delay: 0.03 });
+  // ТЗ №22, B3: step — сколько колб уровня уже было собрано ДО этой
+  // (0 — первая). Каждая следующая звучит на тон выше (мажорная гамма
+  // от A5), потолок — октава: прогресс по уровню слышен.
+  const LOCK_STEPS = [0, 2, 4, 5, 7, 9, 11, 12];
+  function playLock(step = 0) {
+    const semis = LOCK_STEPS[Math.max(0, Math.min(LOCK_STEPS.length - 1, step | 0))];
+    const k = Math.pow(2, semis / 12);
+    tone({ freq: 900 * k, duration: 0.035, type: 'square', gain: 0.09 });
+    tone({ freq: 880 * k, duration: 0.12, type: 'sine', gain: 0.12, delay: 0.03 });
   }
   function playInvalid() {
     tone({ freq: 180, duration: 0.16, type: 'square', gain: 0.05 });

@@ -96,6 +96,14 @@ const Board = (() => {
   let hintState = null;   // { from, to, pulse }
   let hintRafId = null;
 
+  // ТЗ №22, B2/A2: покадровые анимации колб одним RAF-циклом —
+  // «пружинка» собранной колбы (pop), волна победы (wave) и указатель
+  // бестекстового обучения (tutorialIndex). Цикл стоит, пока анимаций нет.
+  let vialAnims = {};      // { [idx]: { kind: 'pop'|'wave', t0, duration } }
+  let tutorialIndex = -1;  // колба, на которую указывает обучение (-1 — нет)
+  let tutorialT0 = 0;
+  let animRafId = null;
+
   // Анимация-полировка (Фаза 6): «оседание» приземлившихся элементов.
   let settleState = null; // { vialIndex, count, scale }
   let settleRafId = null;
@@ -117,6 +125,9 @@ const Board = (() => {
     hintState = null;
     if (settleRafId) { cancelAnimationFrame(settleRafId); settleRafId = null; }
     settleState = null;
+    vialAnims = {};
+    tutorialIndex = -1;
+    if (animRafId) { cancelAnimationFrame(animRafId); animRafId = null; }
     resize();
   }
 
@@ -336,13 +347,26 @@ const Board = (() => {
         const shakeOffset = (shakeState && shakeState.index === idx) ? shakeState.offset : 0;
         const hintPulse = (hintState && (hintState.from === idx || hintState.to === idx)) ? hintState.pulse : 0;
         const settling = (settleState && settleState.vialIndex === idx) ? settleState : null;
+        const anim = vialAnimFrame(idx, layout.elSize);
+        const tutorialPulse = tutorialIndex === idx ? 0.5 + 0.5 * Math.sin(((performance.now() - tutorialT0) / 1100) * Math.PI * 2) : 0;
+        ctx.save();
+        if (anim.scale !== 1 || anim.dy !== 0) {
+          // Масштаб от середины ДНА колбы — «пружинит» стоя, не уезжая вбок.
+          const ax = x + vw / 2, ay = y + vh;
+          ctx.translate(ax, ay + anim.dy);
+          ctx.scale(anim.scale, anim.scale);
+          ctx.translate(-ax, -ay);
+        }
         drawVial(x + shakeOffset, y, vw, vh, vials[idx], layout, {
           isSelected: selectedIndex === idx,
           hiddenCount: hiddenTopByVial[idx] || 0,
-          hintPulse,
+          hintPulse: Math.max(hintPulse, tutorialPulse),
           settleCount: settling ? settling.count : 0,
-          settleScale: settling ? settling.scale : 1
+          settleScale: settling ? settling.scale : 1,
+          capDrop: anim.capDrop
         });
+        ctx.restore();
+        if (tutorialIndex === idx) drawTapRing(x + vw / 2, y + vh * 0.62, vw);
         x += vw + GAP;
         vialIndex++;
       }
@@ -367,7 +391,7 @@ const Board = (() => {
 
   /* ---------- Одна колба ---------- */
   function drawVial(x, y, vw, vh, elements, layout, options) {
-    const { isSelected = false, hiddenCount = 0, hintPulse = 0, settleCount = 0, settleScale = 1 } = options || {};
+    const { isSelected = false, hiddenCount = 0, hintPulse = 0, settleCount = 0, settleScale = 1, capDrop = 0 } = options || {};
     const r = vw * 0.18;
 
     ctx.beginPath();
@@ -407,6 +431,147 @@ const Board = (() => {
       drawElement(cx, isLiftedTop ? cy - elSize * 0.32 : cy, size, elements[i]);
       cy -= elSize + elGap;
     }
+
+    // ТЗ №22, B2: собранная колба «закупорена» — пробка цвета её
+    // элементов. Постоянный признак «эта колба готова» (раньше его
+    // давал только звук), при сборке пробка падает сверху (capDrop).
+    if (hiddenCount === 0 && isFullSameType(elements)) {
+      const capW = vw * 1.12;
+      const capH = Math.max(6, elSize * 0.26);
+      const capX = x + (vw - capW) / 2;
+      const capY = y - capH * 0.55 - capDrop * elSize;
+      const cr = capH * 0.45;
+      ctx.beginPath();
+      ctx.moveTo(capX + cr, capY);
+      ctx.arcTo(capX + capW, capY, capX + capW, capY + capH, cr);
+      ctx.arcTo(capX + capW, capY + capH, capX, capY + capH, cr);
+      ctx.arcTo(capX, capY + capH, capX, capY, cr);
+      ctx.arcTo(capX, capY, capX + capW, capY, cr);
+      ctx.closePath();
+      ctx.fillStyle = COLORS[elements[0].color];
+      ctx.fill();
+      ctx.strokeStyle = THEME.outline;
+      ctx.lineWidth = Math.max(1.5, elSize * 0.06);
+      ctx.stroke();
+    }
+  }
+
+  function isFullSameType(elements) {
+    return elements.length === VIAL_CAPACITY && elements.every(el => sameType(el, elements[0]));
+  }
+
+  /* ---------- ТЗ №22: покадровые анимации колб ---------- */
+  // Текущий кадр анимации колбы: масштаб, вертикальный сдвиг, высота
+  // падающей пробки (в размерах элемента).
+  function vialAnimFrame(idx, elSize) {
+    const a = vialAnims[idx];
+    const none = { scale: 1, dy: 0, capDrop: 0 };
+    if (!a) return none;
+    const t = (performance.now() - a.t0) / a.duration;
+    if (t < 0) return none;
+    if (t >= 1) return none;
+    if (a.kind === 'pop') {
+      // Пробка падает первые 35% времени, затем колба пружинит.
+      const capT = Math.min(1, t / 0.35);
+      const capDrop = (1 - capT) * (1 - capT) * 1.6;
+      const bounceT = Math.max(0, (t - 0.3) / 0.7);
+      const scale = 1 + Math.sin(bounceT * Math.PI) * 0.09 * (1 - bounceT * 0.5);
+      return { scale, dy: 0, capDrop };
+    }
+    // wave — колба подпрыгивает один раз.
+    return { scale: 1 + Math.sin(t * Math.PI) * 0.04, dy: -Math.sin(t * Math.PI) * elSize * 0.45, capDrop: 0 };
+  }
+
+  // «Кольцо тапа» обучения — расходящийся круг поверх колбы.
+  function drawTapRing(cx, cy, vw) {
+    // Живой прогон (N-34): акцент темы = заливка c1 (THEME.accent ===
+    // COLORS.c1), а на уровнях 1–2 все фигуры c1 — акцентное кольцо
+    // сливалось с ними. Кольцо — чернилами темы, «палец» — светлая точка
+    // с чернильной обводкой: контраст к любой заливке и любой теме.
+    const phase = ((performance.now() - tutorialT0) % 1100) / 1100;
+    const radius = vw * (0.3 + phase * 0.6);
+    ctx.save();
+    ctx.globalAlpha = 0.85 * (1 - phase);
+    ctx.strokeStyle = THEME.ink;
+    ctx.lineWidth = Math.max(3, vw * 0.07);
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 0.92;
+    const dot = vw * (0.2 + 0.03 * Math.sin(phase * Math.PI * 2));
+    ctx.fillStyle = '#fffaf0';
+    ctx.strokeStyle = THEME.ink;
+    ctx.lineWidth = Math.max(2, vw * 0.045);
+    ctx.beginPath();
+    ctx.arc(cx, cy, dot, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function runAnimLoop() {
+    if (animRafId) return;
+    function frame() {
+      const now = performance.now();
+      for (const k of Object.keys(vialAnims)) {
+        const a = vialAnims[k];
+        if (now - a.t0 >= a.duration) {
+          delete vialAnims[k];
+          if (a.onDone) a.onDone();
+        }
+      }
+      redraw();
+      if (Object.keys(vialAnims).length || tutorialIndex >= 0) {
+        animRafId = requestAnimationFrame(frame);
+      } else {
+        animRafId = null;
+      }
+    }
+    animRafId = requestAnimationFrame(frame);
+  }
+
+  // Колба только что собрана: пробка падает, колба пружинит.
+  function popVial(idx) {
+    if (prefersReducedMotion()) { redraw(); return; }
+    vialAnims[idx] = { kind: 'pop', t0: performance.now(), duration: 420 };
+    runAnimLoop();
+  }
+
+  // Волна победы: колбы по очереди подпрыгивают, onDone — после последней.
+  function waveVials(onDone) {
+    if (!level || prefersReducedMotion()) { if (onDone) onDone(); return; }
+    const n = level.vials.length;
+    const t0 = performance.now();
+    const step = 55;
+    for (let i = 0; i < n; i++) {
+      vialAnims[i] = { kind: 'wave', t0: t0 + i * step, duration: 340 };
+    }
+    vialAnims[n - 1].onDone = onDone;
+    runAnimLoop();
+  }
+
+  function setTutorial(idx) {
+    if (tutorialIndex === idx) return;
+    tutorialIndex = idx;
+    tutorialT0 = performance.now();
+    if (idx >= 0) runAnimLoop(); else redraw();
+  }
+
+  function prefersReducedMotion() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  // Прямоугольник колбы в КЛИЕНТСКИХ координатах (для слоя эффектов fx.js).
+  function getVialClientRect(idx) {
+    if (!canvas || !lastLayout || !vialRects[idx]) return null;
+    const rect = canvas.getBoundingClientRect();
+    const r = vialRects[idx];
+    return {
+      left: rect.left + r.x, top: rect.top + r.y,
+      width: lastLayout.vw, height: lastLayout.vh,
+      elSize: lastLayout.elSize, elGap: lastLayout.elGap,
+      tubeBottomMargin: lastLayout.tubeBottomMargin
+    };
   }
 
   /* ---------- Один элемент (круг или квадрат в цвете) ---------- */
@@ -587,6 +752,7 @@ const Board = (() => {
   return {
     init, setLevel, resize, redraw,
     hitTest, setSelected, shake, animatePour, showHint, clearHint,
+    popVial, waveVials, setTutorial, getVialClientRect,
     getDiagMetrics,
     // computeLayout — диагностический экспорт (перенесено с
     // fix/vk-remove-shop при сведении в main): координаты клика для

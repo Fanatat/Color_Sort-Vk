@@ -70,7 +70,16 @@ const I18N = {
     // п.4.5.1 требований Яндекса (тот же принцип, что у прежней
     // retentionRewardedBtn ТЗ №14 этап 3): подпись обязана однозначно
     // называть И рекламу, И награду.
-    energyWallAdBtn: 'Смотреть рекламу за +{n} энергии'
+    energyWallAdBtn: 'Смотреть рекламу за +{n} энергии',
+    // ТЗ №22. Рестарт — второй тап подтверждает (R-09).
+    restartConfirm:  'Ещё раз — начать заново',
+    deadEnd:         'Ходов нет — начните заново',
+    // Цель дня (C1) и завтрашняя награда серии (C2, N-35).
+    dailyGoalLine:   'Цель дня: пройти {m} уровня — {n}/{m}',
+    dailyGoalDone:   'Цель дня выполнена! Завтра — новая',
+    dailyGoalReward: 'Цель дня выполнена: +{n} подсказки!',
+    streakTomorrowHints: 'Серия входов: {n} из {m} · завтра +{k} подсказки',
+    streakTomorrowStyle: 'Серия входов: {n} из {m} · завтра ягодная тема'
   },
   en: {
     title: 'Sort: Color & Shape', // карточное имя (п.5.1.3, решение основателя 2026-07-17)
@@ -115,7 +124,14 @@ const I18N = {
     energyToastGain: '+{n} energy!',
     energyWallTitle: 'Out of energy',
     energyWallText:  'Next refill (+{n}) at {time}',
-    energyWallAdBtn: 'Watch an ad for +{n} energy'
+    energyWallAdBtn: 'Watch an ad for +{n} energy',
+    restartConfirm:  'Tap again to restart',
+    deadEnd:         'No moves left — restart the level',
+    dailyGoalLine:   'Daily goal: clear {m} levels — {n}/{m}',
+    dailyGoalDone:   'Daily goal done! A new one tomorrow',
+    dailyGoalReward: 'Daily goal done: +{n} hints!',
+    streakTomorrowHints: 'Login streak: {n} of {m} · tomorrow +{k} hints',
+    streakTomorrowStyle: 'Login streak: {n} of {m} · tomorrow the Berry theme'
   }
 };
 

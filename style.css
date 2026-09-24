@@ -809,6 +809,35 @@ body {
   left: 14px;
   bottom: 18px;
 }
+/* ТЗ №22, A3: рестарт — правее отмены, место постоянное (отмена может
+   прятаться — рестарт от этого не прыгает). .armed — первый тап принят,
+   ждём второй (подтверждение R-09 без модального окна). */
+.restart-btn {
+  position: absolute;
+  left: 72px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.restart-btn.armed {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+/* ТЗ №22, C3: мягкий зов внимания к кнопке (застрял/тупик) — пульс
+   масштабом, без смены цвета: подсказка остаётся той же кнопкой. */
+.btn.attention { animation: attentionPulse 1.1s ease-in-out infinite; }
+@keyframes attentionPulse {
+  0%, 100% { transform: scale(1); box-shadow: 3px 3px 0 var(--shadow); }
+  50% { transform: scale(1.12); box-shadow: 0 0 0 6px rgba(var(--ink-rgb), 0.12), 3px 3px 0 var(--shadow); }
+}
+.fx-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
 /* Кнопка подсказки: явный знак «это реклама» (п.4.5.1) — значок ▶ на
    самой кнопке + подпись под ней. Ясность цепочки реклама → подсказка
    видна ДО тапа, не после. */
@@ -970,6 +999,32 @@ body {
 }
 .progress-label { font-size: 0.85rem; color: var(--ink-soft); }
 
+/* ТЗ №22, C1: цель дня на экране победы — три точки, новая заливается
+   с «попом» (main.js добавляет .just-filled на только что заработанную). */
+.win-daily {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.daily-pips { display: flex; gap: 10px; }
+.daily-pips span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: transparent;
+}
+.daily-pips span.filled { background: var(--accent); }
+.daily-pips span.just-filled { animation: pipPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both; }
+@keyframes pipPop {
+  0%   { transform: scale(0.4); background: transparent; }
+  60%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+.win-daily-label { font-size: 0.85rem; color: var(--ink-soft); text-align: center; }
+.daily-goal-line.done { color: var(--ink); font-weight: bold; }
+
 /* Кнопка «Дальше» — главный элемент экрана (п.2 фазы 3), крупнее
    обычной .btn-primary. */
 .btn-next-big { min-width: 220px; font-size: 1.15rem; padding: 16px 30px; }
@@ -1036,6 +1091,8 @@ body {
   .win-box { animation: none; }
   .win-overlay { animation: none; }
   .board-wrap { transition: none; }
+  .btn.attention { animation: none; outline: 3px solid var(--accent); }
+  .daily-pips span.just-filled { animation: none; }
   /* ТЗ №10, задача E: экраны/тема — тот же принцип, что у уже
      существующих правил выше (анимация выключается целиком, не
      ускоряется). Кастомное свойство обязано жить ВНУТРИ блока правила

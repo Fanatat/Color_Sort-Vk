@@ -236,7 +236,14 @@
     // Platform.load()).
     bonusHints: 0,
     giftedThemes: [],
-    retention: null
+    retention: null,
+    // ТЗ №22, C1: цель дня. dailyDay — UTC-дата 'YYYY-MM-DD' (K-24,
+    // из Platform.now()), dailyWins — побед за эти сутки, dailyDone —
+    // награда за сутки уже выдана. Старый сейв без полей мигрирует в
+    // normalizeState (S-05).
+    dailyDay: '',
+    dailyWins: 0,
+    dailyDone: false
   };
 
   /* ТЗ №15, этап 1, п.1.1: прогрессия — СНОВА idx<=maxUnlocked, как ДО
@@ -1191,7 +1198,16 @@
     const nextAt = Retention.nextUnlockAtMs(_retentionState, RETENTION_CONFIG);
     const pct = Math.max(0, Math.min(100, Math.round((current / cap) * 100)));
     document.querySelectorAll('.energy-bar-fill').forEach(el => { el.style.width = pct + '%'; });
-    document.querySelectorAll('.energy-value-text').forEach(el => { el.textContent = `${current}/${cap}`; });
+    // ТЗ №21, часть B: приветственный бонус (+40) временно поднимает
+    // current выше cap (напр. 47/10) — голая формула «current/cap» и
+    // полоса, ушедшая за 100%, выглядели бы как баг. Полоса уже зажата
+    // clamp'ом выше; текст выше потолка показываем БЕЗ «/cap» (просто
+    // число) — сам факт большого числа поверх полной полосы читается
+    // как «запас», не как сломанный счётчик. Саму величину dripOpened
+    // это не трогает, только отображение.
+    document.querySelectorAll('.energy-value-text').forEach(el => {
+      el.textContent = current > cap ? `${current}` : `${current}/${cap}`;
+    });
     document.querySelectorAll('.energy-next-text').forEach(el => {
       el.textContent = nextAt == null ? '' : t('energyNextAt').replace('{n}', RETENTION_CONFIG.dripPerTick).replace('{time}', formatClock(new Date(nextAt)));
     });
@@ -1202,7 +1218,85 @@
     const el = document.getElementById('retention-streak-line');
     if (!el || !_retentionState) return;
     const shown = Math.min(_retentionState.streakLen, RETENTION_CONFIG.streakThreshold);
-    el.textContent = t('retentionStreakLine').replace('{n}', shown).replace('{m}', RETENTION_CONFIG.streakThreshold);
+    // ТЗ №22, C2 (N-35): если ЗАВТРАШНИЙ вход что-то даёт — называем
+    // что именно. Только отображение: правила серии живут в retention.js.
+    const next = _retentionState.streakLen + 1;
+    const kind = RETENTION_CONFIG.streakDayReward[String(next)];
+    const alreadyGiven = !!(_retentionState.streakRewards && _retentionState.streakRewards[next]);
+    let key = 'retentionStreakLine';
+    if (kind === 'hints' && !alreadyGiven) key = 'streakTomorrowHints';
+    else if (kind === 'style' && !alreadyGiven && !isThemeOwned('berry')) key = 'streakTomorrowStyle';
+    el.textContent = t(key)
+      .replace('{n}', shown)
+      .replace('{m}', RETENTION_CONFIG.streakThreshold)
+      .replace('{k}', RETENTION_CONFIG.hintsRewardCount);
+  }
+
+  /* ---------- Цель дня (ТЗ №22, C1) ----------
+     Близкая цель на сегодня: DAILY_GOAL побед за UTC-сутки (K-24,
+     Platform.now() — та же точка времени, что у энергии). Засчитывается
+     любая победа, включая повтор. Награда — бесплатные подсказки
+     (существующая валюта bonusHints), раз в сутки. Завтра — новая цель:
+     это и есть «состояние, которое ждёт игрока» (N-35). */
+  const DAILY_GOAL = 3;
+  const DAILY_REWARD_HINTS = 2;
+
+  function utcDayKey(ms) {
+    return new Date(ms).toISOString().slice(0, 10);
+  }
+
+  function checkDailyGoalReset() {
+    const today = utcDayKey(Platform.now());
+    if (state.dailyDay !== today) {
+      state.dailyDay = today;
+      state.dailyWins = 0;
+      state.dailyDone = false;
+    }
+  }
+
+  // Засчитывает победу. Возвращает { before, after, rewarded } —
+  // экрану победы, чтобы залить новую точку на глазах.
+  function registerDailyWin() {
+    checkDailyGoalReset();
+    const before = Math.min(state.dailyWins, DAILY_GOAL);
+    state.dailyWins = Math.min(state.dailyWins + 1, 99);
+    const after = Math.min(state.dailyWins, DAILY_GOAL);
+    let rewarded = false;
+    if (!state.dailyDone && state.dailyWins >= DAILY_GOAL) {
+      state.dailyDone = true;
+      state.bonusHints += DAILY_REWARD_HINTS;
+      rewarded = true;
+    }
+    return { before, after, rewarded };
+  }
+
+  function renderDailyGoal() {
+    const el = document.getElementById('daily-goal-line');
+    if (!el) return;
+    checkDailyGoalReset();
+    const n = Math.min(state.dailyWins, DAILY_GOAL);
+    el.textContent = state.dailyDone
+      ? t('dailyGoalDone')
+      : t('dailyGoalLine').replace(/\{m\}/g, DAILY_GOAL).replace('{n}', n);
+    el.classList.toggle('done', state.dailyDone);
+  }
+
+  function renderWinDaily(result) {
+    const pips = document.querySelectorAll('#win-daily-pips span');
+    pips.forEach((p, i) => {
+      p.classList.toggle('filled', i < result.after);
+      p.classList.remove('just-filled');
+      if (i >= result.before && i < result.after) {
+        void p.offsetWidth; // перезапуск CSS-анимации при повторном показе
+        p.classList.add('just-filled');
+      }
+    });
+    const label = document.getElementById('win-daily-label');
+    if (label) {
+      label.textContent = state.dailyDone
+        ? t('dailyGoalDone')
+        : t('dailyGoalLine').replace(/\{m\}/g, DAILY_GOAL).replace('{n}', result.after);
+    }
   }
 
   /* Бейдж остатка бесплатных подсказок на кнопке ? (ТЗ №14, этап 3,
@@ -1308,7 +1402,9 @@
   function goToMenu() {
     retentionTick();
     renderRetentionStreakLine();
+    renderDailyGoal();
     renderEnergyIndicator();
+    leaveLevelHelpers();
     show('menu');
   }
 
@@ -1511,10 +1607,168 @@
   }
 
   /* ---------- Rewarded-подсказка ---------- */
-  function showHintToast() {
+  // ТЗ №22: тост общий для нескольких сообщений — текст выставляется
+  // при каждом показе (data-i18n держит только значение по умолчанию).
+  function showHintToast(key = 'noMoves', ms = 1800) {
+    hintToast.textContent = t(key);
     hintToast.classList.remove('hidden');
     clearTimeout(showHintToast._t);
-    showHintToast._t = setTimeout(() => hintToast.classList.add('hidden'), 1800);
+    showHintToast._t = setTimeout(() => hintToast.classList.add('hidden'), ms);
+  }
+
+  /* ---------- ТЗ №22: отклик на ход, обучение, рестарт, помощь ----------
+     Game сообщает о событиях хода через hooks (см. Game.init в boot()),
+     здесь они превращаются в эффекты (fx.js, Board.popVial), вибрацию
+     (Platform.haptic), шаги бестекстового обучения и «зов» кнопок при
+     застревании. Правила игры тут не меняются. */
+  const btnRestart = document.getElementById('btn-restart');
+  const btnUndo = document.getElementById('btn-undo');
+  const fxCanvas = document.getElementById('fx-canvas');
+  const STUCK_MS = 30000;          // C3: без удачного перелива столько — зовём подсказку
+  const TUTORIAL_IDLE_L2_MS = 6000; // A2: на уровне 2 указатель — только при простое
+  const RESTART_ARM_MS = 2500;      // A3: окно второго тапа-подтверждения
+
+  function haptic(kind) {
+    // Кнопка звука выключает и вибрацию — один «тихий режим» (см. ТЗ №22, «Решено за исполнителя»).
+    if (state.muted || typeof Platform.haptic !== 'function') return;
+    Platform.haptic(kind);
+  }
+
+  let stuckTimer = null;
+  let tutorialTimer = null;
+  let tutorial = null; // { from, to } — активный указатель обучения
+
+  function clearAttention() {
+    btnHint.classList.remove('attention');
+    if (btnRestart) btnRestart.classList.remove('attention');
+  }
+
+  function armStuckTimer() {
+    clearTimeout(stuckTimer);
+    stuckTimer = setTimeout(() => {
+      if (screens.game.classList.contains('active') && !Game.isSolved()) btnHint.classList.add('attention');
+    }, STUCK_MS);
+  }
+
+  function startTutorial() {
+    if (!screens.game.classList.contains('active') || Game.isSolved()) return;
+    const hint = Game.findHint();
+    if (!hint) return;
+    tutorial = { from: hint.from, to: hint.to };
+    Board.setTutorial(hint.from);
+  }
+
+  function stopTutorial() {
+    clearTimeout(tutorialTimer);
+    tutorialTimer = null;
+    if (tutorial) { tutorial = null; Board.setTutorial(-1); }
+  }
+
+  // Вызывается из loadLevel: обучение — только новичку на уровне 1
+  // (N-17: онбординг через сами уровни), на уровне 2 (впервые форма) —
+  // лишь если игрок замер.
+  function onLevelStarted(idx) {
+    stopTutorial();
+    clearAttention();
+    disarmRestart();
+    armStuckTimer();
+    const neverCleared = typeof state.levelTimes[idx] !== 'number';
+    if (idx === 0 && neverCleared && !state.onboardingSeen) {
+      tutorialTimer = setTimeout(startTutorial, 600);
+    } else if (idx === 1 && neverCleared) {
+      tutorialTimer = setTimeout(startTutorial, TUTORIAL_IDLE_L2_MS);
+    }
+  }
+
+  // Ушли с уровня (меню/стена) — таймеры помощи не должны сработать позже.
+  function leaveLevelHelpers() {
+    stopTutorial();
+    clearTimeout(stuckTimer);
+    clearAttention();
+    disarmRestart();
+  }
+
+  const gameHooks = {
+    onSelect({ index }) {
+      haptic('select');
+      clearTimeout(tutorialTimer); // игрок действует сам — отложенный указатель не нужен
+      if (!tutorial) return;
+      Board.setTutorial(index === tutorial.from ? tutorial.to : -1);
+    },
+    onDeselect() {
+      if (tutorial) Board.setTutorial(tutorial.from);
+    },
+    onInvalid() {
+      haptic('invalid');
+    },
+    onPour({ toIdx, targetLen, element, collected }) {
+      stopTutorial();
+      clearAttention();
+      disarmRestart();
+      armStuckTimer();
+      const r = Board.getVialClientRect(toIdx);
+      if (r && element) {
+        const color = Board.COLORS[element.color];
+        Fx.setOutline(Board.THEME.outline);
+        const cx = r.left + r.width / 2;
+        if (collected) {
+          Board.popVial(toIdx);
+          Fx.burst(cx, r.top, color, r.elSize);
+        } else {
+          const cy = r.top + r.height - r.tubeBottomMargin - r.elSize / 2 - (targetLen - 1) * (r.elSize + r.elGap);
+          Fx.splash(cx, cy + r.elSize * 0.35, color, r.elSize);
+        }
+      }
+      haptic(collected ? 'lock' : 'pour');
+    },
+    onUndo() {
+      clearAttention();
+      armStuckTimer();
+    },
+    onDeadEnd() {
+      showDeadEndPrompt();
+    },
+  };
+
+  function showDeadEndPrompt() {
+    showHintToast('deadEnd', 2600);
+    if (btnRestart) btnRestart.classList.add('attention');
+  }
+
+  let restartArmTimer = null;
+  function disarmRestart() {
+    clearTimeout(restartArmTimer);
+    restartArmTimer = null;
+    if (btnRestart) btnRestart.classList.remove('armed');
+  }
+
+  function restartLevel() {
+    disarmRestart();
+    Board.clearHint();
+    boardWrap.classList.add('board-fade');
+    setTimeout(() => {
+      loadLevel(state.levelIndex);
+      requestAnimationFrame(() => boardWrap.classList.remove('board-fade'));
+    }, prefersReducedMotion() ? 0 : BOARD_FADE_MS);
+  }
+
+  if (btnRestart) {
+    btnRestart.addEventListener('click', () => {
+      if (Game.isBusy() || Game.isSolved()) return;
+      if (!Game.hasMoves()) { disarmRestart(); return; } // поле и так в начальном виде
+      if (restartArmTimer) { restartLevel(); return; }
+      btnRestart.classList.add('armed');
+      showHintToast('restartConfirm', RESTART_ARM_MS);
+      restartArmTimer = setTimeout(disarmRestart, RESTART_ARM_MS);
+    });
+  }
+
+  // Победа: сначала волна колб, затем оверлей (сам учёт победы —
+  // сразу, см. showWinOverlay/revealWinOverlay).
+  function onLevelWon() {
+    leaveLevelHelpers();
+    haptic('win');
+    showWinOverlay();
   }
 
   /* Индикатор ожидания rewarded-показа (баг основателя 2026-09-06,
@@ -1573,10 +1827,13 @@
       debugLog('[hint] запрос уже в полёте — игнорирую повторный клик');
       return;
     }
+    btnHint.classList.remove('attention');
     const hint = Game.findHint();
     if (!hint) {
       debugLog('[hint] findHint() вернул null — нет доступных ходов, реклама не запрашивается');
-      showHintToast(); // мягкое сообщение — ролик не показываем зря
+      // ТЗ №22, C3: решения от этой позиции нет — вместо тупикового
+      // «Нет доступных ходов» показываем выход: рестарт (бесплатный).
+      showDeadEndPrompt(); // ролик не показываем зря
       return;
     }
     // ТЗ №14, этап 2/3: баланс бесплатных подсказок (retention.js,
@@ -1688,9 +1945,27 @@
       state.maxUnlocked = Math.max(state.maxUnlocked, nextIdx);
     }
 
+    // ТЗ №22: обучение пройдено (флаг жил в сейве, но не использовался);
+    // цель дня засчитывает победу ДО persist() — одна запись на событие.
+    if (finishedIdx === 0) state.onboardingSeen = true;
+    const daily = registerDailyWin();
+    renderWinDaily(daily);
+    if (daily.rewarded) renderHintBonusBadge();
+
     persist(); // переживает закрытие вкладки отсюда же
-    winOverlay.classList.remove('hidden');
-    Confetti.burst(); // «вау»-момент; сама уважает prefers-reduced-motion
+    // ТЗ №22, B2: учёт победы выше — сразу; оверлей — после волны колб
+    // (~0,4–0,7 с), чтобы собранное поле успело «отпраздновать» само.
+    const transition = pendingWinTransition;
+    Board.waveVials(() => {
+      // Игрок мог уйти в меню во время волны — тогда оверлей не нужен:
+      // прогресс уже сохранён, «Играть» продолжит со следующего уровня.
+      if (pendingWinTransition !== transition || !screens.game.classList.contains('active')) return;
+      winOverlay.classList.remove('hidden');
+      Confetti.burst(); // «вау»-момент; сама уважает prefers-reduced-motion
+      if (daily.rewarded) {
+        showRetentionToast(t('dailyGoalReward').replace('{n}', DAILY_REWARD_HINTS));
+      }
+    });
   }
   function hideWinOverlay() {
     winOverlay.classList.add('hidden');
@@ -1720,6 +1995,8 @@
     Board.setLevel(level);
     Game.setLevel(level);
     Stats.startLevel(idx);
+    if (typeof Fx !== 'undefined') Fx.clear();
+    onLevelStarted(idx);
   }
 
   function formatTime(totalSeconds) {
@@ -2002,6 +2279,13 @@
     // вызовом в boot()), чтобы фоновый ретрай load() ниже тоже это
     // подхватывал при мёрдже реальных данных, а не только первый заход.
     checkRewardedDailyReset();
+
+    // ТЗ №22, C1: миграция цели дня — поля появились в этом ТЗ.
+    if (typeof state.dailyDay !== 'string') state.dailyDay = '';
+    if (typeof state.dailyWins !== 'number' || state.dailyWins < 0) state.dailyWins = 0;
+    if (typeof state.dailyDone !== 'boolean') state.dailyDone = false;
+    if (typeof state.onboardingSeen !== 'boolean') state.onboardingSeen = false;
+    checkDailyGoalReset();
   }
 
   /* Инициализация/восстановление retention.js — ОБЩАЯ между обычным
@@ -2024,9 +2308,29 @@
     // отдельный источник времени: этот ТЗ серию не правит, только
     // докладывает о её поведении в сценариях перевода часов (см. отчёт).
     const nowMs = Platform.now();
-    _retentionState = Retention.isValidEncoded(state.retention)
+    const hadValidRetention = Retention.isValidEncoded(state.retention);
+    _retentionState = hadValidRetention
       ? Retention.decodeState(state.retention)
       : Retention.initState(isBrandNew ? -1 : state.maxUnlocked, nowMs, RETENTION_CONFIG);
+    // ТЗ №21, часть B (решение основателя: +40, одноразово): модерация
+    // Яндекса отклонила билд по п.2.9 — прохождение на одной стартовой
+    // энергии (потолок 10) занимало у модератора ~2 минуты. Бонус
+    // начисляется ТОЛЬКО реально новому игроку (isBrandNew — сейва не
+    // было вовсе, см. boot()), ТОЛЬКО в момент первой инициализации
+    // retention.js (!hadValidRetention — та же ветка, что initState()
+    // выше) и ТОЛЬКО в gateMode:'energy' (у других игр студии этот же
+    // модуль работает в gateMode:'unlock', там валюта другая). Дальше
+    // одноразовость держится структурой кода САМА: при следующем boot()
+    // state.retention уже валиден, initState() сюда не попадёт снова —
+    // это подтверждено тестом (см. tests/), не считается самоочевидным.
+    if (isBrandNew && !hadValidRetention && RETENTION_CONFIG.gateMode === 'energy') {
+      _retentionState = { ..._retentionState, dripOpened: _retentionState.dripOpened + 40 };
+      // Сразу persist() — та же дисциплина, что у grantHints/наград
+      // серии (см. комментарий ниже про beforeTick): награда обязана
+      // пережить закрытие вкладки сразу после boot(), не полагаться на
+      // то, что персист случится позже по другому событию.
+      persist();
+    }
     // ТЗ №18 (сценарий A, найдено при проверке — не новая механика):
     // тик, применённый ЗДЕСЬ (энергия, набежавшая, пока игра была
     // закрыта), раньше нигде не сохранялся сам по себе — задержка
@@ -2098,7 +2402,8 @@
   async function boot() {
     Board.init(boardCanvas);
     Confetti.init(confettiCanvas);
-    Game.init(boardCanvas, showWinOverlay);
+    if (typeof Fx !== 'undefined' && fxCanvas) Fx.init(fxCanvas);
+    Game.init(boardCanvas, onLevelWon, gameHooks);
 
     await Platform.init();
 
@@ -2158,6 +2463,10 @@
     renderOformlenie(); // ТЗ №17: состав экрана известен уже на старте
 
     goToMenu();
+    // ТЗ №22, A1: настоящий новичок (сейва не было) — сразу на уровень 1,
+    // без меню: первое действие в первые секунды (N-26), а энергия и
+    // серия входов объясняются позже, когда игрок вернётся в меню.
+    if (isBrandNewPlayer) playGame();
 
     // Game Ready — когда игра реально готова к взаимодействию (п.1.19.2)
     Platform.gameReady();
