@@ -1416,6 +1416,7 @@
         energyAdInFlight = false;
         resumeGame();
         track('rewarded_result', { place: 'energy', result: outcome || 'unknown' });
+        if (isAdFailureOutcome(outcome)) showRetentionToast(t('energyAdUnavailable'));
       }
     );
   }
@@ -1853,7 +1854,8 @@
      30 показов/сутки — рекомендация доки ВК, защита от накрутки.
      Сутки — КАЛЕНДАРНЫЕ по локальному времени устройства (не UTC и не
      скользящее окно 24ч) — простая, предсказуемая для игрока модель. */
-  const REWARDED_DAILY_LIMIT = 30;
+  const REWARDED_DAILY_LIMIT = 30; // просмотров в сутки (рекомендация ВК); за просмотр — HINTS_PER_AD подсказок, лимит считает просмотры, не подсказки
+  const HINTS_PER_AD = 5;
   function todayKey() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -1880,6 +1882,12 @@
      той же единственной точке, куда доходят ВСЕ исходы обоих
      адаптеров (см. комментарий у showHintLoadingToast). */
   let rewardedInFlight = false;
+
+  // ТЗ ads_rework: исходы адаптера, при которых бонуса нет по вине рекламы
+  // (не «закрыл сам» — тот молчаливый осознанный отказ).
+  function isAdFailureOutcome(outcome) {
+    return outcome === 'error' || outcome === 'timeout' || outcome === 'unavailable';
+  }
 
   btnHint.addEventListener('click', () => {
     debugLog('[hint] клик по кнопке подсказки');
@@ -1911,27 +1919,34 @@
     }
     checkRewardedDailyReset();
     if (state.rewardedCount >= REWARDED_DAILY_LIMIT) {
-      // Лимит исчерпан — подсказка ВСЁ РАВНО бесплатна, БЕЗ попытки
-      // показа рекламы (стандарт п.190: недоступная реклама не тупик;
-      // здесь недоступность не техническая, а по лимиту, но принцип
-      // тот же). Кнопка НЕ прячется — просто эта конкретная подсказка
-      // тихо идёт по бесплатному пути, как при adblock/отсутствии филла.
-      // Задача 15: единственный путь исхода rewarded, что решается ЗДЕСЬ,
-      // до вызова Platform.showRewarded — адаптер про лимит не знает,
-      // поэтому лог тут же, а не в vk_platform.js.
-      console.log(`[rewarded] запрос — исчерпан суточный лимит ${state.rewardedCount}/${REWARDED_DAILY_LIMIT}, подсказка выдана бесплатно`);
+      // ТЗ ads_rework (правило 2): бесплатного пути нет. Раньше после лимита
+      // подсказка шла бесплатно и бесконечно — теперь игрок получает
+      // объяснение и приходит завтра (суточный счётчик обнулится).
+      console.log(`[rewarded] запрос — исчерпан суточный лимит ${state.rewardedCount}/${REWARDED_DAILY_LIMIT}, подсказки нет`);
       debugLog(`[hint] суточный лимит исчерпан (${state.rewardedCount}/${REWARDED_DAILY_LIMIT}) — реклама не запрашивается`);
-      Board.showHint(hint.from, hint.to);
+      showHintToast('hintDailyLimit', 3200);
       return;
     }
-    state.rewardedCount++;
-    persist(); // считаем показ сразу, не дожидаясь колбэка рекламы
     debugLog('[hint] иду в Platform.showRewarded()');
     rewardedInFlight = true;
     showHintLoadingToast();
     track('rewarded_click', { place: 'hint' });
     Platform.showRewarded(
-      () => { debugLog('[hint] onRewarded вызван — подсвечиваю ход'); Board.showHint(hint.from, hint.to); Sound.playReward(); }, // награда получена — подсвечиваем ход (ТЗ №26: и звук награды)
+      () => {
+        debugLog('[hint] onRewarded вызван — подсвечиваю ход');
+        // Счёт суточного лимита — только за реально показанную рекламу.
+        checkRewardedDailyReset();
+        state.rewardedCount++;
+        // Раунд 2 ТЗ ads_rework: один просмотр = HINTS_PER_AD подсказок. Одна
+        // подсвечивается сразу, остальные падают в тот же баланс bonusHints,
+        // что и награды серии/цели дня (тратятся первыми, рекламу не зовут).
+        state.bonusHints += HINTS_PER_AD - 1;
+        persist();
+        renderHintBonusBadge();
+        showHintToast('hintAdGranted', 2200);
+        hintToast.textContent = hintToast.textContent.replace('{n}', HINTS_PER_AD);
+        Board.showHint(hint.from, hint.to); Sound.playReward(); // награда получена — подсвечиваем ход (ТЗ №26: и звук награды)
+      },
       pauseGame,
       // onResume — единственная точка, куда доходят ВСЕ исходы обоих
       // адаптеров (реальный показ, таймаут-фолбэк, И «закрыл без
@@ -1940,7 +1955,10 @@
       // же логикой, что и hideHintLoadingToast чуть выше по коду.
       (outcome) => {
         rewardedInFlight = false; hideHintLoadingToast(); resumeGame();
-        track('rewarded_result', { place: 'hint', result: outcome || 'unknown' });
+        track('rewarded_result', { place: 'hint', result: outcome || 'unknown', hints: outcome === 'shown' || outcome === 'dev' ? HINTS_PER_AD : 0 });
+        // Реклама не показана (adblock, нет объявления, сбой, SDK нет) —
+        // бонуса нет, говорим игроку почему (ТЗ ads_rework, правило 3).
+        if (isAdFailureOutcome(outcome)) showHintToast('hintAdUnavailable', 4500);
       }
     );
   });
